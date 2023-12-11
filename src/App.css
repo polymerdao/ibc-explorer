@@ -1,0 +1,137 @@
+/* Styling for the main container of the app */
+.App {
+  text-align: center;
+}
+
+.app-container {
+  display: flex;
+  align-items: flex-start; /* Align children to the start of the cross axis */
+}
+
+.navigation-frame {
+  width: 200px; /* Adjust width as needed */
+  background-color: #f0f0f0; /* Light grey background */
+  padding: 20px;
+  height: 100vh; /* Full height */
+  box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1); /* Shadow for a bit of depth */
+}
+
+.main-content-frame {
+  flex-grow: 1;
+  /* Take up the remaining space */
+  padding: 20px;
+  /* If the main content frame itself is also a flex container */
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  /* Align its children to the start (top) */
+}
+
+button {
+  display: block;
+  width: 100%;
+  padding: 10px;
+  margin-bottom: 10px; /* Space between buttons */
+  background-color: #fff;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+button:hover {
+  background-color: #e9e9e9;
+}
+
+/* Styling for the header - adjust as needed */
+.App-header {
+  background-color: #282c34;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-size: calc(10px + 2vmin);
+  color: white;
+}
+
+/* Flex container to hold search elements and revision height box */
+.top-controls {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  margin-bottom: 20px;
+}
+
+/* Container for search input and dropdown */
+.search-container {
+  display: flex;
+  align-items: center;
+}
+
+/* Styles for the revision height box */
+.revision-height-box {
+  background-color: #f2f2f2;
+  padding: 5px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  text-align: left;
+  height: 40px; /* Match this with the height of the input and select elements */
+  display: flex;
+  color: black;
+  align-items: center; /* Centers the text vertically */
+  margin-left: auto; /* Pushes the box to the right */
+}
+
+/* Styles for the refresh and channel count box */
+.refresh-count-box, .channel-count-box {
+  background-color: #f2f2f2;
+  padding: 5px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  text-align: left;
+  height: 40px; /* Match this with the height of the input and select elements */
+  display: flex;
+  color: black;
+  align-items: center; /* Centers the text vertically */
+  margin-left: auto; /* Pushes the box to the right */
+}
+
+.search-input {
+  width: 400px; /* Increase width as needed */
+}
+
+input[type="text"], select {
+  font-size: 16px; /* Standard font size */
+  padding: 8px 10px; /* Standard padding: vertical | horizontal */
+  margin-right: 10px; /* Margin to the right */
+  border: 1px solid #ddd; /* Standard border */
+  border-radius: 4px; /* Rounded corners */
+  height: 40px; /* Standard height */
+}
+
+/* Optional: Style the focus state for better user experience */
+input[type="text"]:focus, select:focus {
+  outline: none;
+  border-color: #4CAF50;
+  box-shadow: 0 0 5px rgba(76, 175, 80, 0.5);
+}
+
+table {
+  /* Other table styles (e.g., width, border, etc.) */
+  border-collapse: collapse;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+th, td {
+  text-align: left; /* Aligns text to the left */
+  border: 1px solid #ddd;
+  padding: 8px;
+}
+
+th {
+    text-align: center; /* Centers the text in table headers */
+    color: black;
+    background-color: #f2f2f2;
+}
