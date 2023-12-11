@@ -2,7 +2,10 @@
 IBC dashboard
 
 ## Requirements
-flask
+pip install flask
+pip install PyYAML
+
+
 react
 
 ## Build React Frontend
