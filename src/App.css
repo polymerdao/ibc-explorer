@@ -84,7 +84,7 @@ button:hover {
 }
 
 /* Styles for the refresh and channel count box */
-.refresh-count-box, .channel-count-box {
+.refresh-count-box, .count-box {
   background-color: #f2f2f2;
   padding: 5px;
   border: 1px solid #ddd;
