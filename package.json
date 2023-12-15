@@ -1,38 +1,40 @@
 {
-    "name": "ibc-explorer",
-    "version": "0.1.0",
-    "private": true,
-    "dependencies": {
-	"@testing-library/jest-dom": "^5.17.0",
-	"@testing-library/react": "^13.4.0",
-	"@testing-library/user-event": "^13.5.0",
-	"react": "^18.2.0",
-	"react-dom": "^18.2.0",
-	"react-scripts": "5.0.1",
-	"web-vitals": "^2.1.4"
-    },
-    "scripts": {
-	"start": "react-scripts start",
-	"build": "react-scripts build",
-	"test": "react-scripts test",
-	"eject": "react-scripts eject"
-    },
-    "eslintConfig": {
-	"extends": [
-	    "react-app",
-	    "react-app/jest"
-	]
-    },
-    "browserslist": {
-	"production": [
-	    ">0.2%",
-	    "not dead",
-	    "not op_mini all"
-	],
-	"development": [
-	    "last 1 chrome version",
-	    "last 1 firefox version",
-	    "last 1 safari version"
-	]
-    }
+  "private": true,
+  "license": "MIT",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "@headlessui/react": "^1.7.17",
+    "@heroicons/react": "^2.0.18",
+    "@tremor/react": "^3.10.0",
+    "@types/js-cookie": "^3.0.5",
+    "@types/node": "20.8.9",
+    "@types/react": "18.2.33",
+    "@types/react-dom": "18.2.14",
+    "autoprefixer": "^10.4.16",
+    "eslint": "8.52.0",
+    "eslint-config-next": "14.0.0",
+    "js-cookie": "^3.0.5",
+    "js-yaml": "^4.1.0",
+    "next": "14.0.0",
+    "postcss": "^8.4.31",
+    "prettier": "^3.0.3",
+    "prop-types": "^15.8.1",
+    "react": "18.2.0",
+    "react-dom": "18.2.0",
+    "server-only": "^0.0.1",
+    "tailwindcss": "^3.3.5",
+    "typescript": "5.2.2",
+    "zod": "^3.22.4"
+  },
+  "prettier": {
+    "arrowParens": "always",
+    "singleQuote": true,
+    "tabWidth": 2,
+    "trailingComma": "none"
+  }
 }
