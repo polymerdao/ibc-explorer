@@ -1,0 +1,31 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ibc-explorer
+  labels:
+    app: ibc-explorer
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ibc-explorer
+  template:
+    metadata:
+      labels:
+        app: ibc-explorer
+    spec:
+      containers:
+        - name: ibc-explorer
+          image: ghcr.io/polymerdao/ibc-explorer:v0.0.1-alpha-1
+          resources:
+            limits:
+              cpu: '1'
+              memory: '1000Mi'
+            requests:
+              cpu: '0.5'
+              memory: '200Mi'
+          ports:
+            - containerPort: 5000
+          env:
+            - name: API_URL
+              value: tcp://peptide:26657
