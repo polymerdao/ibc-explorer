@@ -4,7 +4,7 @@ import { Suspense } from 'react';
 import Navbar from "./navbar";
 
 export const metadata = {
-  title: 'Polymer Dashboard',
+  title: 'IBC Explorer',
 };
 
 export default function RootLayout({

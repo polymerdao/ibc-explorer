@@ -16,16 +16,16 @@ spec:
     spec:
       containers:
         - name: ibc-explorer
-          image: ghcr.io/polymerdao/ibc-explorer:v0.0.1-alpha-1
+          image: ghcr.io/polymerdao/ibc-explorer:v0.0.2-alpha-9
           resources:
             limits:
               cpu: '1'
-              memory: '1000Mi'
+              memory: '2000Mi'
             requests:
-              cpu: '0.5'
-              memory: '200Mi'
+              cpu: '1'
+              memory: '1000Mi'
           ports:
-            - containerPort: 5000
+            - containerPort: 3000
           env:
             - name: API_URL
               value: tcp://peptide:26657

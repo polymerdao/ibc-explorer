@@ -24,7 +24,7 @@ export default async function MetricsPage() {
 
   const data = [
     {
-      category: 'Tx Latency',
+      category: 'Optimism Tx Latency',
       stat: txLatencies.length,
       data: latencies
     },
