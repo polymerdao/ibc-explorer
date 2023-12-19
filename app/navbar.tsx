@@ -2,6 +2,7 @@
 
 import { usePathname } from 'next/navigation';
 import { Disclosure } from '@headlessui/react';
+import Image from "next/image";
 
 const navigation = [
   { name: 'Dashboard', href: '/' },
@@ -22,6 +23,9 @@ export default function Navbar() {
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <div className="flex h-16 justify-between">
               <div className="flex">
+                <div className="flex flex-shrink-0 items-center mr-8 pt-2">
+                  <Image src={"/logo512.png"} width={32} height={32} alt={"Logo"} />
+                </div>
                 <div className="hidden sm:-my-px sm:flex sm:space-x-8">
                   {navigation.map((item) => (
                     <a

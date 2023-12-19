@@ -1,11 +1,16 @@
-FROM ghcr.io/polymerdao/polymer:v0.1.0-alpha.10
+FROM ghcr.io/polymerdao/polymer:v0.1.0-alpha.12
 
-RUN apk add --update --no-cache nodejs npm py3-flask py3-yaml git
+RUN apk add --update --no-cache nodejs npm git
+
+WORKDIR /app
+
+COPY package*.json ./
+
+RUN npm install
 
 COPY . .
+RUN npm run build
 
-RUN npm install && npm run build
+EXPOSE 3000
 
-EXPOSE 5000
-
-CMD ["python3", "app.py"]
+CMD ["npm", "run", "start"]

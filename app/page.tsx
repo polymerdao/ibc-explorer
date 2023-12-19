@@ -1,11 +1,12 @@
 import { Card, Title, Text } from '@tremor/react';
-import Search from './search';
 import ClientsTable from './clients-table';
 import { execSync } from "child_process";
 import { ChannelsPaginated, ClientStatesPaginated, ConnectionsPaginated } from "./schemas";
 import ConnectionsTable from "./connections-table";
 import React from "react";
 import ChannelsTable from "./channels-table";
+import { unstable_noStore as noStore } from 'next/cache';
+
 
 
 interface User {
@@ -18,31 +19,43 @@ interface User {
 async function getConnections(apiUrl: string) {
   'use server'
 
-  const cliOutput = execSync(
-    `polymerd query ibc connection connections --output json --node ${apiUrl}`
-  );
-  const parsedData = ConnectionsPaginated.parse(JSON.parse(cliOutput.toString()));
-  return parsedData.connections
+  try {
+    const cliOutput = execSync(
+      `polymerd query ibc connection connections --output json --node ${apiUrl}`
+    );
+    const parsedData = ConnectionsPaginated.parse(JSON.parse(cliOutput.toString()));
+    return parsedData.connections
+  } catch (e) {
+    return []
+  }
 }
 
 async function getClients(apiUrl: string) {
   'use server'
 
-  const cliOutput = execSync(
-    `polymerd query ibc client states --output json --node ${apiUrl}`
-  );
-  const parsedData = ClientStatesPaginated.parse(JSON.parse(cliOutput.toString()));
-  return parsedData.client_states
+  try {
+    const cliOutput = execSync(
+      `polymerd query ibc client states --output json --node ${apiUrl}`
+    );
+    const parsedData = ClientStatesPaginated.parse(JSON.parse(cliOutput.toString()));
+    return parsedData.client_states
+  } catch (e) {
+    return []
+  }
 }
 
 async function getChannels(apiUrl: string) {
   'use server'
 
-  const cliOutput = execSync(
-    `polymerd query ibc channel channels --output json --node ${apiUrl}`
-  );
-  const parsedData = ChannelsPaginated.parse(JSON.parse(cliOutput.toString()));
-  return parsedData.channels
+  try {
+    const cliOutput = execSync(
+      `polymerd query ibc channel channels --output json --node ${apiUrl}`
+    );
+    const parsedData = ChannelsPaginated.parse(JSON.parse(cliOutput.toString()));
+    return parsedData.channels
+  } catch (e) {
+    return []
+  }
 }
 
 export default async function IndexPage({
@@ -50,7 +63,10 @@ export default async function IndexPage({
                                         }: {
   searchParams: { q: string };
 }) {
-  let apiUrl = "tcp://localhost:26657";
+  noStore();
+
+  let apiUrl = process.env.API_URL!;
+  console.log("API URL: ", apiUrl)
   const clients = await getClients(apiUrl)
   const connections = await getConnections(apiUrl)
   const channels = await getChannels(apiUrl)
