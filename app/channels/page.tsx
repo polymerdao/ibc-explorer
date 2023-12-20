@@ -20,6 +20,7 @@ export default function Channels() {
   return IbcComponent<ChannelSchema>({
     initialVisibleColumns: new Set(["channel_id", "state", "port_id", "counterparty.channel_id", "counterparty.port_id", "connection_hops"]),
     columns,
+    statusProperty: "ordering",
     statusOptions,
     defaultSortDescriptor: {
       column: "channel_id",

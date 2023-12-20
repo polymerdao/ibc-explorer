@@ -89,5 +89,6 @@ export type ClientStatesSchema = z.infer<typeof ClientStates>
 export type ConnectionsSchema = z.infer<typeof Connections>
 export type ChannelsSchema = z.infer<typeof Channels>
 export type ChannelSchema = z.infer<typeof Channel>
+export type ConnectionSchema = z.infer<typeof Connection>
 
 

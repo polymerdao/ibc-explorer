@@ -22,19 +22,20 @@ import { SearchIcon } from "./icons/SearchIcon";
 import { ChevronDownIcon } from "./icons/ChevronDownIcon";
 import { Text, Title } from "@tremor/react";
 import _ from 'lodash';
-import { ChannelSchema } from "./schemas";
+import { ChannelSchema, ConnectionSchema } from "./schemas";
 
 
 interface IbcProps {
   initialVisibleColumns: Set<string>;
   columns: { name: string; uid: string; sortable?: boolean }[];
+  statusProperty: string;
   statusOptions: { name: string; uid: string }[];
   defaultSortDescriptor: SortDescriptor;
   ibcEntityName: string; // The name of the IBC entity (channel, connection, client)
   keyProperty: string; // The property to use as the key for the table rows
 }
 
-export function IbcComponent<T extends ChannelSchema>(props: IbcProps) {
+export function IbcComponent<T extends ChannelSchema|ConnectionSchema>(props: IbcProps) {
   const [filterValue, setFilterValue] = React.useState("");
   const [visibleColumns, setVisibleColumns] = React.useState<Selection>(props.initialVisibleColumns);
   const [statusFilter, setStatusFilter] = React.useState<Selection>("all");
@@ -81,7 +82,7 @@ export function IbcComponent<T extends ChannelSchema>(props: IbcProps) {
 
     if (statusFilter !== "all" && Array.from(statusFilter).length !== props.statusOptions.length) {
       filteredChannels = filteredChannels.filter((channel) =>
-        Array.from(statusFilter).includes(channel.ordering),
+        Array.from(statusFilter).includes(_.get(channel, props.statusProperty)),
       );
     }
 
@@ -166,7 +167,7 @@ export function IbcComponent<T extends ChannelSchema>(props: IbcProps) {
             <Dropdown>
               <DropdownTrigger className="hidden sm:flex">
                 <Button endContent={<ChevronDownIcon className="text-small"/>} variant="flat">
-                  Ordering
+                  {_.capitalize(props.statusProperty)}
                 </Button>
               </DropdownTrigger>
               <DropdownMenu
