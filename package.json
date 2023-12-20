@@ -12,6 +12,8 @@
   "dependencies": {
     "@headlessui/react": "^1.7.17",
     "@heroicons/react": "^2.0.18",
+    "@nextui-org/react": "^2.2.9",
+    "@react-stately/data": "^3.11.0",
     "@tremor/react": "^3.10.0",
     "@types/js-cookie": "^3.0.5",
     "@types/node": "20.8.9",
@@ -21,8 +23,10 @@
     "eslint": "8.52.0",
     "eslint-config-next": "14.0.0",
     "ethers": "^6.9.0",
+    "framer-motion": "^10.16.16",
     "js-cookie": "^3.0.5",
     "js-yaml": "^4.1.0",
+    "lodash": "^4.17.21",
     "next": "14.0.0",
     "postcss": "^8.4.31",
     "prettier": "^3.0.3",
@@ -42,6 +46,7 @@
     "trailingComma": "none"
   },
   "devDependencies": {
+    "@types/lodash": "^4.14.202",
     "@types/stats-lite": "^2.2.2"
   }
 }

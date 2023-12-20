@@ -1,62 +1,10 @@
-import { Card, Title, Text } from '@tremor/react';
+import { Card, Text, Title } from '@tremor/react';
 import ClientsTable from './clients-table';
-import { execSync } from "child_process";
-import { ChannelsPaginated, ClientStatesPaginated, ConnectionsPaginated } from "./schemas";
 import ConnectionsTable from "./connections-table";
 import React from "react";
 import ChannelsTable from "./channels-table";
 import { unstable_noStore as noStore } from 'next/cache';
-
-
-
-interface User {
-  id: number;
-  name: string;
-  username: string;
-  email: string;
-}
-
-async function getConnections(apiUrl: string) {
-  'use server'
-
-  try {
-    const cliOutput = execSync(
-      `polymerd query ibc connection connections --output json --node ${apiUrl}`
-    );
-    const parsedData = ConnectionsPaginated.parse(JSON.parse(cliOutput.toString()));
-    return parsedData.connections
-  } catch (e) {
-    return []
-  }
-}
-
-async function getClients(apiUrl: string) {
-  'use server'
-
-  try {
-    const cliOutput = execSync(
-      `polymerd query ibc client states --output json --node ${apiUrl}`
-    );
-    const parsedData = ClientStatesPaginated.parse(JSON.parse(cliOutput.toString()));
-    return parsedData.client_states
-  } catch (e) {
-    return []
-  }
-}
-
-async function getChannels(apiUrl: string) {
-  'use server'
-
-  try {
-    const cliOutput = execSync(
-      `polymerd query ibc channel channels --output json --node ${apiUrl}`
-    );
-    const parsedData = ChannelsPaginated.parse(JSON.parse(cliOutput.toString()));
-    return parsedData.channels
-  } catch (e) {
-    return []
-  }
-}
+import { getChannels, getClients, getConnections } from "./api/ibc/[type]/ibc";
 
 export default async function IndexPage({
                                           searchParams
@@ -75,7 +23,6 @@ export default async function IndexPage({
     <main className="p-4 md:p-10 mx-auto max-w-7xl">
       <Title>Clients</Title>
       <Text>A list of virtual clients</Text>
-      {/*<Search />*/}
       <Card className="mt-6">
         <ClientsTable clients={clients}/>
       </Card>
