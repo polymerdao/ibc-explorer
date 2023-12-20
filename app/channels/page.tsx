@@ -42,7 +42,7 @@ export default function Channels() {
   const [isLoading, setIsLoading] = React.useState(true);
 
   useEffect(() => {
-    fetch("http://localhost:3000/api/ibc/channels").then(res => res.json()).then(data => {
+    fetch("/api/ibc/channels").then(res => res.json()).then(data => {
       setChannels(data);
     })
   }, [])
