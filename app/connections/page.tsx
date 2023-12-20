@@ -12,8 +12,9 @@ const columns = [
   {name: "Delay Period", uid: "delay_period", sortable: false},
 ];
 const statusOptions = [
+  {name: "Init", uid: "STATE_INIT"},
+  {name: "Try Pending", uid: "STATE_TRY_PENDING"},
   {name: "Open", uid: "STATE_OPEN"},
-  {name: "Try Open", uid: "STATE_TRY_OPEN"},
 ];
 export default function Channels() {
   return IbcComponent<ConnectionSchema>({
