@@ -99,10 +99,9 @@ export default function Channels() {
 
   const renderCell = React.useCallback((channel: ChannelSchema, columnKey: React.Key) => {
     const cellValue = _get(channel, columnKey as keyof ChannelSchema) as string | string[];
-    console.log("cellValue: ", cellValue, " columnKey: ", columnKey, " channel: ", channel)
     switch (columnKey) {
-      case "connections_hops":
-        return (cellValue as string[]).join(", ");
+      case "connection_hops":
+        return (cellValue as string[]).join("\n");
       default:
         return cellValue;
     }
