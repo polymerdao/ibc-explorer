@@ -22,20 +22,20 @@ import { SearchIcon } from "./icons/SearchIcon";
 import { ChevronDownIcon } from "./icons/ChevronDownIcon";
 import { Text, Title } from "@tremor/react";
 import _ from 'lodash';
-import { ChannelSchema, ConnectionSchema } from "./schemas";
+import { ChannelSchema, ClientSchema, ConnectionSchema } from "./schemas";
 
 
 interface IbcProps {
   initialVisibleColumns: Set<string>;
   columns: { name: string; uid: string; sortable?: boolean }[];
-  statusProperty: string;
+  statusProperty?: string;
   statusOptions: { name: string; uid: string }[];
   defaultSortDescriptor: SortDescriptor;
   ibcEntityName: string; // The name of the IBC entity (channel, connection, client)
   keyProperty: string; // The property to use as the key for the table rows
 }
 
-export function IbcComponent<T extends ChannelSchema|ConnectionSchema>(props: IbcProps) {
+export function IbcComponent<T extends ChannelSchema | ConnectionSchema | ClientSchema>(props: IbcProps) {
   const [filterValue, setFilterValue] = React.useState("");
   const [visibleColumns, setVisibleColumns] = React.useState<Selection>(props.initialVisibleColumns);
   const [statusFilter, setStatusFilter] = React.useState<Selection>("all");
@@ -80,9 +80,9 @@ export function IbcComponent<T extends ChannelSchema|ConnectionSchema>(props: Ib
       )
     }
 
-    if (statusFilter !== "all" && Array.from(statusFilter).length !== props.statusOptions.length) {
+    if (statusFilter !== "all" && Array.from(statusFilter).length !== props.statusOptions.length && props.statusProperty != null) {
       filteredChannels = filteredChannels.filter((channel) =>
-        Array.from(statusFilter).includes(_.get(channel, props.statusProperty)),
+        Array.from(statusFilter).includes(_.get(channel, props.statusProperty!)),
       );
     }
 
@@ -164,27 +164,29 @@ export function IbcComponent<T extends ChannelSchema|ConnectionSchema>(props: Ib
             onValueChange={onSearchChange}
           />
           <div className="flex gap-3">
-            <Dropdown>
-              <DropdownTrigger className="hidden sm:flex">
-                <Button endContent={<ChevronDownIcon className="text-small"/>} variant="flat">
-                  {_.capitalize(props.statusProperty)}
-                </Button>
-              </DropdownTrigger>
-              <DropdownMenu
-                disallowEmptySelection
-                aria-label="Table Columns"
-                closeOnSelect={false}
-                selectedKeys={statusFilter}
-                selectionMode="multiple"
-                onSelectionChange={setStatusFilter}
-              >
-                {props.statusOptions.map((status) => (
-                  <DropdownItem key={status.uid} className="capitalize">
-                    {status.name}
-                  </DropdownItem>
-                ))}
-              </DropdownMenu>
-            </Dropdown>
+            {(props.statusProperty != null) ? (
+              <Dropdown>
+                <DropdownTrigger className="hidden sm:flex">
+                  <Button endContent={<ChevronDownIcon className="text-small"/>} variant="flat">
+                    {_.capitalize(props.statusProperty)}
+                  </Button>
+                </DropdownTrigger>
+                <DropdownMenu
+                  disallowEmptySelection
+                  aria-label="Table Columns"
+                  closeOnSelect={false}
+                  selectedKeys={statusFilter}
+                  selectionMode="multiple"
+                  onSelectionChange={setStatusFilter}
+                >
+                  {props.statusOptions.map((status) => (
+                    <DropdownItem key={status.uid} className="capitalize">
+                      {status.name}
+                    </DropdownItem>
+                  ))}
+                </DropdownMenu>
+              </Dropdown>
+            ) : (<></>)}
             <Dropdown>
               <DropdownTrigger className="hidden sm:flex">
                 <Button endContent={<ChevronDownIcon className="text-small"/>} variant="flat">
