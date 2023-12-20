@@ -6,6 +6,7 @@ import Image from "next/image";
 
 const navigation = [
   { name: 'Metrics', href: '/' },
+  { name: 'Connections', href: '/connections' },
   { name: 'Channels', href: '/channels' },
 ];
 
