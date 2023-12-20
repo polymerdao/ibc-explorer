@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
         - name: ibc-explorer
-          image: ghcr.io/polymerdao/ibc-explorer:v0.0.2-alpha-9
+          image: ghcr.io/polymerdao/ibc-explorer:v0.0.2-alpha-12
           resources:
             limits:
               cpu: '1'
@@ -29,3 +29,16 @@ spec:
           env:
             - name: API_URL
               value: tcp://peptide:26657
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ibc-explorer
+spec:
+  type: LoadBalancer
+  selector:
+    app: ibc-explorer
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 3000
