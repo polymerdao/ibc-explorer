@@ -64,9 +64,16 @@ export default function Channels() {
     let filteredChannels = [...channels];
 
     if (hasSearchFilter) {
-      filteredChannels = filteredChannels.filter((channel) =>
-        channel.channel_id.toLowerCase().includes(filterValue.toLowerCase()),
-      );
+      filteredChannels = filteredChannels.filter((channel) => {
+          return columns.some((c) => {
+            let cellValue = _get(channel, c.uid as keyof ChannelSchema) as any
+            if (typeof cellValue === "string") {
+              return cellValue.toLowerCase().includes(filterValue.toLowerCase())
+            }
+            return false;
+          })
+        }
+      )
     }
 
     if (statusFilter !== "all" && Array.from(statusFilter).length !== statusOptions.length) {
@@ -146,7 +153,7 @@ export default function Channels() {
           <Input
             isClearable
             className="w-full sm:max-w-[44%]"
-            placeholder="Search by channel id..."
+            placeholder="Search across all fields..."
             startContent={<SearchIcon/>}
             value={filterValue}
             onClear={() => onClear()}
@@ -156,7 +163,7 @@ export default function Channels() {
             <Dropdown>
               <DropdownTrigger className="hidden sm:flex">
                 <Button endContent={<ChevronDownIcon className="text-small"/>} variant="flat">
-                  Status
+                  Ordering
                 </Button>
               </DropdownTrigger>
               <DropdownMenu
