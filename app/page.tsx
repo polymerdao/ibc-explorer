@@ -1,9 +1,18 @@
-import { Card, Metric, Text, Title, BarList, Flex, Grid } from '@tremor/react';
+'use client';
+
+// Import necessary dependencies
+import React, { useState, useEffect } from 'react';
+import { Card, Metric, Text, Title, BarList, Flex, Grid, Divider } from '@tremor/react';
 import * as stats from 'stats-lite';
-import { fetchEvmData } from "./events";
+import { fetchEvmData, getLatestBlock } from "./events";
+import DateTimeRangePicker from "./components/DateTimePicker";
+import { Block } from "ethers";
 
-
-const calculateStats = (latencies: number[]): { avg: number; min: number; median: number } => {
+const calculateStats = (latencies: number[]): {
+  avg: number;
+  min: number;
+  median: number
+} => {
   const avg = stats.mean(latencies);
   const min = Math.min(...latencies);
   const median = stats.median(latencies);
@@ -11,28 +20,73 @@ const calculateStats = (latencies: number[]): { avg: number; min: number; median
   return {avg, min, median};
 };
 
+const calculateBlockNumber = (timestamp: number, latestBlock: Block, blockTime: number) => {
+  return Math.ceil(latestBlock.number - (latestBlock.timestamp - timestamp) / blockTime);
+};
 
-export default async function MetricsPage() {
+interface MetricData {
+  category: string;
+  stat: number;
+  data: {
+    name: string;
+    value: number
+  }[];
+}
 
-  const txLatencies = await fetchEvmData(5340727, 5437287)
-  const latencyStats = calculateStats(txLatencies);
-
-  let latencies = [];
-  latencies.push({name: "Avg", value: latencyStats.avg})
-  latencies.push({name: "Min", value: latencyStats.min})
-  latencies.push({name: "Median", value: latencyStats.median})
-
-  const data = [
+const MetricsPage: React.FC = () => {
+  const [blockRange, setBlockRange] = useState<[number, number]>([0, 0]);
+  const [data, setData] = useState<MetricData[]>([
     {
-      category: 'Optimism Tx Latency',
-      stat: txLatencies.length,
-      data: latencies
+      category: 'Optimism Tx Latency in seconds',
+      stat: 0,
+      data: [],
     },
-  ];
+  ]);
 
+  const fetchData = async () => {
+    const txLatencies = await fetchEvmData(...blockRange, 'Optimism');
+    const latencyStats = calculateStats(txLatencies);
+
+    const latencies = [
+      {name: "Avg", value: latencyStats.avg},
+      {name: "Min", value: latencyStats.min},
+      {name: "Median", value: latencyStats.median},
+    ];
+
+    setData([
+      {
+        category: 'E2E Tx Latency in seconds',
+        stat: txLatencies.length,
+        data: latencies,
+      },
+    ]);
+  };
+
+  useEffect(() => {
+    fetchData();
+  }, [blockRange]);
+
+  const handleRangeChange = async (newStartDate: Date, newEndDate: Date) => {
+    console.log('Range Changed:', newStartDate, 'to', newEndDate);
+
+    // Assuming block time is 2 seconds
+    const blockTime = 2;
+
+    const latestBlock = await getLatestBlock();
+
+    const blockStartNumber = calculateBlockNumber(newStartDate.getTime() / 1000, latestBlock!, blockTime);
+    const blockEndNumber = calculateBlockNumber(newEndDate.getTime() / 1000, latestBlock!, blockTime);
+
+    console.log('Block Number for Start Date:', blockStartNumber);
+    console.log('Block Number for End Date:', blockEndNumber);
+    setBlockRange([blockStartNumber, blockEndNumber]);
+  };
 
   return (
     <main className="p-4 md:p-10 mx-auto max-w-7xl">
+
+      <DateTimeRangePicker onRangeChange={handleRangeChange}/>
+      <Divider>Optimism Sepolia</Divider>
       <Grid numItemsSm={2} numItemsLg={3} className="gap-6">
         {data.map((item) => (
           <Card key={item.category}>
@@ -43,7 +97,7 @@ export default async function MetricsPage() {
               className="space-x-2"
             >
               <Metric>{item.stat}</Metric>
-              <Text>Total packets</Text>
+              <Text>Total packets </Text>
             </Flex>
             <Flex className="mt-6">
               <Text>Statistics</Text>
@@ -61,4 +115,7 @@ export default async function MetricsPage() {
       </Grid>
     </main>
   );
-}
+};
+
+export default MetricsPage;
+
