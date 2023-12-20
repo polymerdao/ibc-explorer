@@ -48,13 +48,9 @@ export function IbcComponent<T extends ChannelSchema | ConnectionSchema | Client
   useEffect(() => {
     fetch(`/api/ibc/${props.ibcEntityName}s`).then(res => res.json()).then(data => {
       setIbcItems(data);
+      setIsLoading(false);
     })
   }, [])
-
-  useEffect(() => {
-    setIsLoading(false);
-  }, [ibcItems])
-
 
   const hasSearchFilter = Boolean(filterValue);
 
