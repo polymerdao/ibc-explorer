@@ -12,11 +12,13 @@ const ClientState = z.object({
   params: z.string().optional(),
 });
 
+const Client = z.object({
+  client_id: z.string(),
+  client_state: ClientState,
+});
+
 const ClientStates = z.array(
-  z.object({
-    client_id: z.string(),
-    client_state: ClientState,
-  })
+  Client
 );
 
 const Pagination = z.object({
@@ -90,5 +92,6 @@ export type ConnectionsSchema = z.infer<typeof Connections>
 export type ChannelsSchema = z.infer<typeof Channels>
 export type ChannelSchema = z.infer<typeof Channel>
 export type ConnectionSchema = z.infer<typeof Connection>
+export type ClientSchema = z.infer<typeof Client>
 
 
