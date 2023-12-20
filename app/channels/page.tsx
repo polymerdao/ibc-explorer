@@ -18,8 +18,8 @@ import {
   Selection,
   SortDescriptor, Spinner
 } from "@nextui-org/react";
-import { ChevronDownIcon } from "../ChevronDownIcon";
-import { SearchIcon } from "./SearchIcon";
+import { ChevronDownIcon } from "../icons/ChevronDownIcon";
+import { SearchIcon } from "../icons/SearchIcon";
 import { columns, statusOptions } from "./data";
 import { Text, Title } from "@tremor/react";
 import { ChannelSchema, ChannelsSchema } from "../schemas";
