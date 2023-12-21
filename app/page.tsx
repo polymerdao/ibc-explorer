@@ -47,9 +47,7 @@ const MetricsPage: React.FC = () => {
 
   const fetchData = async () => {
     const newData = await Promise.all(Object.keys(CHAIN_CONFIGS).map(async (chain) => {
-      // Assuming block time is 2 seconds
-      const blockTime = 2;
-
+      const blockTime = CHAIN_CONFIGS[chain as CHAIN].blockTime;
       const latestBlock = await getLatestBlock(chain as CHAIN);
 
       const blockStartNumber = calculateBlockNumber(dateRange[0].getTime() / 1000, latestBlock!, blockTime);
