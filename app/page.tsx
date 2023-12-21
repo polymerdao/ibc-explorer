@@ -9,6 +9,7 @@ import { Block } from "ethers";
 import _ from "lodash";
 import { Spinner } from "@nextui-org/react";
 import { EvmData } from "./api/metrics/route";
+import { ChannelSchema } from "./schemas";
 
 const calculateStats = (latencies: number[]): {
   avg: number;
@@ -43,7 +44,20 @@ const MetricsPage: React.FC = () => {
 
   const [dateRange, setDateRange] = useState<[Date, Date]>([startOfDay, now]);
   const [data, setData] = useState<MetricData[]>([]);
+  const [dapps, setDapps] = React.useState<number>(0);
   const [isLoading, setIsLoading] = useState(true);
+
+
+  useEffect(() => {
+    fetch(`/api/ibc/channels`).then(res => res.json()).then(data => {
+      let ports = new Set<string>();
+      data.map((item: ChannelSchema) => {
+        ports.add(item.port_id)
+        ports.add(item.counterparty.port_id)
+      })
+      setDapps(ports.size)
+    })
+  }, [dateRange])
 
   const fetchData = async () => {
     Promise.all(Object.keys(CHAIN_CONFIGS).map(async (chain) => {
@@ -102,40 +116,48 @@ const MetricsPage: React.FC = () => {
     <main className="p-4 md:p-10 mx-auto max-w-7xl">
       <Divider>Filter</Divider>
       <DateTimeRangePicker onRangeChange={handleRangeChange} initialStartDate={startOfDay} initialEndDate={now}/>
-      <Divider>KPI</Divider>
-      <Card className="max-w-xs" decoration="top" decorationColor="slate">
-        <Text>Connected chains</Text>
-        <Metric>{Object.keys(CHAIN_CONFIGS).length}</Metric>
-      </Card>
-      <Divider>Sepolia</Divider>
       {isLoading && <Spinner label="Loading..."/>}
       {!isLoading &&
-        <Grid numItemsSm={2} numItemsLg={3} className="gap-6">
-            {data.map((item) => (
-              <Card key={item.category}>
-                <Title>{item.category}</Title>
-                <Flex
-                  justifyContent="start"
-                  alignItems="baseline"
-                  className="space-x-2"
-                >
-                  <Metric>{item.stat}</Metric>
-                  <Text>Total packets </Text>
-                </Flex>
-                <Flex className="mt-6">
-                  <Text>Statistics</Text>
-                  <Text className="text-right">Value</Text>
-                </Flex>
-                <BarList
-                  data={item.data}
-                  valueFormatter={(number: number) =>
-                    Intl.NumberFormat('us').format(number).toString()
-                  }
-                  className="mt-2"
-                />
-              </Card>
-            ))}
-          </Grid>
+          <>
+              <Divider>KPI</Divider>
+              <Grid numItemsSm={2} numItemsLg={3} className="gap-6">
+                  <Card className="" decoration="top" decorationColor="slate">
+                      <Text>Connected chains</Text>
+                      <Metric>{Object.keys(CHAIN_CONFIGS).length}</Metric>
+                  </Card>
+                  <Card className="" decoration="top" decorationColor="slate">
+                      <Text>Number of DApps</Text>
+                      <Metric>{dapps}</Metric>
+                  </Card>
+              </Grid>
+              <Divider>Sepolia</Divider>
+              <Grid numItemsSm={2} numItemsLg={3} className="gap-6">
+                {data.map((item) => (
+                  <Card key={item.category}>
+                    <Title>{item.category}</Title>
+                    <Flex
+                      justifyContent="start"
+                      alignItems="baseline"
+                      className="space-x-2"
+                    >
+                      <Metric>{item.stat}</Metric>
+                      <Text>Total packets </Text>
+                    </Flex>
+                    <Flex className="mt-6">
+                      <Text>Statistics</Text>
+                      <Text className="text-right">Value</Text>
+                    </Flex>
+                    <BarList
+                      data={item.data}
+                      valueFormatter={(number: number) =>
+                        Intl.NumberFormat('us').format(number).toString()
+                      }
+                      className="mt-2"
+                    />
+                  </Card>
+                ))}
+              </Grid>
+          </>
       }
     </main>
   );
