@@ -15,7 +15,6 @@ class CachingJsonRpcProvider extends ethers.JsonRpcProvider {
     const cachedData = this.cache.getKey(cacheKey);
 
     if (cachedData) {
-      console.log(`Using cached data for key: ${cacheKey}`);
       return cachedData;
     }
 

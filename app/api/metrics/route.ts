@@ -85,13 +85,13 @@ async function fetchEvmData(fromBlock: number, toBlock: number, chainId: CHAIN, 
     const ackTx = await provider.getTransactionReceipt(pair.ackLog.transactionHash);
     const ackGasUsed = ackTx!.gasUsed;
     const ackGasPrice = ackTx!.gasPrice;
-    const ackTransactionCost = Number(ethers.formatEther(ackGasUsed * ackGasPrice));
+    const ackTransactionCost = Number(ethers.formatUnits(ackGasUsed * ackGasPrice, "gwei"));
 
     // Calculate gas costs for SendPacket transaction
     const sendPacketTx = await provider.getTransactionReceipt(pair.sendPacketLog.transactionHash);
     const sendPacketGasUsed = sendPacketTx!.gasUsed;
     const sendPacketGasPrice = sendPacketTx!.gasPrice;
-    const sendPacketTransactionCost = Number(ethers.formatEther(sendPacketGasUsed * sendPacketGasPrice));
+    const sendPacketTransactionCost = Number(ethers.formatUnits(sendPacketGasUsed * sendPacketGasPrice, "gwei"));
 
 
     transactionData.push({
