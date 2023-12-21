@@ -46,7 +46,7 @@ const MetricsPage: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
 
   const fetchData = async () => {
-    const newData = await Promise.all(Object.keys(CHAIN_CONFIGS).map(async (chain) => {
+    Promise.all(Object.keys(CHAIN_CONFIGS).map(async (chain) => {
       const blockTime = CHAIN_CONFIGS[chain as CHAIN].blockTime;
       const latestBlock = await getLatestBlock(chain as CHAIN);
 
@@ -83,10 +83,10 @@ const MetricsPage: React.FC = () => {
           ],
         };
       });
-    }));
-
-    setIsLoading(false);
-    setData(_.flatten(newData));
+    })).then((data) => {
+      setIsLoading(false);
+      setData(_.flatten(data));
+    });
   };
 
   useEffect(() => {
@@ -100,7 +100,13 @@ const MetricsPage: React.FC = () => {
 
   return (
     <main className="p-4 md:p-10 mx-auto max-w-7xl">
+      <Divider>Filter</Divider>
       <DateTimeRangePicker onRangeChange={handleRangeChange} initialStartDate={startOfDay} initialEndDate={now}/>
+      <Divider>KPI</Divider>
+      <Card className="max-w-xs" decoration="top" decorationColor="slate">
+        <Text>Connected chains</Text>
+        <Metric>{Object.keys(CHAIN_CONFIGS).length}</Metric>
+      </Card>
       <Divider>Sepolia</Divider>
       {isLoading && <Spinner label="Loading..."/>}
       {!isLoading &&
