@@ -59,24 +59,34 @@ const MetricsPage: React.FC = () => {
 
       const response = await fetch(`/api/metrics?from=${blockStartNumber}&to=${blockEndNumber}&chain=${chain}`);
       const evmData: EvmData[] = await response.json()
-      const latencyStats = calculateStats(_.map(evmData, 'txLatency'))
 
-      const latencies = [
-        {name: "Avg", value: latencyStats.avg},
-        {name: "Min", value: latencyStats.min},
-        {name: "Median", value: latencyStats.median},
-        {name: "Max", value: latencyStats.max},
-      ];
+      const statsTemplate = {
+        txLatency: `${_.capitalize(chain)} E2E Tx Latency in seconds`,
+        ackTransactionCost: `${_.capitalize(chain)} Ack Gas Cost in gwei`,
+        sendPacketTransactionCost: `${_.capitalize(chain)} Send Packet Gas Cost in gwei`,
+      }
 
-      return {
-        category: `${_.capitalize(chain)} E2E Tx Latency in seconds`,
-        stat: evmData.length,
-        data: latencies,
-      };
+      return Object.keys(statsTemplate).map((key) => {
+        const title = statsTemplate[key as keyof typeof statsTemplate];
+        const data = _.map(evmData, key);
+
+        const stats = calculateStats(data);
+
+        return {
+          category: title,
+          stat: data.length,
+          data: [
+            {name: "Avg", value: stats.avg},
+            {name: "Min", value: stats.min},
+            {name: "Median", value: stats.median},
+            {name: "Max", value: stats.max},
+          ],
+        };
+      });
     }));
 
     setIsLoading(false);
-    setData(newData);
+    setData(_.flatten(newData));
   };
 
   useEffect(() => {
