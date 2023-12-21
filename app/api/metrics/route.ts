@@ -11,6 +11,7 @@ export async function GET(request: NextRequest) {
   const from = searchParams.get('from')
   const to = searchParams.get('to')
   const chain = searchParams.get('chain')
+  const dispatcher = searchParams.get('dispatcher')
 
   if (!from || !to || !chain) {
     return NextResponse.error()
@@ -19,7 +20,8 @@ export async function GET(request: NextRequest) {
   const fromBlock = Number(from)
   const toBlock = Number(to)
   const chainId = chain as CHAIN
-  const evmData = await fetchEvmData(fromBlock, toBlock, chainId);
+  const dispatcherAddress = dispatcher ?? CHAIN_CONFIGS[chainId].dispatcher;
+  const evmData = await fetchEvmData(fromBlock, toBlock, chainId, dispatcherAddress);
   return Response.json(evmData)
 }
 
@@ -59,14 +61,15 @@ export interface EvmData {
   sendPacketTransactionCost: number;
 }
 
-async function fetchEvmData(fromBlock: number, toBlock: number, chainId: CHAIN) {
-  console.log(`Fetching EVM data from block ${fromBlock} to ${toBlock}`);
+async function fetchEvmData(fromBlock: number, toBlock: number, chainId: CHAIN, dispatcherAddress: string) {
+  console.log(`Fetching EVM data from block ${fromBlock} to ${toBlock} using chain ${chainId} and dispatcher ${dispatcherAddress}`);
   const provider = new CachingJsonRpcProvider(CHAIN_CONFIGS[chainId].rpc, CHAIN_CONFIGS[chainId].id);
-
-  const contract = new ethers.Contract(CHAIN_CONFIGS[chainId].dispatcher, Abi.abi, provider);
+  const contract = new ethers.Contract(dispatcherAddress, Abi.abi, provider);
 
   const ackLogs = (await contract.queryFilter('Acknowledgement', fromBlock, toBlock)) as Array<ethers.EventLog>;
   const sendPacketLogs = (await contract.queryFilter('SendPacket', fromBlock, toBlock)) as Array<ethers.EventLog>;
+  console.log(`Found ${ackLogs.length} Acknowledgement logs and ${sendPacketLogs.length} SendPacket logs`)
+
   const logPairs = createLogPairs(ackLogs, sendPacketLogs);
 
   const transactionData: EvmData[] = [];
