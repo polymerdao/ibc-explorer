@@ -7,6 +7,7 @@ import { CHAIN, getLatestBlock } from "./chains";
 import DateTimeRangePicker from "./components/DateTimePicker";
 import { Block } from "ethers";
 import _ from "lodash";
+import { Spinner } from "@nextui-org/react";
 
 const calculateStats = (latencies: number[]): {
   avg: number;
@@ -43,6 +44,7 @@ const MetricsPage: React.FC = () => {
 
   const [dateRange, setDateRange] = useState<[Date, Date]>([startOfDay, now]);
   const [data, setData] = useState<MetricData[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
   const fetchData = async () => {
     const newData = await Promise.all(CHAINS.map(async (chain) => {
@@ -63,23 +65,25 @@ const MetricsPage: React.FC = () => {
       const latencyStats = calculateStats(_.map(evmData, 'txLatency'))
 
       const latencies = [
-        { name: "Avg", value: latencyStats.avg },
-        { name: "Min", value: latencyStats.min },
-        { name: "Median", value: latencyStats.median },
-        { name: "Max", value: latencyStats.max },
+        {name: "Avg", value: latencyStats.avg},
+        {name: "Min", value: latencyStats.min},
+        {name: "Median", value: latencyStats.median},
+        {name: "Max", value: latencyStats.max},
       ];
 
       return {
-        category: `${chain} E2E Tx Latency in seconds`,
+        category: `${_.capitalize(chain)} E2E Tx Latency in seconds`,
         stat: evmData.length,
         data: latencies,
       };
     }));
 
+    setIsLoading(false);
     setData(newData);
   };
 
   useEffect(() => {
+    setIsLoading(true);
     fetchData();
   }, [dateRange]);
 
@@ -91,32 +95,35 @@ const MetricsPage: React.FC = () => {
     <main className="p-4 md:p-10 mx-auto max-w-7xl">
       <DateTimeRangePicker onRangeChange={handleRangeChange} initialStartDate={startOfDay} initialEndDate={now}/>
       <Divider>Sepolia</Divider>
-      <Grid numItemsSm={2} numItemsLg={3} className="gap-6">
-        {data.map((item) => (
-          <Card key={item.category}>
-            <Title>{item.category}</Title>
-            <Flex
-              justifyContent="start"
-              alignItems="baseline"
-              className="space-x-2"
-            >
-              <Metric>{item.stat}</Metric>
-              <Text>Total packets </Text>
-            </Flex>
-            <Flex className="mt-6">
-              <Text>Statistics</Text>
-              <Text className="text-right">Value</Text>
-            </Flex>
-            <BarList
-              data={item.data}
-              valueFormatter={(number: number) =>
-                Intl.NumberFormat('us').format(number).toString()
-              }
-              className="mt-2"
-            />
-          </Card>
-        ))}
-      </Grid>
+      {isLoading && <Spinner label="Loading..."/>}
+      {!isLoading &&
+        <Grid numItemsSm={2} numItemsLg={3} className="gap-6">
+            {data.map((item) => (
+              <Card key={item.category}>
+                <Title>{item.category}</Title>
+                <Flex
+                  justifyContent="start"
+                  alignItems="baseline"
+                  className="space-x-2"
+                >
+                  <Metric>{item.stat}</Metric>
+                  <Text>Total packets </Text>
+                </Flex>
+                <Flex className="mt-6">
+                  <Text>Statistics</Text>
+                  <Text className="text-right">Value</Text>
+                </Flex>
+                <BarList
+                  data={item.data}
+                  valueFormatter={(number: number) =>
+                    Intl.NumberFormat('us').format(number).toString()
+                  }
+                  className="mt-2"
+                />
+              </Card>
+            ))}
+          </Grid>
+      }
     </main>
   );
 };
