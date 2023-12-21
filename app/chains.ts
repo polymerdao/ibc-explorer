@@ -8,12 +8,12 @@ export const CHAIN_CONFIGS: {
   optimism: {
     id: 11155420,
     rpc: "https://opt-sepolia.g.alchemy.com/v2/RN7slh_2cUIuzhxo4M9VgYCbqRcPOmkJ",
-    dispatcher: "0x7a1d713f80BFE692D7b4Baa4081204C49735441E"
+    dispatcher: "0xD92B86315CBcf9cC612F0b0542E0bE5871bCa146"
   },
   base: {
     id: 84532,
     rpc: "https://base-sepolia.g.alchemy.com/v2/zGVxj0T-xvSR29_t7MlIhqRskkSwugVM",
-    dispatcher: "0x749053bBFe3f607382Ac6909556c4d0e03D6eAF0"
+    dispatcher: "0xab6AEF0311954C40AcD4D1DED56CAAE9cc074975"
 
   }
 };
