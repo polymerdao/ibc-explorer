@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import { BarList, Card, Divider, Flex, Grid, Metric, Text, Title } from '@tremor/react';
 import * as stats from 'stats-lite';
-import { CHAIN, fetchEvmData, getLatestBlock } from "./events";
+import { CHAIN, getLatestBlock } from "./chains";
 import DateTimeRangePicker from "./components/DateTimePicker";
 import { Block } from "ethers";
 import _ from "lodash";
@@ -35,7 +35,7 @@ interface MetricData {
   }[];
 }
 
-const CHAINS: CHAIN[] = ['Optimism', 'Base'];
+const CHAINS: CHAIN[] = ['optimism', 'base'];
 
 const MetricsPage: React.FC = () => {
   const now = new Date();
@@ -58,7 +58,8 @@ const MetricsPage: React.FC = () => {
       console.log(`Block Number for ${chain} End Date ${blockEndNumber}`);
 
 
-      const evmData = await fetchEvmData(blockStartNumber, blockEndNumber, chain);
+      const response = await fetch(`/api/metrics?from=${blockStartNumber}&to=${blockEndNumber}&chain=${chain}`);
+      const evmData = await response.json()
       const latencyStats = calculateStats(_.map(evmData, 'txLatency'))
 
       const latencies = [
