@@ -1,23 +1,27 @@
-import { ethers, Networkish } from "ethers";
-import Abi from "./contracts/Dispatcher.json"
+import { ethers } from "ethers";
+import CachingJsonRpcProvider from "./provider";
+import Abi from "../../contracts/Dispatcher.json";
+import { CHAIN, CHAIN_CONFIGS } from "../../chains";
+import { NextRequest, NextResponse } from "next/server";
 
-export type CHAIN = 'Optimism' | 'Base';
+export const dynamic = 'force-dynamic' // defaults to auto
 
-const CHAIN_CONFIGS: {
-  [key in CHAIN]: { id: number; rpc: string, dispatcher: string};
-} = {
-  Optimism: {
-    id: 11155420,
-    rpc: "https://opt-sepolia.g.alchemy.com/v2/RN7slh_2cUIuzhxo4M9VgYCbqRcPOmkJ",
-    dispatcher: "0x7a1d713f80BFE692D7b4Baa4081204C49735441E"
-  },
-  Base: {
-    id: 84532,
-    rpc: "https://base-sepolia.g.alchemy.com/v2/zGVxj0T-xvSR29_t7MlIhqRskkSwugVM",
-    dispatcher: "0x749053bBFe3f607382Ac6909556c4d0e03D6eAF0"
+export async function GET(request: NextRequest) {
+  const searchParams = request.nextUrl.searchParams
+  const from = searchParams.get('from')
+  const to = searchParams.get('to')
+  const chain = searchParams.get('chain')
 
+  if (!from || !to || !chain) {
+    return NextResponse.error()
   }
-};
+
+  const fromBlock = Number(from)
+  const toBlock = Number(to)
+  const chainId = chain as CHAIN
+  return NextResponse.json(await fetchEvmData(fromBlock, toBlock, chainId))
+}
+
 
 const createLogPairs = (ackLogs: Array<ethers.EventLog>, sendPacketLogs: Array<ethers.EventLog>) => {
   const logPairs: {
@@ -56,7 +60,7 @@ export interface EvmData {
 
 export async function fetchEvmData(fromBlock: number, toBlock: number, chainId: CHAIN) {
   console.log(`Fetching EVM data from block ${fromBlock} to ${toBlock}`);
-  const provider = new ethers.JsonRpcProvider(CHAIN_CONFIGS[chainId].rpc, CHAIN_CONFIGS[chainId].id);
+  const provider = new CachingJsonRpcProvider(CHAIN_CONFIGS[chainId].rpc, CHAIN_CONFIGS[chainId].id);
 
   const contract = new ethers.Contract(CHAIN_CONFIGS[chainId].dispatcher, Abi.abi, provider);
 
@@ -93,10 +97,4 @@ export async function fetchEvmData(fromBlock: number, toBlock: number, chainId: 
     });
   }
   return transactionData
-}
-
-
-export async function getLatestBlock(chainId: CHAIN) {
-  const provider = new ethers.JsonRpcProvider(CHAIN_CONFIGS[chainId].rpc);
-  return await provider.getBlock("latest");
 }
