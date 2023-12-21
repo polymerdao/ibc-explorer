@@ -1,23 +1,25 @@
 'use client';
 
-// Import necessary dependencies
-import React, { useState, useEffect } from 'react';
-import { Card, Metric, Text, Title, BarList, Flex, Grid, Divider } from '@tremor/react';
+import React, { useEffect, useState } from 'react';
+import { BarList, Card, Divider, Flex, Grid, Metric, Text, Title } from '@tremor/react';
 import * as stats from 'stats-lite';
 import { CHAIN, fetchEvmData, getLatestBlock } from "./events";
 import DateTimeRangePicker from "./components/DateTimePicker";
 import { Block } from "ethers";
+import _ from "lodash";
 
 const calculateStats = (latencies: number[]): {
   avg: number;
   min: number;
-  median: number
+  median: number;
+  max: number;
 } => {
   const avg = stats.mean(latencies);
   const min = Math.min(...latencies);
   const median = stats.median(latencies);
+  const max = Math.max(...latencies);
 
-  return {avg, min, median};
+  return {avg, min, median, max};
 };
 
 const calculateBlockNumber = (timestamp: number, latestBlock: Block, blockTime: number) => {
@@ -37,7 +39,7 @@ const CHAINS: CHAIN[] = ['Optimism', 'Base'];
 
 const MetricsPage: React.FC = () => {
   const now = new Date();
-  const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0);
+  const startOfDay = new Date(now.getFullYear(), now.getMonth(), 1, 0, 0, 0);
 
   const [dateRange, setDateRange] = useState<[Date, Date]>([startOfDay, now]);
   const [data, setData] = useState<MetricData[]>([]);
@@ -56,18 +58,19 @@ const MetricsPage: React.FC = () => {
       console.log(`Block Number for ${chain} End Date ${blockEndNumber}`);
 
 
-      const txLatencies = await fetchEvmData(blockStartNumber, blockEndNumber, chain);
-      const latencyStats = calculateStats(txLatencies);
+      const evmData = await fetchEvmData(blockStartNumber, blockEndNumber, chain);
+      const latencyStats = calculateStats(_.map(evmData, 'txLatency'))
 
       const latencies = [
         { name: "Avg", value: latencyStats.avg },
         { name: "Min", value: latencyStats.min },
         { name: "Median", value: latencyStats.median },
+        { name: "Max", value: latencyStats.max },
       ];
 
       return {
         category: `${chain} E2E Tx Latency in seconds`,
-        stat: txLatencies.length,
+        stat: evmData.length,
         data: latencies,
       };
     }));
