@@ -3,24 +3,21 @@ import Abi from "./contracts/Dispatcher.json"
 
 export type CHAIN = 'Optimism' | 'Base';
 
-const CHAIN_IDS: {
-  [key in CHAIN]: { id: number; rpc: string };
+const CHAIN_CONFIGS: {
+  [key in CHAIN]: { id: number; rpc: string, dispatcher: string};
 } = {
   Optimism: {
     id: 11155420,
-    rpc: "https://opt-sepolia.g.alchemy.com/v2/RN7slh_2cUIuzhxo4M9VgYCbqRcPOmkJ"
+    rpc: "https://opt-sepolia.g.alchemy.com/v2/RN7slh_2cUIuzhxo4M9VgYCbqRcPOmkJ",
+    dispatcher: "0x7a1d713f80BFE692D7b4Baa4081204C49735441E"
   },
   Base: {
     id: 84532,
-    rpc: "https://base-sepolia.g.alchemy.com/v2/zGVxj0T-xvSR29_t7MlIhqRskkSwugVM"
+    rpc: "https://base-sepolia.g.alchemy.com/v2/zGVxj0T-xvSR29_t7MlIhqRskkSwugVM",
+    dispatcher: "0x749053bBFe3f607382Ac6909556c4d0e03D6eAF0"
+
   }
 };
-
-const DISPATCHER_ADDRESSES: { [key in CHAIN]: string } = {
-  Optimism: '0x7a1d713f80BFE692D7b4Baa4081204C49735441E',
-  Base: '0x749053bBFe3f607382Ac6909556c4d0e03D6eAF0'
-}
-
 
 const createLogPairs = (ackLogs: Array<ethers.EventLog>, sendPacketLogs: Array<ethers.EventLog>) => {
   const logPairs: {
@@ -59,13 +56,9 @@ export interface EvmData {
 
 export async function fetchEvmData(fromBlock: number, toBlock: number, chainId: CHAIN) {
   console.log(`Fetching EVM data from block ${fromBlock} to ${toBlock}`);
-  const provider = new ethers.JsonRpcProvider(CHAIN_IDS[chainId].rpc, CHAIN_IDS[chainId].id);
+  const provider = new ethers.JsonRpcProvider(CHAIN_CONFIGS[chainId].rpc, CHAIN_CONFIGS[chainId].id);
 
-  if (!(chainId in DISPATCHER_ADDRESSES)) {
-    throw new Error(`Dispatcher address not found for chainId: ${chainId}`);
-  }
-
-  const contract = new ethers.Contract(DISPATCHER_ADDRESSES[chainId], Abi.abi, provider);
+  const contract = new ethers.Contract(CHAIN_CONFIGS[chainId].dispatcher, Abi.abi, provider);
 
   const ackLogs = (await contract.queryFilter('Acknowledgement', fromBlock, toBlock)) as Array<ethers.EventLog>;
   const sendPacketLogs = (await contract.queryFilter('SendPacket', fromBlock, toBlock)) as Array<ethers.EventLog>;
@@ -104,6 +97,6 @@ export async function fetchEvmData(fromBlock: number, toBlock: number, chainId: 
 
 
 export async function getLatestBlock(chainId: CHAIN) {
-  const provider = new ethers.JsonRpcProvider(CHAIN_IDS[chainId].rpc);
+  const provider = new ethers.JsonRpcProvider(CHAIN_CONFIGS[chainId].rpc);
   return await provider.getBlock("latest");
 }
