@@ -1,5 +1,6 @@
 import { ethers } from "ethers";
 
+
 export type CHAIN = 'optimism' | 'base';
 
 export const CHAIN_CONFIGS: {

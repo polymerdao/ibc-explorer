@@ -3,11 +3,12 @@
 import React, { useEffect, useState } from 'react';
 import { BarList, Card, Divider, Flex, Grid, Metric, Text, Title } from '@tremor/react';
 import * as stats from 'stats-lite';
-import { CHAIN, getLatestBlock } from "./chains";
+import { CHAIN, CHAIN_CONFIGS, getLatestBlock } from "./chains";
 import DateTimeRangePicker from "./components/DateTimePicker";
 import { Block } from "ethers";
 import _ from "lodash";
 import { Spinner } from "@nextui-org/react";
+import { EvmData } from "./api/metrics/route";
 
 const calculateStats = (latencies: number[]): {
   avg: number;
@@ -36,8 +37,6 @@ interface MetricData {
   }[];
 }
 
-const CHAINS: CHAIN[] = ['optimism', 'base'];
-
 const MetricsPage: React.FC = () => {
   const now = new Date();
   const startOfDay = new Date(now.getFullYear(), now.getMonth(), 1, 0, 0, 0);
@@ -47,11 +46,11 @@ const MetricsPage: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
 
   const fetchData = async () => {
-    const newData = await Promise.all(CHAINS.map(async (chain) => {
+    const newData = await Promise.all(Object.keys(CHAIN_CONFIGS).map(async (chain) => {
       // Assuming block time is 2 seconds
       const blockTime = 2;
 
-      const latestBlock = await getLatestBlock(chain);
+      const latestBlock = await getLatestBlock(chain as CHAIN);
 
       const blockStartNumber = calculateBlockNumber(dateRange[0].getTime() / 1000, latestBlock!, blockTime);
       const blockEndNumber = calculateBlockNumber(dateRange[1].getTime() / 1000, latestBlock!, blockTime);
@@ -61,7 +60,7 @@ const MetricsPage: React.FC = () => {
 
 
       const response = await fetch(`/api/metrics?from=${blockStartNumber}&to=${blockEndNumber}&chain=${chain}`);
-      const evmData = await response.json()
+      const evmData: EvmData[] = await response.json()
       const latencyStats = calculateStats(_.map(evmData, 'txLatency'))
 
       const latencies = [
