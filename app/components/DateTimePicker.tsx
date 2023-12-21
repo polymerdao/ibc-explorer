@@ -1,8 +1,10 @@
 'use client';
-import React, { useState, ChangeEvent } from 'react';
+import React, { useState, ChangeEvent, useEffect } from 'react';
 
 interface DateTimeRangePickerProps {
   onRangeChange: (newStartDate: Date, newEndDate: Date) => void;
+  initialStartDate: Date;
+  initialEndDate: Date;
 }
 
 const formatToDateTimeLocalString = (date: Date): string => {
@@ -15,12 +17,9 @@ const formatToDateTimeLocalString = (date: Date): string => {
   return `${year}-${month}-${day}T${hours}:${minutes}`;
 };
 
-const DateTimeRangePicker: React.FC<DateTimeRangePickerProps> = ({ onRangeChange }) => {
-  const now = new Date();
-  const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0);
-
-  const [startDate, setStartDate] = useState<Date | null>(startOfDay);
-  const [endDate, setEndDate] = useState<Date | null>(now);
+const DateTimeRangePicker: React.FC<DateTimeRangePickerProps> = ({ onRangeChange, initialStartDate, initialEndDate }) => {
+  const [startDate, setStartDate] = useState<Date | null>(initialStartDate);
+  const [endDate, setEndDate] = useState<Date | null>(initialEndDate);
 
   const handleStartDateChange = (e: ChangeEvent<HTMLInputElement>) => {
     const newStartDate = e.target.value;

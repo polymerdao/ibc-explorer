@@ -1,15 +1,19 @@
 import { ethers, Networkish } from "ethers";
 import Abi from "./contracts/Dispatcher.json"
 
-const RPC_URL = 'https://opt-sepolia.g.alchemy.com/v2/RN7slh_2cUIuzhxo4M9VgYCbqRcPOmkJ';
-
-type CHAIN = 'Optimism' | 'Base';
+export type CHAIN = 'Optimism' | 'Base';
 
 const CHAIN_IDS: {
-  [key in CHAIN]: number
+  [key in CHAIN]: { id: number; rpc: string };
 } = {
-  Optimism: 11155420,
-  Base: 84532,
+  Optimism: {
+    id: 11155420,
+    rpc: "https://opt-sepolia.g.alchemy.com/v2/RN7slh_2cUIuzhxo4M9VgYCbqRcPOmkJ"
+  },
+  Base: {
+    id: 84532,
+    rpc: "https://base-sepolia.g.alchemy.com/v2/zGVxj0T-xvSR29_t7MlIhqRskkSwugVM"
+  }
 };
 
 const DISPATCHER_ADDRESSES: { [key in CHAIN]: string } = {
@@ -49,7 +53,7 @@ const createLogPairs = (ackLogs: Array<ethers.EventLog>, sendPacketLogs: Array<e
 
 export async function fetchEvmData(fromBlock: number, toBlock: number, chainId: CHAIN) {
   console.log(`Fetching EVM data from block ${fromBlock} to ${toBlock}`);
-  const provider = new ethers.JsonRpcProvider(RPC_URL, CHAIN_IDS[chainId]);
+  const provider = new ethers.JsonRpcProvider(CHAIN_IDS[chainId].rpc, CHAIN_IDS[chainId].id);
 
   if (!(chainId in DISPATCHER_ADDRESSES)) {
     throw new Error(`Dispatcher address not found for chainId: ${chainId}`);
@@ -74,7 +78,7 @@ export async function fetchEvmData(fromBlock: number, toBlock: number, chainId: 
 }
 
 
-export async function getLatestBlock() {
-  const provider = new ethers.JsonRpcProvider(RPC_URL);
+export async function getLatestBlock(chainId: CHAIN) {
+  const provider = new ethers.JsonRpcProvider(CHAIN_IDS[chainId].rpc);
   return await provider.getBlock("latest");
 }
