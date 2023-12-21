@@ -19,7 +19,8 @@ export async function GET(request: NextRequest) {
   const fromBlock = Number(from)
   const toBlock = Number(to)
   const chainId = chain as CHAIN
-  return NextResponse.json(await fetchEvmData(fromBlock, toBlock, chainId))
+  const evmData = await fetchEvmData(fromBlock, toBlock, chainId);
+  return Response.json(evmData)
 }
 
 
@@ -58,7 +59,7 @@ export interface EvmData {
   sendPacketTransactionCost: number;
 }
 
-export async function fetchEvmData(fromBlock: number, toBlock: number, chainId: CHAIN) {
+async function fetchEvmData(fromBlock: number, toBlock: number, chainId: CHAIN) {
   console.log(`Fetching EVM data from block ${fromBlock} to ${toBlock}`);
   const provider = new CachingJsonRpcProvider(CHAIN_CONFIGS[chainId].rpc, CHAIN_CONFIGS[chainId].id);
 
