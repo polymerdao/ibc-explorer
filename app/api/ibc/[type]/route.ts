@@ -9,7 +9,6 @@ export async function GET(request: NextRequest,
   const type = params.type
 
   let apiUrl = process.env.API_URL!;
-  console.log("API URL: ", apiUrl)
 
   switch (type) {
     case "channels":
