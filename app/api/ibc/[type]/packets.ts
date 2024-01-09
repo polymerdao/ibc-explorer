@@ -15,6 +15,8 @@ export interface PacketData {
   fee: string;
   id: string;
   state: string;
+  createTime: number;
+  endTime?: number;
 }
 
 interface Channel {
@@ -59,9 +61,13 @@ export async function getPackets(request: NextRequest) {
   // console.log("connectChannelLogs: ", connectChannelLogs)
 
   const packets: Record<string, PacketData> = {};
-  sendPacketLogs.forEach((sendPacketLog) => {
+  for (const sendPacketLog of sendPacketLogs) {
+    console.log("sendPacketLog: ", sendPacketLog)
     const [sourcePortAddress, sourceChannelId, packet, sequence, timeout, fee] = sendPacketLog.args;
     const key = `${sourcePortAddress}-${sourceChannelId}-${sequence}`;
+
+    const blockFrom = await providerFrom.getBlock(sendPacketLog.blockNumber)
+
 
     packets[key] = {
       sourcePortAddress,
@@ -70,11 +76,12 @@ export async function getPackets(request: NextRequest) {
       sequence: sequence.toString(),
       timeout: timeout.toString(),
       id: key,
-      state: "SENT"
+      state: "SENT",
+      createTime: blockFrom!.timestamp,
     };
-  });
+  }
 
-  console.log("packets: ", packets)
+  // console.log("packets: ", packets)
 
   // for (const recvPacketLog of recvPacketLogs) {
   //   const [destPortAddress, destChannelId, sequence] = recvPacketLog.args;
@@ -96,13 +103,16 @@ export async function getPackets(request: NextRequest) {
   //   }
   // }
 
-  ackLogs.forEach((log) => {
-    const [sourcePortAddress, sourceChannelId, sequence] = log.args;
+  for (const ackLog of ackLogs) {
+    const [sourcePortAddress, sourceChannelId, sequence] = ackLog.args;
     const key = `${sourcePortAddress}-${sourceChannelId}-${sequence}`;
     if (packets[key]) {
+      const blockFrom = await providerFrom.getBlock(ackLog.blockNumber)
+      packets[key].endTime = blockFrom!.timestamp;
       packets[key].state = "ACK";
+
     }
-  });
+  }
 
 
   const response: PacketData[] = [];

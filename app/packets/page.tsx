@@ -1,12 +1,12 @@
 'use client';
 
-import { Card, Col, Metric, Select, SelectItem, Text } from "@tremor/react";
+import { Col, Select, SelectItem } from "@tremor/react";
 import { useState } from "react";
 import OptimismIcon from "./optimismIcon";
 import BaseIcon from "./baseIcon";
 import { Grid } from "@tremor/react";
 import { IbcComponent } from "../ibc";
-import { ConnectionSchema } from "../schemas";
+import { PacketData } from "../api/ibc/[type]/packets";
 
 
 const columns = [
@@ -15,6 +15,8 @@ const columns = [
   {name: "Sequence", uid: "sequence", sortable: true},
   {name: "Source Port Address", uid: "sourcePortAddress", sortable: false},
   {name: "Source Channel Id", uid: "sourceChannelId", sortable: false},
+  {name: "Create Time", uid: "createTime", sortable: true},
+  {name: "End Time", uid: "endTime", sortable: true},
 ];
 
 export default function Packets() {
@@ -61,8 +63,8 @@ export default function Packets() {
         </Grid>
       </div>
       {chainFrom && chainTo &&
-      <IbcComponent<ConnectionSchema>
-        initialVisibleColumns={new Set(["state", "sourcePortAddress", "sourceChannelId", "sequence"])}
+      <IbcComponent<PacketData>
+        initialVisibleColumns={new Set(["state", "sourcePortAddress", "sourceChannelId", "sequence", "createTime", "endTime"])}
         columns={columns}
         statusOptions={[]}
         defaultSortDescriptor={{

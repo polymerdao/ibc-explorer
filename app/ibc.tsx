@@ -23,6 +23,7 @@ import { ChevronDownIcon } from "./icons/ChevronDownIcon";
 import { Text, Title } from "@tremor/react";
 import _ from 'lodash';
 import { ChannelSchema, ClientSchema, ConnectionSchema } from "./schemas";
+import { PacketData } from "./api/ibc/[type]/packets";
 
 
 interface IbcProps {
@@ -36,7 +37,7 @@ interface IbcProps {
   queryParams?: URLSearchParams;
 }
 
-export function IbcComponent<T extends ChannelSchema | ConnectionSchema | ClientSchema>(props: IbcProps) {
+export function IbcComponent<T extends ChannelSchema | ConnectionSchema | ClientSchema | PacketData>(props: IbcProps) {
   const [filterValue, setFilterValue] = React.useState("");
   const [visibleColumns, setVisibleColumns] = React.useState<Selection>(props.initialVisibleColumns);
   const [statusFilter, setStatusFilter] = React.useState<Selection>("all");
@@ -111,6 +112,10 @@ export function IbcComponent<T extends ChannelSchema | ConnectionSchema | Client
     switch (columnKey) {
       case "connection_hops":
         return (cellValue as string[]).join("\n");
+      case "createTime":
+        return new Date(Number(cellValue) * 1000).toLocaleString();
+      case "endTime":
+        return new Date(Number(cellValue) * 1000).toLocaleString();
       default:
         return cellValue;
     }
