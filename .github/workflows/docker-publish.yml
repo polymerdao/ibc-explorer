@@ -9,8 +9,8 @@ env:
   IMAGE_NAME: ghcr.io/polymerdao/ibc-explorer
 
 jobs:
-  docker-build-polymer:
-    runs-on: ubuntu-22.04-16core
+  docker-build-ibc-explorer:
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v2
@@ -51,12 +51,11 @@ jobs:
           context: .
           platforms: linux/amd64,linux/arm64
           push: true
-          file: docker/polymerase/Dockerfile
+          file: Dockerfile
           provenance: false
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           build-args: |
-            BUILD_LIGHT_CLIENTS=altair
             BUILD_TAGS=noproof
           cache-from: type=registry,ref=${{ env.IMAGE_NAME }}:buildcache
           cache-to: type=registry,ref=${{ env.IMAGE_NAME }}:buildcache,mode=max
