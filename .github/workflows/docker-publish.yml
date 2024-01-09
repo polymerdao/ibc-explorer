@@ -1,0 +1,62 @@
+name: docker-ibc-explorer
+
+on:
+  push:
+    tags:
+      - "v*.*.*"
+
+env:
+  IMAGE_NAME: ghcr.io/polymerdao/ibc-explorer
+
+jobs:
+  docker-build-polymer:
+    runs-on: ubuntu-22.04-16core
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          ref: ${{ github.event.inputs.build-ref }}
+
+      - name: Docker meta
+        id: meta
+        uses: docker/metadata-action@v4
+        with:
+          images: |
+            ${{ env.IMAGE_NAME }}
+          tags: |
+            type=sha
+            type=semver,pattern={{raw}}
+
+          labels: |
+            org.opencontainers.image.source=https://github.com/polymerdao/ibc-explorer
+            org.opencontainers.image.title=ibc-explorer
+            org.opencontainers.image.url=https://github.com/polymerdao/ibc-explorer
+
+      - name: Authenticate Docker
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.PACKAGES_TOKEN }}
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v2
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      - name: Build and push
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          platforms: linux/amd64,linux/arm64
+          push: true
+          file: docker/polymerase/Dockerfile
+          provenance: false
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          build-args: |
+            BUILD_LIGHT_CLIENTS=altair
+            BUILD_TAGS=noproof
+          cache-from: type=registry,ref=${{ env.IMAGE_NAME }}:buildcache
+          cache-to: type=registry,ref=${{ env.IMAGE_NAME }}:buildcache,mode=max
