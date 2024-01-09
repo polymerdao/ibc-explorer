@@ -40,7 +40,7 @@ export function IbcComponent<T extends ChannelSchema | ConnectionSchema | Client
   const [filterValue, setFilterValue] = React.useState("");
   const [visibleColumns, setVisibleColumns] = React.useState<Selection>(props.initialVisibleColumns);
   const [statusFilter, setStatusFilter] = React.useState<Selection>("all");
-  const [rowsPerPage, setRowsPerPage] = React.useState(10);
+  const [rowsPerPage, setRowsPerPage] = React.useState(25);
   const [sortDescriptor, setSortDescriptor] = React.useState<SortDescriptor>(props.defaultSortDescriptor);
   const [ibcItems, setIbcItems] = React.useState<T[]>([]);
   const [page, setPage] = React.useState(1);
@@ -264,6 +264,7 @@ export function IbcComponent<T extends ChannelSchema | ConnectionSchema | Client
 
       <Table
         aria-label="Example table with custom cells, pagination and sorting"
+        isStriped
         isHeaderSticky
         bottomContent={bottomContent}
         bottomContentPlacement="outside"
