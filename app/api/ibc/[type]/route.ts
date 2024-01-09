@@ -1,5 +1,5 @@
 import { getChannels, getClients, getConnections } from "./ibc";
-import { NextRequest } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { getPackets } from "./packets";
 
 export const dynamic = 'force-dynamic' // defaults to auto
@@ -10,15 +10,19 @@ export async function GET(request: NextRequest,
 
   let apiUrl = process.env.API_URL!;
 
-  switch (type) {
-    case "channels":
-      let data = await getChannels(apiUrl);
-      return Response.json(data)
-    case "connections":
-      return Response.json(await getConnections(apiUrl))
-    case "clients":
-      return Response.json(await getClients(apiUrl))
-    case "packets":
-      return await getPackets(request)
+  try {
+    switch (type) {
+      case "channels":
+        let data = await getChannels(apiUrl);
+        return Response.json(data)
+      case "connections":
+        return Response.json(await getConnections(apiUrl))
+      case "clients":
+        return Response.json(await getClients(apiUrl))
+      case "packets":
+        return await getPackets(request)
+    }
+  } catch (e) {
+    return NextResponse.error()
   }
 }

@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Button,
   Dropdown,
@@ -46,11 +46,22 @@ export function IbcComponent<T extends ChannelSchema | ConnectionSchema | Client
   const [ibcItems, setIbcItems] = React.useState<T[]>([]);
   const [page, setPage] = React.useState(1);
   const [isLoading, setIsLoading] = React.useState(true);
+  const [errorMessage, setErrorMessage] = useState('');
+
 
   useEffect(() => {
     fetch(`/api/ibc/${props.ibcEntityName}s?${props.queryParams?.toString() || ""}`)
-      .then(res => res.json()).then(data => {
-      setIbcItems(data);
+      .then(res => {
+        if (!res.ok) {
+          throw new Error(`HTTP error! Status: ${res.status}`);
+        }
+        return res.json();
+      })
+      .then(data => {
+        setIbcItems(data);
+        setIsLoading(false);
+      }).catch(err => {
+      setErrorMessage('Error loading data');
       setIsLoading(false);
     })
   }, [props])
@@ -156,6 +167,7 @@ export function IbcComponent<T extends ChannelSchema | ConnectionSchema | Client
   const topContent = React.useMemo(() => {
     return (
       <div className="flex flex-col gap-4 mt-4">
+
         <div className="flex justify-between gap-3 items-end">
           <Input
             isClearable
@@ -264,6 +276,7 @@ export function IbcComponent<T extends ChannelSchema | ConnectionSchema | Client
 
   return (
     <main className="p-4 md:p-10 mx-auto max-w-7xl">
+      {errorMessage && <p style={{color: 'red'}}>{errorMessage}</p>}
       <Title>{_.capitalize(props.ibcEntityName) + "s"}</Title>
       <Text>A list of virtual {props.ibcEntityName}s</Text>
 
