@@ -5,7 +5,17 @@ import { useState } from "react";
 import OptimismIcon from "./optimismIcon";
 import BaseIcon from "./baseIcon";
 import { Grid } from "@tremor/react";
+import { IbcComponent } from "../ibc";
+import { ConnectionSchema } from "../schemas";
 
+
+const columns = [
+  {name: "ID", uid: "id", sortable: true},
+  {name: "State", uid: "state", sortable: true},
+  {name: "Sequence", uid: "sequence", sortable: true},
+  {name: "Source Port Address", uid: "sourcePortAddress", sortable: false},
+  {name: "Source Channel Id", uid: "sourceChannelId", sortable: false},
+];
 
 export default function Packets() {
   const [chainFrom, setChainFrom] = useState("");
@@ -20,6 +30,7 @@ export default function Packets() {
   async function chainToChange(val: string) {
     setChainTo(val)
   }
+
 
   return (
     <main className="p-4 md:p-10 mx-auto max-w-7xl">
@@ -49,6 +60,25 @@ export default function Packets() {
           </Col>
         </Grid>
       </div>
+      {chainFrom && chainTo &&
+      <IbcComponent<ConnectionSchema>
+        initialVisibleColumns={new Set(["state", "sourcePortAddress", "sourceChannelId", "sequence"])}
+        columns={columns}
+        statusOptions={[]}
+        defaultSortDescriptor={{
+          column: "id",
+          direction: "ascending",
+        }}
+        ibcEntityName="packet"
+        keyProperty="id"
+        queryParams={
+          new URLSearchParams({
+            chainFrom: chainFrom,
+            chainTo: chainTo,
+            from: "1",
+          })}
+      />
+      }
     </main>
   );
 

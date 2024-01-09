@@ -33,6 +33,7 @@ interface IbcProps {
   defaultSortDescriptor: SortDescriptor;
   ibcEntityName: string; // The name of the IBC entity (channel, connection, client)
   keyProperty: string; // The property to use as the key for the table rows
+  queryParams?: URLSearchParams;
 }
 
 export function IbcComponent<T extends ChannelSchema | ConnectionSchema | ClientSchema>(props: IbcProps) {
@@ -46,11 +47,12 @@ export function IbcComponent<T extends ChannelSchema | ConnectionSchema | Client
   const [isLoading, setIsLoading] = React.useState(true);
 
   useEffect(() => {
-    fetch(`/api/ibc/${props.ibcEntityName}s`).then(res => res.json()).then(data => {
+    fetch(`/api/ibc/${props.ibcEntityName}s?${props.queryParams?.toString() || ""}`)
+      .then(res => res.json()).then(data => {
       setIbcItems(data);
       setIsLoading(false);
     })
-  }, [])
+  }, [props])
 
   const hasSearchFilter = Boolean(filterValue);
 
