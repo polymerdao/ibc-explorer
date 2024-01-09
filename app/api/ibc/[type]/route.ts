@@ -1,8 +1,10 @@
 import { getChannels, getClients, getConnections } from "./ibc";
+import { NextRequest } from "next/server";
+import { getPackets } from "./packets";
 
 export const dynamic = 'force-dynamic' // defaults to auto
-export async function GET(request: Request,
-                          {params}: { params: { type: "channels" | "connections" | "clients" } }
+export async function GET(request: NextRequest,
+                          {params}: { params: { type: "channels" | "connections" | "clients" | "packets" } }
 ) {
   const type = params.type
 
@@ -17,5 +19,7 @@ export async function GET(request: Request,
       return Response.json(await getConnections(apiUrl))
     case "clients":
       return Response.json(await getClients(apiUrl))
+    case "packets":
+      return await getPackets(request)
   }
 }

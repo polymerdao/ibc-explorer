@@ -9,6 +9,7 @@ const navigation = [
   { name: 'Clients', href: '/clients' },
   { name: 'Connections', href: '/connections' },
   { name: 'Channels', href: '/channels' },
+  { name: 'Packets', href: '/packets' },
 ];
 
 function classNames(...classes: string[]) {
