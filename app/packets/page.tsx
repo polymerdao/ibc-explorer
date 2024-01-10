@@ -71,8 +71,8 @@ export default function Packets() {
         columns={columns}
         statusOptions={[]}
         defaultSortDescriptor={{
-          column: "id",
-          direction: "ascending",
+          column: "createTime",
+          direction: "descending",
         }}
         ibcEntityName="packet"
         keyProperty="id"
