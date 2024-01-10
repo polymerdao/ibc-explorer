@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { CHAIN, CHAIN_CONFIGS } from "../../../chains";
 import CachingJsonRpcProvider from "../../metrics/provider";
 import Abi from "../../../contracts/Dispatcher.json";
+import { getChannels } from "./ibc";
 
 
 export const dynamic = 'force-dynamic' // defaults to auto
@@ -33,7 +34,7 @@ interface Channel {
   counterpartyChannelId: string; // Assuming bytes32 is represented as a string
 }
 
-export async function getPackets(request: NextRequest) {
+export async function getPackets(request: NextRequest, apiUrl: string) {
   const searchParams = request.nextUrl.searchParams
   const from = searchParams.get('from')
   const to = searchParams.get('to')
@@ -44,6 +45,17 @@ export async function getPackets(request: NextRequest) {
   if (!from || !chainFrom || !chainTo) {
     return NextResponse.error()
   }
+
+  const channels = await getChannels(apiUrl)
+  const openChannels = channels.filter((channel) => {
+    return channel.state === "STATE_OPEN" && channel.port_id.startsWith(`polyibc.${chainFrom}.`) && channel.counterparty.port_id.startsWith(`polyibc.${chainTo}.`)
+  })
+
+  if (openChannels.length === 0) {
+    return []
+  }
+
+  console.log(openChannels)
 
   const fromBlock = Number(from)
   const toBlock = to ? Number(to) : "latest"
@@ -67,7 +79,7 @@ export async function getPackets(request: NextRequest) {
 
   const packets: Record<string, PacketData> = {};
   for (const sendPacketLog of sendPacketLogs) {
-    console.log("sendPacketLog: ", sendPacketLog)
+    // console.log("sendPacketLog: ", sendPacketLog)
     const [sourcePortAddress, sourceChannelId, packet, sequence, timeout, fee] = sendPacketLog.args;
     const key = `${sourcePortAddress}-${sourceChannelId}-${sequence}`;
 
@@ -127,5 +139,5 @@ export async function getPackets(request: NextRequest) {
   Object.keys(packets).forEach((key) => {
     response.push(packets[key]);
   });
-  return Response.json(response)
+  return response
 }
