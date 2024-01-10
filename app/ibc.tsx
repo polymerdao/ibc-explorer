@@ -25,6 +25,8 @@ import _ from 'lodash';
 import { ChannelSchema, ClientSchema, ConnectionSchema } from "./schemas";
 import { PacketData } from "./api/ibc/[type]/packets";
 import { Tooltip } from "@nextui-org/tooltip";
+import { compareAsc, format } from "date-fns";
+
 
 
 interface IbcProps {
@@ -125,10 +127,10 @@ export function IbcComponent<T extends ChannelSchema | ConnectionSchema | Client
       case "connection_hops":
         return (cellValue as string[]).join("\n");
       case "createTime":
-        return new Date(Number(cellValue) * 1000).toLocaleString();
+        return format(new Date(Number(cellValue) * 1000), "yyyy-MM-dd HH:mm:ss");
       case "endTime":
         if (cellValue) {
-          return new Date(Number(cellValue) * 1000).toLocaleString();
+          return format(new Date(Number(cellValue) * 1000), "yyyy-MM-dd HH:mm:ss");
         } return "--";
       case "sourcePortAddress":
         return (
