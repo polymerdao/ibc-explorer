@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
         - name: ibc-explorer
-          image: ghcr.io/polymerdao/ibc-explorer:v0.0.2-alpha-17
+          image: ghcr.io/polymerdao/ibc-explorer:v0.0.2-alpha-22
           resources:
             limits:
               cpu: '1'
