@@ -20,7 +20,7 @@ export async function GET(request: NextRequest,
       case "clients":
         return Response.json(await getClients(apiUrl))
       case "packets":
-        return await getPackets(request)
+        return Response.json(await getPackets(request, apiUrl))
     }
   } catch (e) {
     return NextResponse.error()
