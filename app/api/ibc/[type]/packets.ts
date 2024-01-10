@@ -17,6 +17,11 @@ export interface PacketData {
   state: string;
   createTime: number;
   endTime?: number;
+  sendTx: string;
+  rcvTx?: string;
+  ackTx?: string;
+  sourceChain: string;
+  destChain: string;
 }
 
 interface Channel {
@@ -78,6 +83,9 @@ export async function getPackets(request: NextRequest) {
       id: key,
       state: "SENT",
       createTime: blockFrom!.timestamp,
+      sendTx: sendPacketLog.transactionHash,
+      sourceChain: chainFromId,
+      destChain: chainToId,
     };
   }
 
@@ -110,7 +118,7 @@ export async function getPackets(request: NextRequest) {
       const blockFrom = await providerFrom.getBlock(ackLog.blockNumber)
       packets[key].endTime = blockFrom!.timestamp;
       packets[key].state = "ACK";
-
+      packets[key].ackTx = ackLog.transactionHash;
     }
   }
 
