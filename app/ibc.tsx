@@ -24,6 +24,7 @@ import { Text, Title } from "@tremor/react";
 import _ from 'lodash';
 import { ChannelSchema, ClientSchema, ConnectionSchema } from "./schemas";
 import { PacketData } from "./api/ibc/[type]/packets";
+import { Tooltip } from "@nextui-org/tooltip";
 
 
 interface IbcProps {
@@ -126,7 +127,17 @@ export function IbcComponent<T extends ChannelSchema | ConnectionSchema | Client
       case "createTime":
         return new Date(Number(cellValue) * 1000).toLocaleString();
       case "endTime":
-        return new Date(Number(cellValue) * 1000).toLocaleString();
+        if (cellValue) {
+          return new Date(Number(cellValue) * 1000).toLocaleString();
+        } return "--";
+      case "sourcePortAddress":
+        return (
+          <Tooltip showArrow={true} content={cellValue}>
+            <span>
+              {cellValue.slice(0, 6) + "..." + cellValue.slice(-6)}
+            </span>
+          </Tooltip>
+        )
       default:
         return cellValue;
     }
