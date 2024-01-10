@@ -25,8 +25,8 @@ import _ from 'lodash';
 import { ChannelSchema, ClientSchema, ConnectionSchema } from "./schemas";
 import { PacketData } from "./api/ibc/[type]/packets";
 import { Tooltip } from "@nextui-org/tooltip";
-import { compareAsc, format } from "date-fns";
-
+import { format } from "date-fns";
+import Link from "next/link";
 
 
 interface IbcProps {
@@ -131,7 +131,8 @@ export function IbcComponent<T extends ChannelSchema | ConnectionSchema | Client
       case "endTime":
         if (cellValue) {
           return format(new Date(Number(cellValue) * 1000), "yyyy-MM-dd HH:mm:ss");
-        } return "--";
+        }
+        return "--";
       case "sourcePortAddress":
         return (
           <Tooltip showArrow={true} content={cellValue}>
@@ -139,6 +140,20 @@ export function IbcComponent<T extends ChannelSchema | ConnectionSchema | Client
               {cellValue.slice(0, 6) + "..." + cellValue.slice(-6)}
             </span>
           </Tooltip>
+        )
+      case "sendTx":
+      case "ackTx":
+        const sourceChain = _get(channel, "sourceChain") as string
+        if (!cellValue) return "--"
+        return (
+          <Link
+            className="text-blue-500"
+            target="_blank"
+            rel="noopener noreferrer"
+            href={`https://${sourceChain}-sepolia.blockscout.com/tx/${cellValue}`}
+          >
+            {cellValue.slice(0, 6) + "..." + cellValue.slice(-6)}
+          </Link>
         )
       default:
         return cellValue;

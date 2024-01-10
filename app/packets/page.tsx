@@ -12,9 +12,12 @@ import { PacketData } from "../api/ibc/[type]/packets";
 const columns = [
   {name: "ID", uid: "id", sortable: true},
   {name: "State", uid: "state", sortable: true},
-  {name: "Sequence", uid: "sequence", sortable: true},
+  {name: "Send Tx", uid: "sendTx", sortable: false},
+  // {name: "Rcv Tx", uid: "rcvTx", sortable: false},
+  {name: "Ack Tx", uid: "ackTx", sortable: false},
   {name: "Source Port Address", uid: "sourcePortAddress", sortable: false},
-  {name: "Source Channel Id", uid: "sourceChannelId", sortable: false},
+  {name: "Source Channel Id", uid: "sourceChannelId", sortable: true},
+  {name: "Sequence", uid: "sequence", sortable: true},
   {name: "Create Time", uid: "createTime", sortable: true},
   {name: "End Time", uid: "endTime", sortable: true},
 ];
@@ -64,7 +67,7 @@ export default function Packets() {
       </div>
       {chainFrom && chainTo &&
       <IbcComponent<PacketData>
-        initialVisibleColumns={new Set(["state", "sourcePortAddress", "sourceChannelId", "sequence", "createTime", "endTime"])}
+        initialVisibleColumns={new Set(["state", "sourcePortAddress", "sourceChannelId", "sequence", "createTime", "endTime", "sendTx", "rcvTx", "ackTx"])}
         columns={columns}
         statusOptions={[]}
         defaultSortDescriptor={{
