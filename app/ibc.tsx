@@ -156,6 +156,19 @@ export function IbcComponent<T extends ChannelSchema | ConnectionSchema | Client
             {cellValue.slice(0, 6) + "..." + cellValue.slice(-6)}
           </Link>
         )
+      case "rcvTx":
+        const destChain = _get(channel, "destChain") as string
+        if (!cellValue) return "--"
+        return (
+          <Link
+            className="text-blue-500"
+            target="_blank"
+            rel="noopener noreferrer"
+            href={`https://${destChain}-sepolia.blockscout.com/tx/${cellValue}`}
+          >
+            {cellValue.slice(0, 6) + "..." + cellValue.slice(-6)}
+          </Link>
+        )
       default:
         return cellValue;
     }
