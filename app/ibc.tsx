@@ -64,6 +64,7 @@ export function IbcComponent<T extends ChannelSchema | ConnectionSchema | Client
         setIbcItems(data);
         setIsLoading(false);
       }).catch(err => {
+      console.log(err);
       setErrorMessage('Error loading data');
       setIsLoading(false);
     })
@@ -113,8 +114,8 @@ export function IbcComponent<T extends ChannelSchema | ConnectionSchema | Client
 
   const sortedItems = React.useMemo(() => {
     return [...items].sort((a: T, b: T) => {
-      const first = a[sortDescriptor.column as keyof T] as string;
-      const second = b[sortDescriptor.column as keyof T] as string;
+      const first = String(a[sortDescriptor.column as keyof T]);
+      const second = String(b[sortDescriptor.column as keyof T]);
       let cmp = first.localeCompare(second);
 
       return sortDescriptor.direction === "descending" ? -cmp : cmp;
