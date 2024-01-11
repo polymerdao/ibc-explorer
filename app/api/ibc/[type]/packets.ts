@@ -4,14 +4,18 @@ import { CHAIN, CHAIN_CONFIGS } from "../../../chains";
 import CachingJsonRpcProvider from "../../metrics/provider";
 import Abi from "../../../contracts/Dispatcher.json";
 import { getChannels } from "./ibc";
+import { IbcExtension, QueryClient, setupIbcExtension } from "@cosmjs/stargate";
+import { Tendermint37Client } from "@cosmjs/tendermint-rpc";
 
 
 export const dynamic = 'force-dynamic' // defaults to auto
 
 export interface PacketData {
-  sequence: string;
+  sequence: number;
   sourcePortAddress: string;
   sourceChannelId: string;
+  destPortAddress: string;
+  destChannelId: string;
   timeout: string;
   fee: string;
   id: string;
@@ -25,13 +29,9 @@ export interface PacketData {
   destChain: string;
 }
 
-interface Channel {
-  version: string;
-  ordering: string; // Adjust the type based on your ChannelOrder type
-  feeEnabled: boolean;
-  connectionHops: string[];
-  counterpartyPortId: string;
-  counterpartyChannelId: string; // Assuming bytes32 is represented as a string
+async function getTmClient(rpc: string): Promise<QueryClient & IbcExtension> {
+  const tmClient = await Tendermint37Client.connect(rpc);
+  return QueryClient.withExtensions(tmClient, setupIbcExtension)
 }
 
 export async function getPackets(request: NextRequest, apiUrl: string) {
@@ -55,12 +55,12 @@ export async function getPackets(request: NextRequest, apiUrl: string) {
     return []
   }
 
+  const tmClient = await getTmClient(apiUrl)
+
   const validChannelIds = new Set<string>()
   openChannels.forEach((channel) => {
     validChannelIds.add(channel.channel_id)
   })
-
-  // console.log(openChannels)
 
   const fromBlock = Number(from)
   const toBlock = to ? Number(to) : "latest"
@@ -75,11 +75,8 @@ export async function getPackets(request: NextRequest, apiUrl: string) {
   const contractTo = new ethers.Contract(dispatcherToAddress, Abi.abi, providerTo);
 
   const sendPacketLogs = (await contractFrom.queryFilter('SendPacket', fromBlock, toBlock)) as Array<ethers.EventLog>;
-  const recvPacketLogs = (await contractTo.queryFilter('RecvPacket', fromBlock, toBlock)) as Array<ethers.EventLog>;
-  const ackLogs = (await contractFrom.queryFilter('Acknowledgement', fromBlock, toBlock)) as Array<ethers.EventLog>;
 
-  // console.log("ackLogs: ", ackLogs, "sendPacketLogs: ", sendPacketLogs, "recvPacketLogs: ", recvPacketLogs)
-  // console.log("connectChannelLogs: ", connectChannelLogs)
+  const unprocessedPacketKeys = new Set<string>();
 
   const packets: Record<string, PacketData> = {};
   for (const sendPacketLog of sendPacketLogs) {
@@ -89,17 +86,25 @@ export async function getPackets(request: NextRequest, apiUrl: string) {
       continue
     }
 
-    // console.log("sendPacketLog: ", sendPacketLog)
+    const channel = openChannels.find((channel) => {
+      return channel.channel_id === packet.sourceChannelId && channel.port_id === packet.sourcePortAddress
+    })
+
+    if (!channel) {
+      console.warn("No channel found for packet: ", packet)
+      continue
+    }
 
     const key = `${sourcePortAddress}-${sourceChannelId}-${sequence}`;
     const blockFrom = await providerFrom.getBlock(sendPacketLog.blockNumber)
 
-
     packets[key] = {
       sourcePortAddress,
       sourceChannelId: ethers.decodeBytes32String(sourceChannelId),
+      destPortAddress: channel.counterparty.port_id,
+      destChannelId: channel.counterparty.channel_id,
       fee,
-      sequence: sequence.toString(),
+      sequence: sequence,
       timeout: timeout.toString(),
       id: key,
       state: "SENT",
@@ -108,32 +113,21 @@ export async function getPackets(request: NextRequest, apiUrl: string) {
       sourceChain: chainFromId,
       destChain: chainToId,
     };
+    unprocessedPacketKeys.add(key);
   }
 
-  // console.log("packets: ", packets)
+  // States could be like:
+  // SENT (event on L2), POLY_RECV (received by Polymer), POLY_SENT (committed on Polymer), RECV (event on L2),
+  // WRITE_ACK (event on L2), POLY_ACK_RECV (ack received on Polymer), POLY_WRITE_ACK (ack written on Polymer), ACK (event on L2)
 
-  for (const recvPacketLog of recvPacketLogs) {
-    const [destPortAddress, destChannelId, sequence] = recvPacketLog.args;
-    // console.log("destPortAddress: ", destPortAddress, "destChannelId: ", destChannelId, "sequence: ", sequence)
-    const channelValue = await contractTo.portChannelMap(destPortAddress, destChannelId)
-    const channel: Channel = {
-      version: channelValue.version,
-      ordering: channelValue.ordering, // Adjust the field name based on the actual field name in your contract
-      feeEnabled: channelValue.feeEnabled,
-      connectionHops: channelValue.connectionHops,
-      counterpartyPortId: channelValue.counterpartyPortId.split(".")[2],
-      counterpartyChannelId: ethers.hexlify(channelValue.counterpartyChannelId), // Convert bytes32 to hex string
-    };
-    // console.log("channel: ", channel)
+  // polymer: -> packet receipt (dest port and channel id) | packet commitment (src port id and channel id) -> packet acknowledgement (dest port and channel id)
 
-    const key = `0x${channel.counterpartyPortId}-${channel.counterpartyChannelId}-${sequence}`;
-    // console.log("key: ", key)
-    if (packets[key]) {
-      // console.log("Setting packet state to RECV")
-      packets[key].state = "RECV";
-      packets[key].rcvTx = recvPacketLog.transactionHash;
-    }
-  }
+  // To set a proper state for each packet, start with SENT state for all relevant packets, then:
+  // For each packet go into the reverse direction of the packet flow starting from ACK
+  // If a packet reached the corresponding state, set it as the state for the packet and move on to the next packet
+  // Otherwise move to the next state until SENT state is reached
+
+  const ackLogs = (await contractFrom.queryFilter('Acknowledgement', fromBlock, toBlock)) as Array<ethers.EventLog>;
 
   for (const ackLog of ackLogs) {
     const [sourcePortAddress, sourceChannelId, sequence] = ackLog.args;
@@ -143,9 +137,86 @@ export async function getPackets(request: NextRequest, apiUrl: string) {
       packets[key].endTime = blockFrom!.timestamp;
       packets[key].state = "ACK";
       packets[key].ackTx = ackLog.transactionHash;
+      unprocessedPacketKeys.delete(key);
     }
   }
 
+  for (const key in unprocessedPacketKeys) {
+    const packet = packets[key]
+
+    const ack = await tmClient.ibc.channel.packetAcknowledgement(packet.destPortAddress, packet.destChannelId, packet.sequence)
+    if (ack.acknowledgement) {
+      packet.state = "POLY_WRITE_ACK";
+      unprocessedPacketKeys.delete(key);
+    }
+  }
+
+  // It seems that due to short circuiting POLY_ACK_RECV can be distinguished as a separate state so this state is skipped
+
+  // TODO: use a separate from and to block for dest chain
+  const writeAckLogs = (await contractTo.queryFilter('WriteAckPacket', fromBlock, toBlock)) as Array<ethers.EventLog>;
+  for (const writeAckLog of writeAckLogs) {
+    const [receiver, destChannelId, sequence, ack] = writeAckLog.args;
+
+    const channel = openChannels.find((channel) => {
+      return channel.counterparty.channel_id === destChannelId && channel.counterparty.port_id === `polyibc.${chainTo}.${receiver}`
+    })
+
+    if (!channel) {
+      console.log("Unable to find channel for write ack: ", destChannelId, "receiver: ", receiver)
+      continue
+    }
+
+    const key = `${channel.port_id}-${channel.channel_id}-${sequence}`;
+    if (packets[key]) {
+      packets[key].state = "WRITE_ACK";
+      unprocessedPacketKeys.delete(key);
+    }
+  }
+
+  // TODO: use a separate from and to block for dest chain
+  const recvPacketLogs = (await contractTo.queryFilter('RecvPacket', fromBlock, toBlock)) as Array<ethers.EventLog>;
+
+  for (const recvPacketLog of recvPacketLogs) {
+    const [destPortAddress, destChannelId, sequence] = recvPacketLog.args;
+
+    const channel = openChannels.find((channel) => {
+      return channel.counterparty.channel_id === destChannelId && channel.counterparty.port_id === `polyibc.${chainTo}.${destPortAddress}`
+    })
+
+    if (!channel) {
+      console.log("Unable to find channel for recv packet: ", destChannelId, "receiver: ", destPortAddress)
+      continue
+    }
+
+
+    const key = `${channel.port_id}-${channel.channel_id}-${sequence}`;
+    if (packets[key]) {
+      packets[key].state = "RECV";
+      packets[key].rcvTx = recvPacketLog.transactionHash;
+      unprocessedPacketKeys.delete(key);
+    }
+  }
+
+  for (const key in unprocessedPacketKeys) {
+    const packet = packets[key]
+
+    const packetCommitment = await tmClient.ibc.channel.packetCommitment(packet.sourcePortAddress, packet.sourceChannelId, packet.sequence)
+    if (packetCommitment.commitment) {
+      packet.state = "POLY_WRITE_ACK";
+      unprocessedPacketKeys.delete(key);
+    }
+  }
+
+  for (const key in unprocessedPacketKeys) {
+    const packet = packets[key]
+
+    const packetReceipt = await tmClient.ibc.channel.packetReceipt(packet.destPortAddress, packet.destChannelId, packet.sequence)
+    if (packetReceipt.received) {
+      packet.state = "POLY_RECV";
+      unprocessedPacketKeys.delete(key);
+    }
+  }
 
   const response: PacketData[] = [];
   Object.keys(packets).forEach((key) => {
