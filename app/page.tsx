@@ -9,7 +9,7 @@ import { Block } from "ethers";
 import _ from "lodash";
 import { Spinner } from "@nextui-org/react";
 import { EvmData } from "./api/metrics/route";
-import { ChannelSchema } from "./schemas";
+import { IdentifiedChannel } from "cosmjs-types/ibc/core/channel/v1/channel";
 
 const calculateStats = (latencies: number[]): {
   avg: number;
@@ -51,9 +51,9 @@ const MetricsPage: React.FC = () => {
   useEffect(() => {
     fetch(`/api/ibc/channels`).then(res => res.json()).then(data => {
       let ports = new Set<string>();
-      data.map((item: ChannelSchema) => {
-        ports.add(item.port_id)
-        ports.add(item.counterparty.port_id)
+      data.map((item: IdentifiedChannel) => {
+        ports.add(item.portId)
+        ports.add(item.counterparty.portId)
       })
       setDapps(ports.size)
     })

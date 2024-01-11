@@ -1,7 +1,7 @@
 'use client';
 
 import { IbcComponent } from "../ibc";
-import { ClientSchema, ConnectionSchema } from "../schemas";
+import { IdentifiedClientState } from "cosmjs-types/ibc/core/client/v1/client";
 
 const columns = [
   {name: "Client ID", uid: "client_id", sortable: true},
@@ -13,7 +13,7 @@ const statusOptions = [
   {name: "Try Open", uid: "STATE_TRY_OPEN"},
 ];
 export default function Channels() {
-  return IbcComponent<ClientSchema>({
+  return IbcComponent<IdentifiedClientState>({
     initialVisibleColumns: new Set(["client_id", "client_state.latest_height.revision_height", "client_state.latest_height.revision_number"]),
     columns,
     statusOptions: [],
