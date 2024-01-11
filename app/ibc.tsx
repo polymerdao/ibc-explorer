@@ -110,22 +110,26 @@ export function IbcComponent<T extends IdentifiedChannel | IdentifiedConnection 
 
   const pages = Math.ceil(filteredItems.length / rowsPerPage);
 
-  const items = React.useMemo(() => {
+  const sortedItems = React.useMemo(() => {
     const start = (page - 1) * rowsPerPage;
     const end = start + rowsPerPage;
 
-    return filteredItems.slice(start, end);
-  }, [page, filteredItems, rowsPerPage]);
+    return [...filteredItems].sort((a: T, b: T) => {
+      const first = a[sortDescriptor.column as keyof T];
+      const second = b[sortDescriptor.column as keyof T];
 
-  const sortedItems = React.useMemo(() => {
-    return [...items].sort((a: T, b: T) => {
-      const first = String(a[sortDescriptor.column as keyof T]);
-      const second = String(b[sortDescriptor.column as keyof T]);
-      let cmp = first.localeCompare(second);
+      let cmp
+
+      if (typeof first === "string" && typeof second === "string" && !["createTime", "sequence"].includes(sortDescriptor.column as string)) {
+        cmp = first.localeCompare(second);
+      } else {
+        console.log(sortDescriptor.column, first, second)
+        cmp = Number(first) - Number(second);
+      }
 
       return sortDescriptor.direction === "descending" ? -cmp : cmp;
-    });
-  }, [sortDescriptor, items]);
+    }).slice(start, end);
+  }, [sortDescriptor, page, filteredItems, rowsPerPage]);
 
   const renderCell = React.useCallback((channel: T, columnKey: React.Key) => {
     const cellValue = _get(channel, columnKey as keyof T) as string | string[];
@@ -329,7 +333,7 @@ export function IbcComponent<T extends IdentifiedChannel | IdentifiedConnection 
         </div>
       </div>
     );
-  }, [items.length, page, pages, hasSearchFilter]);
+  }, [filteredItems.length, page, pages, hasSearchFilter]);
 
   return (
     <main className="p-4 md:p-10 mx-auto max-w-7xl">
