@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
         - name: ibc-explorer
-          image: ghcr.io/polymerdao/ibc-explorer:v0.0.2-alpha-22
+          image: ghcr.io/polymerdao/ibc-explorer:v0.0.2-alpha-23
           resources:
             limits:
               cpu: '1'
@@ -28,7 +28,7 @@ spec:
             - containerPort: 3000
           env:
             - name: API_URL
-              value: tcp://peptide:26657
+              value: http://peptide:26657
 ---
 apiVersion: v1
 kind: Service
