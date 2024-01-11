@@ -10,6 +10,8 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@cosmjs/stargate": "^0.32.2",
+    "@cosmjs/tendermint-rpc": "^0.32.2",
     "@headlessui/react": "^1.7.17",
     "@heroicons/react": "^2.0.18",
     "@nextui-org/react": "^2.2.9",
@@ -20,6 +22,7 @@
     "@types/react": "18.2.33",
     "@types/react-dom": "18.2.14",
     "autoprefixer": "^10.4.16",
+    "bun": "^1.0.22",
     "date-fns": "^3.2.0",
     "eslint": "8.52.0",
     "eslint-config-next": "14.0.0",
@@ -50,6 +53,7 @@
   "devDependencies": {
     "@types/flat-cache": "^2.0.2",
     "@types/lodash": "^4.14.202",
-    "@types/stats-lite": "^2.2.2"
+    "@types/stats-lite": "^2.2.2",
+    "ts-node": "^10.9.2"
   }
 }
