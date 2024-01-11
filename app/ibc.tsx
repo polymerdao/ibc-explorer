@@ -22,11 +22,13 @@ import { SearchIcon } from "./icons/SearchIcon";
 import { ChevronDownIcon } from "./icons/ChevronDownIcon";
 import { Text, Title } from "@tremor/react";
 import _ from 'lodash';
-import { ChannelSchema, ClientSchema, ConnectionSchema } from "./schemas";
 import { PacketData } from "./api/ibc/[type]/packets";
 import { Tooltip } from "@nextui-org/tooltip";
 import { format } from "date-fns";
 import Link from "next/link";
+import { IdentifiedConnection } from "cosmjs-types/ibc/core/connection/v1/connection";
+import { IdentifiedClientState } from "cosmjs-types/ibc/core/client/v1/client";
+import { IdentifiedChannel } from "cosmjs-types/ibc/core/channel/v1/channel";
 
 
 interface IbcProps {
@@ -40,7 +42,7 @@ interface IbcProps {
   queryParams?: URLSearchParams;
 }
 
-export function IbcComponent<T extends ChannelSchema | ConnectionSchema | ClientSchema | PacketData>(props: IbcProps) {
+export function IbcComponent<T extends IdentifiedChannel | IdentifiedConnection | IdentifiedClientState | PacketData>(props: IbcProps) {
   const [filterValue, setFilterValue] = React.useState("");
   const [visibleColumns, setVisibleColumns] = React.useState<Selection>(props.initialVisibleColumns);
   const [statusFilter, setStatusFilter] = React.useState<Selection>("all");
@@ -125,7 +127,7 @@ export function IbcComponent<T extends ChannelSchema | ConnectionSchema | Client
   const renderCell = React.useCallback((channel: T, columnKey: React.Key) => {
     const cellValue = _get(channel, columnKey as keyof T) as string | string[];
     switch (columnKey) {
-      case "connection_hops":
+      case "connectionHops":
         return (cellValue as string[]).join("\n");
       case "createTime":
         return format(new Date(Number(cellValue) * 1000), "yyyy-MM-dd HH:mm:ss");

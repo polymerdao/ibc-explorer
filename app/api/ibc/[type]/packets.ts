@@ -3,9 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { CHAIN, CHAIN_CONFIGS } from "../../../chains";
 import CachingJsonRpcProvider from "../../metrics/provider";
 import Abi from "../../../contracts/Dispatcher.json";
-import { getChannels } from "./ibc";
-import { IbcExtension, QueryClient, setupIbcExtension } from "@cosmjs/stargate";
-import { Tendermint37Client } from "@cosmjs/tendermint-rpc";
+import { getChannels, getTmClient } from "./ibc";
 
 
 export const dynamic = 'force-dynamic' // defaults to auto
@@ -29,11 +27,6 @@ export interface PacketData {
   destChain: string;
 }
 
-async function getTmClient(rpc: string): Promise<QueryClient & IbcExtension> {
-  const tmClient = await Tendermint37Client.connect(rpc);
-  return QueryClient.withExtensions(tmClient, setupIbcExtension)
-}
-
 export async function getPackets(request: NextRequest, apiUrl: string) {
   const searchParams = request.nextUrl.searchParams
   const from = searchParams.get('from')
@@ -48,7 +41,7 @@ export async function getPackets(request: NextRequest, apiUrl: string) {
 
   const channels = await getChannels(apiUrl)
   const openChannels = channels.filter((channel) => {
-    return channel.state === "STATE_OPEN" && channel.port_id.startsWith(`polyibc.${chainFrom}.`) && channel.counterparty.port_id.startsWith(`polyibc.${chainTo}.`)
+    return channel.state.toString() === "STATE_OPEN" && channel.portId.startsWith(`polyibc.${chainFrom}.`) && channel.counterparty.portId.startsWith(`polyibc.${chainTo}.`)
   })
 
   if (openChannels.length === 0) {
@@ -59,7 +52,7 @@ export async function getPackets(request: NextRequest, apiUrl: string) {
 
   const validChannelIds = new Set<string>()
   openChannels.forEach((channel) => {
-    validChannelIds.add(channel.channel_id)
+    validChannelIds.add(channel.channelId)
   })
 
   const fromBlock = Number(from)
@@ -87,7 +80,7 @@ export async function getPackets(request: NextRequest, apiUrl: string) {
     }
 
     const channel = openChannels.find((channel) => {
-      return channel.channel_id === packet.sourceChannelId && channel.port_id === packet.sourcePortAddress
+      return channel.channelId === packet.sourceChannelId && channel.portId === packet.sourcePortAddress
     })
 
     if (!channel) {
@@ -101,8 +94,8 @@ export async function getPackets(request: NextRequest, apiUrl: string) {
     packets[key] = {
       sourcePortAddress,
       sourceChannelId: ethers.decodeBytes32String(sourceChannelId),
-      destPortAddress: channel.counterparty.port_id,
-      destChannelId: channel.counterparty.channel_id,
+      destPortAddress: channel.counterparty.portId,
+      destChannelId: channel.counterparty.channelId,
       fee,
       sequence: sequence,
       timeout: timeout.toString(),
@@ -159,7 +152,7 @@ export async function getPackets(request: NextRequest, apiUrl: string) {
     const [receiver, destChannelId, sequence, ack] = writeAckLog.args;
 
     const channel = openChannels.find((channel) => {
-      return channel.counterparty.channel_id === destChannelId && channel.counterparty.port_id === `polyibc.${chainTo}.${receiver}`
+      return channel.counterparty.channelId === destChannelId && channel.counterparty.portId === `polyibc.${chainTo}.${receiver}`
     })
 
     if (!channel) {
@@ -167,7 +160,7 @@ export async function getPackets(request: NextRequest, apiUrl: string) {
       continue
     }
 
-    const key = `${channel.port_id}-${channel.channel_id}-${sequence}`;
+    const key = `${channel.portId}-${channel.channelId}-${sequence}`;
     if (packets[key]) {
       packets[key].state = "WRITE_ACK";
       unprocessedPacketKeys.delete(key);
@@ -181,7 +174,7 @@ export async function getPackets(request: NextRequest, apiUrl: string) {
     const [destPortAddress, destChannelId, sequence] = recvPacketLog.args;
 
     const channel = openChannels.find((channel) => {
-      return channel.counterparty.channel_id === destChannelId && channel.counterparty.port_id === `polyibc.${chainTo}.${destPortAddress}`
+      return channel.counterparty.channelId === destChannelId && channel.counterparty.portId === `polyibc.${chainTo}.${destPortAddress}`
     })
 
     if (!channel) {
@@ -190,7 +183,7 @@ export async function getPackets(request: NextRequest, apiUrl: string) {
     }
 
 
-    const key = `${channel.port_id}-${channel.channel_id}-${sequence}`;
+    const key = `${channel.portId}-${channel.channelId}-${sequence}`;
     if (packets[key]) {
       packets[key].state = "RECV";
       packets[key].rcvTx = recvPacketLog.transactionHash;
