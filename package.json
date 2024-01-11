@@ -53,7 +53,6 @@
     "@types/flat-cache": "^2.0.2",
     "@types/lodash": "^4.14.202",
     "@types/stats-lite": "^2.2.2",
-    "ts-node": "^10.9.2",
-    "bun": "^1.0.22"
+    "ts-node": "^10.9.2"
   }
 }
