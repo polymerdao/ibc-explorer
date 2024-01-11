@@ -54,7 +54,8 @@ export function IbcComponent<T extends IdentifiedChannel | IdentifiedConnection 
   const [errorMessage, setErrorMessage] = useState('');
 
 
-  useEffect(() => {
+  function loadData() {
+    setIsLoading(true)
     fetch(`/api/ibc/${props.ibcEntityName}s?${props.queryParams?.toString() || ""}`)
       .then(res => {
         if (!res.ok) {
@@ -70,7 +71,9 @@ export function IbcComponent<T extends IdentifiedChannel | IdentifiedConnection 
       setErrorMessage('Error loading data');
       setIsLoading(false);
     })
-  }, [props])
+  }
+
+  useEffect(loadData, [])
 
   const hasSearchFilter = Boolean(filterValue);
 
@@ -223,6 +226,16 @@ export function IbcComponent<T extends IdentifiedChannel | IdentifiedConnection 
             onValueChange={onSearchChange}
           />
           <div className="flex gap-3">
+            <div>
+              <Button
+                variant="flat"
+                color="primary"
+                onClick={() => {
+                  loadData()
+                }}
+              > Reload
+              </Button>
+            </div>
             {(props.statusProperty != null) ? (
               <Dropdown>
                 <DropdownTrigger className="hidden sm:flex">
