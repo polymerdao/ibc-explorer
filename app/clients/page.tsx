@@ -4,9 +4,9 @@ import { IbcComponent } from "../ibc";
 import { IdentifiedClientState } from "cosmjs-types/ibc/core/client/v1/client";
 
 const columns = [
-  {name: "Client ID", uid: "client_id", sortable: true},
-  {name: "Revision Height", uid: "client_state.latest_height.revision_height", sortable: true},
-  {name: "Revision Number", uid: "client_state.latest_height.revision_number", sortable: true},
+  {name: "Client ID", uid: "clientId", sortable: true},
+  {name: "Revision Height", uid: "clientState.revisionHeight", sortable: true},
+  {name: "Revision Number", uid: "clientState.revisionNumber", sortable: true},
 ];
 const statusOptions = [
   {name: "Open", uid: "STATE_OPEN"},
@@ -14,14 +14,14 @@ const statusOptions = [
 ];
 export default function Channels() {
   return IbcComponent<IdentifiedClientState>({
-    initialVisibleColumns: new Set(["client_id", "client_state.latest_height.revision_height", "client_state.latest_height.revision_number"]),
+    initialVisibleColumns: new Set(["clientId", "clientState.revisionHeight", "clientState.revisionNumber"]),
     columns,
     statusOptions: [],
     defaultSortDescriptor: {
-      column: "client_id",
+      column: "clientId",
       direction: "ascending",
     },
     ibcEntityName: "client",
-    keyProperty: "client_id"
+    keyProperty: "clientId"
   })
 }

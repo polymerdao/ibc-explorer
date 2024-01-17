@@ -27,8 +27,8 @@ import { Tooltip } from "@nextui-org/tooltip";
 import { format } from "date-fns";
 import Link from "next/link";
 import { IdentifiedConnection } from "cosmjs-types/ibc/core/connection/v1/connection";
-import { IdentifiedClientState } from "cosmjs-types/ibc/core/client/v1/client";
 import { IdentifiedChannel } from "cosmjs-types/ibc/core/channel/v1/channel";
+import { IdentifiedClientState } from "cosmjs-types/ibc/core/client/v1/client";
 
 
 interface IbcProps {
