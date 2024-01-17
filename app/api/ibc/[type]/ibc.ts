@@ -1,7 +1,6 @@
 import { IbcExtension, QueryClient, setupIbcExtension } from "@cosmjs/stargate";
 import { Tendermint37Client } from "@cosmjs/tendermint-rpc";
 import { QueryConnectionsResponse } from "cosmjs-types/ibc/core/connection/v1/query";
-import { QueryClientStatesResponse } from "cosmjs-types/ibc/core/client/v1/query";
 import { QueryChannelsResponse } from "cosmjs-types/ibc/core/channel/v1/query";
 
 export async function getTmClient(rpc: string): Promise<QueryClient & IbcExtension> {
@@ -17,8 +16,20 @@ export async function getConnections(apiUrl: string) {
 
 export async function getClients(apiUrl: string) {
   const tmClient = await getTmClient(apiUrl)
-  const states = await tmClient.ibc.client.allStates()
-  return (QueryClientStatesResponse.toJSON(states) as QueryClientStatesResponse).clientStates
+
+  let clients = []
+  const connections = await getConnections(apiUrl)
+  for (const connection of connections) {
+    const clientState = await tmClient.ibc.client.state(connection.clientId)
+    clients.push({
+      clientId: connection.clientId,
+      clientState: {
+        revisionHeight: String(clientState.proofHeight.revisionHeight),
+        revisionNumber: String(clientState.proofHeight.revisionNumber),
+      }
+    })
+  }
+  return clients
 }
 
 export async function getChannels(apiUrl: string) {
