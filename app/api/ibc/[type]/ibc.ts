@@ -17,10 +17,15 @@ export async function getConnections(apiUrl: string) {
 export async function getClients(apiUrl: string) {
   const tmClient = await getTmClient(apiUrl)
 
+  let clientIds = new Set<string>()
   let clients = []
   const connections = await getConnections(apiUrl)
   for (const connection of connections) {
+    if (clientIds.has(connection.clientId)) {
+      continue
+    }
     const clientState = await tmClient.ibc.client.state(connection.clientId)
+
     clients.push({
       clientId: connection.clientId,
       clientState: {
@@ -28,6 +33,7 @@ export async function getClients(apiUrl: string) {
         revisionNumber: String(clientState.proofHeight.revisionNumber),
       }
     })
+    clientIds.add(connection.clientId)
   }
   return clients
 }
