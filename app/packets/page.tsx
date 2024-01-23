@@ -2,12 +2,10 @@
 
 import { Col, Select, SelectItem } from "@tremor/react";
 import { useState } from "react";
-import OptimismIcon from "./optimismIcon";
-import BaseIcon from "./baseIcon";
 import { Grid } from "@tremor/react";
 import { IbcComponent } from "../ibc";
 import { PacketData } from "../api/ibc/[type]/packets";
-
+import { CHAIN_CONFIGS } from "../chains";
 
 const columns = [
   {name: "ID", uid: "id", sortable: true},
@@ -36,7 +34,6 @@ export default function Packets() {
     setChainTo(val)
   }
 
-
   return (
     <main className="p-4 md:p-10 mx-auto max-w-7xl">
       <div className="max-w-sm mx-auto space-y-6">
@@ -44,23 +41,29 @@ export default function Packets() {
           <Col>
             <div className="text-slate-500 text-sm text-center font-mono">Chain From</div>
             <Select value={chainFrom} onValueChange={chainFromChange} enableClear={false}>
-              <SelectItem value="optimism" icon={OptimismIcon}>
-                Optimism
-              </SelectItem>
-              <SelectItem value="base" icon={BaseIcon}>
-                Base
-              </SelectItem>
+              {
+                Object.entries(CHAIN_CONFIGS).map(([key, value]) => {
+                  return (
+                    <SelectItem value={key} icon={value.icon}>
+                      {value.display}
+                    </SelectItem>
+                  )
+                }, {})
+              }
             </Select>
           </Col>
           <Col>
             <div className="text-slate-500 text-sm text-center font-mono">Chain To</div>
             <Select value={chainTo} onValueChange={chainToChange} disabled={chainToDisabled}>
-              <SelectItem value="optimism" icon={OptimismIcon}>
-                Optimism
-              </SelectItem>
-              <SelectItem value="base" icon={BaseIcon}>
-                Base
-              </SelectItem>
+              {
+                Object.entries(CHAIN_CONFIGS).map(([key, value]) => {
+                  return (
+                    <SelectItem value={key} icon={value.icon}>
+                      {value.display}
+                    </SelectItem>
+                  )
+                }, {})
+              }
             </Select>
           </Col>
         </Grid>
@@ -86,6 +89,4 @@ export default function Packets() {
       }
     </main>
   );
-
-
 }
