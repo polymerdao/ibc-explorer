@@ -79,7 +79,7 @@ export async function getPackets(request: NextRequest, apiUrl: string) {
     let [sourcePortAddress, sourceChannelId, packet, sequence, timeout, fee] = sendPacketLog.args;
     sourceChannelId = ethers.decodeBytes32String(sourceChannelId)
     if (!validChannelIds.has(sourceChannelId)) {
-      console.log("Skipping packet for channel: ", ethers.decodeBytes32String(sourceChannelId))
+      console.log("Skipping packet for channel: ", sourceChannelId)
       continue
     }
 
