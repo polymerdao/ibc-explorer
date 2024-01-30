@@ -6,7 +6,8 @@ COPY . .
 ENV NODE_ENV=production
 
 RUN npm ci
-
+RUN npm install -g @zeit/ncc
+RUN ncc build -o dist
 RUN npm run build
 
 RUN addgroup -g 1001 -S appgroup && \
