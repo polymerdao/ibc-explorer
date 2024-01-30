@@ -1,4 +1,6 @@
-build
-node_modules
-venv
 .next
+.dockerignore
+Dockerfile
+README.md
+.git
+.gitignore

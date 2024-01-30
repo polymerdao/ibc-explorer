@@ -1,8 +1,7 @@
 {
-  "name": "ibc-explorer",
+  "name": "next-ibc-explorer",
   "version": "0.1.0",
   "private": true,
-  "license": "MIT",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
@@ -10,49 +9,20 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "@cosmjs/stargate": "^0.32.2",
-    "@cosmjs/tendermint-rpc": "^0.32.2",
-    "@headlessui/react": "^1.7.17",
-    "@heroicons/react": "^2.0.18",
-    "@nextui-org/react": "^2.2.9",
-    "@react-stately/data": "^3.11.0",
-    "@tremor/react": "^3.10.0",
-    "@types/js-cookie": "^3.0.5",
-    "@types/node": "20.8.9",
-    "@types/react": "18.2.33",
-    "@types/react-dom": "18.2.14",
-    "autoprefixer": "^10.4.16",
-    "date-fns": "^3.2.0",
-    "eslint": "8.52.0",
-    "eslint-config-next": "14.0.0",
-    "ethers": "^6.9.0",
-    "flat-cache": "^4.0.0",
-    "framer-motion": "^10.16.16",
-    "js-cookie": "^3.0.5",
-    "js-yaml": "^4.1.0",
-    "lodash": "^4.17.21",
-    "next": "14.0.0",
-    "postcss": "^8.4.31",
-    "prettier": "^3.0.3",
-    "prop-types": "^15.8.1",
-    "react": "18.2.0",
-    "react-dom": "18.2.0",
-    "server-only": "^0.0.1",
-    "stats-lite": "^2.2.0",
-    "tailwindcss": "^3.3.5",
-    "typescript": "5.2.2",
-    "zod": "^3.22.4"
-  },
-  "prettier": {
-    "arrowParens": "always",
-    "singleQuote": true,
-    "tabWidth": 2,
-    "trailingComma": "none"
+    "next": "14.1.0",
+    "react": "^18",
+    "react-dom": "^18",
+    "sharp": "^0.33.2"
   },
   "devDependencies": {
-    "@types/flat-cache": "^2.0.2",
-    "@types/lodash": "^4.14.202",
-    "@types/stats-lite": "^2.2.2",
-    "ts-node": "^10.9.2"
+    "@types/node": "^20",
+    "@types/react": "^18",
+    "@types/react-dom": "^18",
+    "autoprefixer": "^10.0.1",
+    "eslint": "^8",
+    "eslint-config-next": "14.1.0",
+    "postcss": "^8",
+    "tailwindcss": "^3.3.0",
+    "typescript": "^5"
   }
 }

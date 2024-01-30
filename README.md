@@ -1,22 +1,19 @@
 # ibc-explorer
-IBC dashboard
+IBC Dashboard
 
 ## Local Dev Requirements
-Make sure you have flask, PyYaml, npm installed. Setup K8s port forwarding to
+Install Node and NPM. Install Docker to test production deployment images.
 
 ## Build React Frontend
 
 ```shell
-npm install && npm run build
-```
-
-## Run flask app
-```shell
-python3 app.py
+cd ibc-explorer
+npm install
+npm run dev
 ```
 
 ## Run via Docker
-Alternatively you can run via docker
+Alternatively you can run via Docker:
 
 ```shell
 docker build -t ibc-explorer .
