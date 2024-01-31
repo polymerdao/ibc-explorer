@@ -44,7 +44,7 @@ export default function Packets() {
               {
                 Object.entries(CHAIN_CONFIGS).map(([key, value]) => {
                   return (
-                    <SelectItem value={key} icon={value.icon}>
+                    <SelectItem key={key} value={key} icon={value.icon}>
                       {value.display}
                     </SelectItem>
                   )
@@ -58,7 +58,7 @@ export default function Packets() {
               {
                 Object.entries(CHAIN_CONFIGS).map(([key, value]) => {
                   return (
-                    <SelectItem value={key} icon={value.icon}>
+                    <SelectItem key={key} value={key} icon={value.icon}>
                       {value.display}
                     </SelectItem>
                   )
