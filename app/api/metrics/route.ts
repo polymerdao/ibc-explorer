@@ -47,7 +47,9 @@ const createLogPairs = (ackLogs: Array<ethers.EventLog>, sendPacketLogs: Array<e
 
     if (ackLogsMap.has(key)) {
       const ackLog = ackLogsMap.get(key)!;
-      logPairs.push({ackLog, sendPacketLog});
+      if (ackLog.blockNumber > sendPacketLog.blockNumber) {
+        logPairs.push({ackLog, sendPacketLog});
+      }
     }
   });
 

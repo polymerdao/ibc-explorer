@@ -12,7 +12,7 @@ export const CHAIN_CONFIGS: {
   optimism: {
     id: 11155420,
     display: "Optimism",
-    rpc: "https://opt-sepolia.g.alchemy.com/v2/RN7slh_2cUIuzhxo4M9VgYCbqRcPOmkJ",
+    rpc: "https://opt-sepolia.g.alchemy.com/v2/jKvLhhXvtnWdNeZrKst0demxnwJcYH1o",
     dispatcher: opDispatcher,
     blockTime: 2,
     icon: OptimismIcon,
@@ -20,7 +20,7 @@ export const CHAIN_CONFIGS: {
   base: {
     id: 84532,
     display: "Base",
-    rpc: "https://base-sepolia.g.alchemy.com/v2/zGVxj0T-xvSR29_t7MlIhqRskkSwugVM",
+    rpc: "https://base-sepolia.g.alchemy.com/v2/776dC6qT-NTtupdnxlUJuXGbUIKWWhLe",
     dispatcher: baseDispatcher,
     blockTime: 2,
     icon: BaseIcon,
