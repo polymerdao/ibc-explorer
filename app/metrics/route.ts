@@ -11,8 +11,13 @@ export async function GET(request: NextRequest) {
   const oneHourAgo = new Date();
   oneHourAgo.setHours(now.getHours() - 1);
 
-
-  const metrics = await calcMetrics([oneHourAgo, now], request.nextUrl.origin);
+  let metrics;
+  try {
+    metrics = await calcMetrics([oneHourAgo, now], request.nextUrl.origin);
+  } catch (error) {
+    console.error('Failed to calculate metrics:', error);
+    return new Response('Internal Server Error', { status: 500 });
+  }
   for (let chainMetrics of metrics) {
     for (let metric of chainMetrics) {
       if (metric.stat == 0) {
