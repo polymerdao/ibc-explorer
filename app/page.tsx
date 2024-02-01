@@ -41,9 +41,10 @@ const MetricsPage: React.FC = () => {
 
   const fetchData = async () => {
     calcMetrics(dateRange).then((data) => {
-      setIsLoading(false);
       setData(_.flatten(data));
-    });
+    }).catch((e) => {
+      console.error('Failed to fetch metrics data:', e);
+    }).finally(() => setIsLoading(false));
   };
 
   useEffect(() => {
