@@ -130,6 +130,10 @@ export async function getPackets(request: NextRequest, apiUrl: string) {
     const key = `${sourcePortAddress}-${ethers.decodeBytes32String(sourceChannelId)}-${sequence}`;
     if (packets[key]) {
       const blockFrom = await providerFrom.getBlock(ackLog.blockNumber)
+      if (blockFrom!.timestamp < packets[key].createTime) {
+        continue
+      }
+
       packets[key].endTime = blockFrom!.timestamp;
       packets[key].state = "ACK";
       packets[key].ackTx = ackLog.transactionHash;
@@ -194,10 +198,17 @@ export async function getPackets(request: NextRequest, apiUrl: string) {
 
 
     const key = `0x${channel.portId.split(".")[2]}-${channel.channelId}-${sequence}`;
+    const recvBlock = await providerTo.getBlock(recvPacketLog.blockNumber)
+
+    if (recvBlock!.timestamp < packets[key].createTime) {
+      continue
+    }
+
     if (key in unprocessedPacketKeys) {
       packets[key].state = "RECV";
       unprocessedPacketKeys.delete(key);
     }
+
 
     if (packets[key]) {
       packets[key].rcvTx = recvPacketLog.transactionHash;
