@@ -40,7 +40,6 @@ export async function GET(request: NextRequest) {
 
   return new Response(defaultMetrics, {
     headers: {
-      'Cache-Control': 'no-store',
       'Content-type': register.contentType
     }
   });
