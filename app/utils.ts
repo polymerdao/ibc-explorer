@@ -36,7 +36,7 @@ export async function calcMetrics(dateRange: [Date, Date], origin: string= '') {
     try {
       response = await fetch(`${origin}/api/metrics?from=${blockStartNumber}&to=${blockEndNumber}&chain=${chain}`);
     } catch (error) {
-      console.error(`Failed to fetch metrics for chain ${chain}:`, error);
+      console.error(`Failed to fetch metrics for chain ${chain} origin ${origin}:`, error);
       return []; // Skip this chain's metrics calculation on error
     }
     const evmData: EvmData[] = await response.json();

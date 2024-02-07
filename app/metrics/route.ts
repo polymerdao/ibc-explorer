@@ -13,7 +13,7 @@ export async function GET(request: NextRequest) {
 
   let metrics;
   try {
-    metrics = await calcMetrics([oneHourAgo, now], request.nextUrl.origin);
+    metrics = await calcMetrics([oneHourAgo, now], "http://" + request.nextUrl.host);
   } catch (error) {
     console.error('Failed to calculate metrics:', error);
     return new Response('Internal Server Error', { status: 500 });
