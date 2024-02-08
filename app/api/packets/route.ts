@@ -25,13 +25,13 @@ export async function GET(request: NextRequest) {
   const channels = await getChannels()
   const openChannels = channels.filter((channel) => {
     return channel.state.toString() === "STATE_OPEN"
-      && (
-        (channel.portId.startsWith(`polyibc.${chainFrom}.`) && channel.counterparty.portId.startsWith(`polyibc.${chainTo}.`))
-        || (channel.portId.startsWith(`polyibc.${chainTo}.`) && channel.counterparty.portId.startsWith(`polyibc.${chainFrom}.`))
-      )
+      // && (
+      //   (channel.portId.startsWith(`polyibc.${chainFrom}.`) && channel.counterparty.portId.startsWith(`polyibc.${chainTo}.`))
+      //   || (channel.portId.startsWith(`polyibc.${chainTo}.`) && channel.counterparty.portId.startsWith(`polyibc.${chainFrom}.`))
+      // )
   })
   if (openChannels.length === 0) {
-    return []
+    return NextResponse.json([]);
   }
 
   const tmClient = await getTmClient(apiUrl)
@@ -43,15 +43,11 @@ export async function GET(request: NextRequest) {
 
   const fromBlock = Number(from)
   const toBlock = to ? Number(to) : "latest"
-  const chainFromId = chainFrom as CHAIN
-  const chainToId = chainTo as CHAIN
-  const dispatcherFromAddress = dispatcher ?? CHAIN_CONFIGS[chainFromId].dispatcher;
-  const dispatcherToAddress = CHAIN_CONFIGS[chainToId].dispatcher;
 
+  const chainFromId = chainFrom as CHAIN
+  const dispatcherFromAddress = dispatcher ?? CHAIN_CONFIGS[chainFromId].dispatcher;
   const providerFrom = new CachingJsonRpcProvider(CHAIN_CONFIGS[chainFromId].rpc, CHAIN_CONFIGS[chainFromId].id);
-  const providerTo = new CachingJsonRpcProvider(CHAIN_CONFIGS[chainToId].rpc, CHAIN_CONFIGS[chainToId].id);
   const contractFrom = new ethers.Contract(dispatcherFromAddress, Abi.abi, providerFrom);
-  const contractTo = new ethers.Contract(dispatcherToAddress, Abi.abi, providerTo);
 
   const sendPacketLogs = (await contractFrom.queryFilter('SendPacket', fromBlock, toBlock)) as Array<ethers.EventLog>;
 
@@ -61,15 +57,17 @@ export async function GET(request: NextRequest) {
   for (const sendPacketLog of sendPacketLogs) {
     let [sourcePortAddress, sourceChannelId, packet, sequence, timeout, fee] = sendPacketLog.args;
     sourceChannelId = ethers.decodeBytes32String(sourceChannelId)
+
+    // Only collect packets for open channels
     if (!validChannelIds.has(sourceChannelId)) {
       console.log("Skipping packet for channel: ", sourceChannelId)
       continue
     }
 
+    // Find channel this packet is sent over
     const channel = openChannels.find((channel) => {
-      return channel.channelId === sourceChannelId && channel.portId === `polyibc.${chainFrom}.${sourcePortAddress.slice(2)}`
+      return channel.channelId === sourceChannelId // && channel.portId === `polyibc.${chainFrom}.${sourcePortAddress.slice(2)}`
     })
-
     if (!channel) {
       console.warn("No channel found for packet: ", sourceChannelId, sourcePortAddress)
       continue
@@ -90,8 +88,8 @@ export async function GET(request: NextRequest) {
       state: "SENT",
       createTime: blockFrom!.timestamp,
       sendTx: sendPacketLog.transactionHash,
-      sourceChain: chainFromId,
-      destChain: chainToId,
+      sourceChain: channel.portId.split(".")[1] as CHAIN,
+      destChain: channel.counterparty.portId.split(".")[1] as CHAIN,
     };
     unprocessedPacketKeys.add(key);
   }
@@ -104,6 +102,11 @@ export async function GET(request: NextRequest) {
   // For each packet go into the reverse direction of the packet flow starting from ACK
   // If a packet reached the corresponding state, set it as the state for the packet and move on to the next packet
   // Otherwise move to the next state until SENT state is reached
+
+  const chainToId = chainTo as CHAIN
+  const dispatcherToAddress = CHAIN_CONFIGS[chainToId].dispatcher;
+  const providerTo = new CachingJsonRpcProvider(CHAIN_CONFIGS[chainToId].rpc, CHAIN_CONFIGS[chainToId].id);
+  const contractTo = new ethers.Contract(dispatcherToAddress, Abi.abi, providerTo);
 
   const ackLogs = (await contractFrom.queryFilter('Acknowledgement', fromBlock, toBlock)) as Array<ethers.EventLog>;
   console.log("Ack logs: ", ackLogs.length)
@@ -138,6 +141,7 @@ export async function GET(request: NextRequest) {
       }
     } catch (e) {
       // api call throws an error if no ack is found
+      return NextResponse.error();
     }
   }
 
@@ -227,5 +231,5 @@ export async function GET(request: NextRequest) {
   Object.keys(packets).forEach((key) => {
     response.push(packets[key]);
   });
-  return response
+  return NextResponse.json(response);
 }
