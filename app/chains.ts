@@ -3,8 +3,8 @@ import { Chain } from "./types/chain";
 import { OptimismIcon, BaseIcon } from "./icons/Chains";
 
 export type CHAIN = 'optimism' | 'base';
-let opDispatcher = process.env.OP_DISPATCHER!;
-let baseDispatcher = process.env.BASE_DISPATCHER!;
+let opDispatcher = process.env.DISPATCHER_ADDRESS_OPTIMISM!;
+let baseDispatcher = process.env.DISPATCHER_ADDRESS_BASE!;
 
 export const CHAIN_CONFIGS: {
   [key in CHAIN]: Chain;
