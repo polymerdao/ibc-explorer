@@ -2,7 +2,7 @@
 IBC dashboard
 
 ## Local Dev Requirements
-Make sure you have flask, PyYaml, npm installed. Setup K8s port forwarding to
+Make sure you have npm and docker installed. 
 
 ## Build React Frontend
 
@@ -10,13 +10,8 @@ Make sure you have flask, PyYaml, npm installed. Setup K8s port forwarding to
 npm install && npm run build
 ```
 
-## Run flask app
-```shell
-python3 app.py
-```
-
 ## Run via Docker
-Alternatively you can run via docker
+You can run via docker
 
 ```shell
 docker build -t ibc-explorer .
