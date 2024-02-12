@@ -1,5 +1,5 @@
 import { QueryChannelsResponse } from "cosmjs-types/ibc/core/channel/v1/query";
-import { getTmClient } from "@/api/utils/tendermint";
+import { getTmClient } from "@/api/utils/cosmos";
 
 export async function GET() {
   const tmClient = await getTmClient(process.env.API_URL!)

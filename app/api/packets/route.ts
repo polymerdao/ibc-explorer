@@ -3,8 +3,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { Packet } from "utils/types";
 import { CHAIN, CHAIN_CONFIGS } from "utils/chains/chains";
 import Abi from "utils/contracts/dispatcher.json";
-import CachingJsonRpcProvider from "../utils/cache";
-import { getTmClient } from "../utils/tendermint";
+import CachingJsonRpcProvider from "../utils/provider-cache";
+import { getTmClient } from "../utils/cosmos";
 import { GET as getChannels } from "../channels/route";
 
 export const dynamic = 'force-dynamic' // defaults to auto
@@ -39,7 +39,7 @@ export async function GET(request: NextRequest) {
   const fromBlock = Number(from);
   const toBlock = to ? Number(to) : "latest";
 
-  // Get all the send logs from the source chains
+  // Collect send logs from all chains
   let sendLogs: Array<[ethers.EventLog, CHAIN]> = [];
   let srcChainProviders: Record<CHAIN, CachingJsonRpcProvider> = {} as Record<CHAIN, CachingJsonRpcProvider>;
   let srcChainContracts: Array<[ethers.Contract, CHAIN]> = [];
@@ -59,7 +59,7 @@ export async function GET(request: NextRequest) {
   const packets: Record<string, Packet> = {};
 
   for (const sendLog of sendLogs) {
-    const [sendEvent, chainFrom] = sendLog;
+    const [sendEvent, srcChain] = sendLog;
     let [sourcePortAddress, sourceChannelId, packet, sequence, timeout, fee] = sendEvent.args;
     sourceChannelId = ethers.decodeBytes32String(sourceChannelId);
 
@@ -69,7 +69,7 @@ export async function GET(request: NextRequest) {
     }
 
     const channel = openChannels.find((channel) => {
-      return channel.channelId === sourceChannelId && channel.portId === `polyibc.${chainFrom}.${sourcePortAddress.slice(2)}`;
+      return channel.channelId === sourceChannelId && channel.portId === `polyibc.${srcChain}.${sourcePortAddress.slice(2)}`;
     })
     if (!channel) {
       console.warn("No channel found for packet: ", sourceChannelId, sourcePortAddress);
@@ -77,8 +77,8 @@ export async function GET(request: NextRequest) {
     }
 
     const key = `${sourcePortAddress}-${sourceChannelId}-${sequence}`;
-    const providerFrom = srcChainProviders[chainFrom];
-    const blockFrom = await providerFrom.getBlock(sendEvent.blockNumber);
+    const srcProvider = srcChainProviders[srcChain];
+    const blockFrom = await srcProvider.getBlock(sendEvent.blockNumber);
 
     packets[key] = {
       sourcePortAddress,
@@ -123,8 +123,8 @@ export async function GET(request: NextRequest) {
     let [sourcePortAddress, sourceChannelId, sequence] = ackEvent.args;
     const key = `${sourcePortAddress}-${ethers.decodeBytes32String(sourceChannelId)}-${sequence}`;
     if (packets[key]) {
-      const fromProvider = srcChainProviders[srcChain];
-      const blockFrom = await fromProvider.getBlock(ackLog[0].blockNumber);
+      const srcProvider = srcChainProviders[srcChain];
+      const blockFrom = await srcProvider.getBlock(ackLog[0].blockNumber);
       if (blockFrom!.timestamp < packets[key].createTime) {
         continue;
       }
