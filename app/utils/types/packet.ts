@@ -7,7 +7,7 @@ export interface Packet {
   timeout: string;
   fee: string;
   id: string;
-  state: string;
+  state: PacketStates;
   createTime: number;
   endTime?: number;
   sendTx: string;
@@ -17,11 +17,11 @@ export interface Packet {
   destChain: string;
 }
 
-export interface Chain {
-  id: number;
-  display: string;
-  rpc: string;
-  dispatcher: string;
-  blockTime: number;
-  icon: () => JSX.Element;
+export enum PacketStates {
+  SENT,
+  ACK,
+  POLY_WRITE_ACK,
+  WRITE_ACK,
+  RECV,
+  POLY_RECV
 }

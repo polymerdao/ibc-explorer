@@ -1,19 +1,17 @@
 import { ethers } from 'ethers';
 import * as flatCache from 'flat-cache';
 
-class CachingJsonRpcProvider extends ethers.JsonRpcProvider {
+export class CachingJsonRpcProvider extends ethers.JsonRpcProvider {
   private cache;
 
   constructor(url: string, network?: ethers.Networkish) {
     super(url, network);
-
     this.cache = flatCache.load('ethCache', "/tmp");
   }
 
   private async fetchDataWithCache<T>(cacheKey: string, fetchFunction: () => Promise<T>): Promise<T> {
     // Check if the data is already in the cache
     const cachedData = this.cache.getKey(cacheKey);
-
     if (cachedData) {
       return cachedData;
     }
@@ -24,7 +22,6 @@ class CachingJsonRpcProvider extends ethers.JsonRpcProvider {
     // Store the new data in the cache
     this.cache.setKey(cacheKey, data);
     this.cache.save(true);
-
     return data;
   }
 
@@ -37,7 +34,6 @@ class CachingJsonRpcProvider extends ethers.JsonRpcProvider {
   }
 
   // Override other methods as needed
-
   // Example: Override getTransactionReceipt method
   async getTransactionReceipt(transactionHash: string): Promise<ethers.TransactionReceipt | null> {
     return await this.fetchDataWithCache(
@@ -46,5 +42,3 @@ class CachingJsonRpcProvider extends ethers.JsonRpcProvider {
     );
   }
 }
-
-export default CachingJsonRpcProvider;

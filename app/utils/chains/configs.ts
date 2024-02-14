@@ -1,8 +1,8 @@
-import { ethers } from "ethers";
-import { Chain } from "utils/types";
+import { Chain } from "utils/types/chain";
 import { OptimismIcon, BaseIcon } from "./icons";
 
 export type CHAIN = 'optimism' | 'base';
+
 let opDispatcher = process.env.OP_DISPATCHER!;
 let baseDispatcher = process.env.BASE_DISPATCHER!;
 
@@ -26,8 +26,3 @@ export const CHAIN_CONFIGS: {
     icon: BaseIcon,
   }
 };
-
-export async function getLatestBlock(chainId: CHAIN) {
-  const provider = new ethers.JsonRpcProvider(CHAIN_CONFIGS[chainId].rpc);
-  return await provider.getBlock("latest");
-}
