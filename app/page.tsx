@@ -1,11 +1,10 @@
+import { redirect } from "next/navigation";
+
 export default function Home() {
+  redirect('/packets');
+
   return (
     <>
-      <div className="flex justify-center">
-        <h3>
-          Welcome to Polymer Labs IBC Explorer
-        </h3>
-      </div>
     </>
   );
 }
