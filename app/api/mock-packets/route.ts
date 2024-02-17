@@ -1,18 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { Packet, PacketStates } from "utils/types/packet";
 
-function getRandomHexString(length: number): string {
-  const characters = 'abcdef0123456789';
-  let result = '0x';
-  for (let i = 0; i < length; i++) {
-    result += characters.charAt(Math.floor(Math.random() * characters.length));
-  }
-  return result;
-}
-
 export function GET(request: NextRequest) {
   const reqParams = request.nextUrl.searchParams;
-  const size = reqParams.get("size") ? parseInt(reqParams.get("size") as string) : 10;
+  const size = reqParams.get("size") ? parseInt(reqParams.get("size") as string) : 100;
   const packets: Packet[] = [];
 
   for (let i = 1; i <= size; i++) {
@@ -40,4 +31,13 @@ export function GET(request: NextRequest) {
     packets.push(packet);
   }
   return NextResponse.json(packets);
+}
+
+function getRandomHexString(length: number): string {
+  const characters = 'abcdef0123456789';
+  let result = '0x';
+  for (let i = 0; i < length; i++) {
+    result += characters.charAt(Math.floor(Math.random() * characters.length));
+  }
+  return result;
 }

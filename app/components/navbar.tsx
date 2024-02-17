@@ -5,12 +5,8 @@ import { usePathname } from 'next/navigation';
 import Link from 'next/link';
 import Image from "next/image";
 
-const navigation = [
+const tabs = [
   { name: 'Packets', href: '/packets' },
-  { name: 'Metrics', href: '/metrics' },
-  { name: 'Clients', href: '/clients' },
-  { name: 'Connections', href: '/connections' },
-  { name: 'Channels', href: '/channels' },
 ];
 
 function classNames(...classes: string[]) {
@@ -36,7 +32,7 @@ export default function Navbar() {
         </div>
 
         <div className="hidden sm:flex w-0 sm:w-full space-x-8" id="navbar-default">
-          {navigation.map((item) => (
+          {tabs.map((item) => (
             <Link
               key={item.name}
               href={item.href}
@@ -86,7 +82,7 @@ export default function Navbar() {
                 'fixed sm:hidden flex flex-col space-y-8 border-[0.8px] p-8 w-full h-screen top-16 border-gray-300 dark:border-gray-700 bg-content-bg-lt dark:bg-bg-dk ease-in-out duration-[400ms]'
           )}
         >
-          {navigation.map((item) => (
+          {tabs.map((item) => (
             <Link
               key={item.name}
               href={item.href}
