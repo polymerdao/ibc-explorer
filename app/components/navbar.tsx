@@ -22,7 +22,7 @@ export default function Navbar() {
   }
 
   return (
-    <nav className="w-full z-10 sticky top-0 bg-content-bg-lt/85 dark:bg-bg-dk/85 border-b-[0.8px] border-gray-300 dark:border-gray-700 backdrop-blur-sm ease-in-out">
+    <nav className="w-full z-10 sticky top-0 bg-content-bg-light/85 dark:bg-bg-dark/85 border-b-[0.8px] border-gray-300 dark:border-gray-700 backdrop-blur-sm ease-in-out">
       <div className="h-16 min-w-0 xl:min-w-[80rem] max-w-screen-xl xl:w-4/5 mx-auto px-6 sm:px-8 flex justify-between sm:justify-start">
 
         <div className="flex items-center shrink-0 mr-10 pt-1">
@@ -38,8 +38,8 @@ export default function Navbar() {
               href={item.href}
               className={classNames(
                 pathname === item.href
-                  ? 'border-fg-lt border-opacity-60 dark:border-fg-dk dark:border-opacity-60'
-                  : 'border-transparent text-gray-600 dark:text-gray-300 hover:text-fg-lt dark:hover:text-fg-dk',
+                  ? 'border-fg-light border-opacity-60 dark:border-fg-dark dark:border-opacity-60'
+                  : 'border-transparent text-gray-600 dark:text-gray-300 hover:text-fg-light dark:hover:text-fg-dark',
                     'inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium transition ease-in-out'
               )}
             >
@@ -60,7 +60,7 @@ export default function Navbar() {
               nav
                 ? 'rotate-45 translate-y-[0.315rem]'
                 : 'rotate-0 translate-y-0',
-                  "w-full h-0.5 bg-fg-lt dark:bg-fg-dk opacity-95 rounded-md mt-1 transition ease-in-out"
+                  "w-full h-0.5 bg-fg-light dark:bg-fg-dark opacity-95 rounded-md mt-1 transition ease-in-out"
             )}
           ></div>
           <div 
@@ -68,7 +68,7 @@ export default function Navbar() {
               nav
                 ? 'rotate-[-45deg] -translate-y-[0.315rem]'
                 : 'rotate-0 translate-y-0',
-                  "w-full h-0.5 bg-fg-lt dark:bg-fg-dk opacity-95 rounded-md mb-1 transition ease-in-out"
+                  "w-full h-0.5 bg-fg-light dark:bg-fg-dark opacity-95 rounded-md mb-1 transition ease-in-out"
             )}
           ></div>
         </button>
@@ -78,8 +78,8 @@ export default function Navbar() {
           className={classNames(
             nav
               ? 'right-0'
-              : 'right-[-100%]',
-                'fixed sm:hidden flex flex-col space-y-8 border-[0.8px] p-8 w-full h-screen top-16 border-gray-300 dark:border-gray-700 bg-content-bg-lt dark:bg-bg-dk ease-in-out duration-[400ms]'
+              : 'right-[-100%] hidden',
+                'fixed sm:hidden flex flex-col space-y-8 border-[0.8px] p-8 w-full h-screen top-16 border-gray-300 dark:border-gray-700 bg-content-bg-light dark:bg-bg-dark ease-in-out duration-[400ms]'
           )}
         >
           {tabs.map((item) => (
@@ -88,8 +88,8 @@ export default function Navbar() {
               href={item.href}
               className={classNames(
                 pathname === item.href
-                  ? 'decoration-fg-lt/70 dark:decoration-fg-dk/70'
-                  : 'text-gray-600 dark:text-gray-300 decoration-fg-lt/0 dark:decoration-fg-dk/0',
+                  ? 'decoration-fg-light/70 dark:decoration-fg-dark/70'
+                  : 'text-gray-600 dark:text-gray-300 decoration-fg-light/0 dark:decoration-fg-dark/0',
                     'inline-flex items-center px-1 pt-1 text-lg font-bold underline underline-offset-8 decoration-2 rounded-md transition ease-in-out'
               )}
             >
