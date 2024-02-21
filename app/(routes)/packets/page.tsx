@@ -176,8 +176,8 @@ export default function Packets() {
 
 function stateToString(state: PacketStates) {
   switch (state) {
+    case PacketStates.SENT || PacketStates.POLY_RECV: return 'Relaying';
+    case PacketStates.RECV || PacketStates.WRITE_ACK || PacketStates.POLY_WRITE_ACK: return 'Confirming';
     case PacketStates.ACK: return 'Delivered';
-    case PacketStates.POLY_WRITE_ACK || PacketStates.POLY_RECV: return 'Relaying';
-    case PacketStates.RECV || PacketStates.SENT || PacketStates.WRITE_ACK: return 'Confirming';
   }
 }
