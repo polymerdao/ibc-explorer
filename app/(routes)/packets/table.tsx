@@ -10,54 +10,108 @@ export function PacketTable({ table, loading }: { table: Table<Packet>, loading:
 
   return (
     <div>
-      <table>
-        <thead>
-          {table.getHeaderGroups().map(headerGroup => (
-            <tr key={headerGroup.id}>
-            {headerGroup.headers.map(header => {
-              return (
-                <th key={header.id} colSpan={header.colSpan} className="pl-8 first:pl-0">
-                  {header.isPlaceholder ? null : (
-                    <div>
-                      {flexRender(
-                        header.column.columnDef.header,
-                        header.getContext()
-                      )}
-                      {header.column.getCanFilter() ? (
-                        <div>
-                          <ColumnFilter column={header.column} table={table} />
-                        </div>
-                      ) : null}
-                    </div>
-                  )}
-                </th>
-              )
-            })}
-            </tr>
+      {/* Rows per Page */}
+      <div className="mb-3">
+        <span className="mr-2">{table.getFilteredRowModel().rows.length} total packets</span>
+        <select
+          value={table.getState().pagination.pageSize}
+          onChange={e => {
+            table.setPageSize(Number(e.target.value))
+          }}
+          className="dark:bg-bg-dark">
+          {[10, 20, 30, 40, 50].map(pageSize => (
+            <option key={pageSize} value={pageSize}>
+              Show {pageSize}
+            </option>
           ))}
-        </thead>
-        {loading ? (
-          <tbody>
-            <tr>
-              <td colSpan={table.getVisibleLeafColumns.length} className="text-center">
-                Loading...
-              </td>
-            </tr>
-          </tbody>
-        ) : (
-        <tbody>
-          {table.getRowModel().rows.map(row => (
-            <tr key={row.id}>
-              {row.getVisibleCells().map(cell => (
-                <td key={cell.id} className="pl-8 first:pl-0">
-                  {flexRender(cell.column.columnDef.cell, cell.getContext())}
+        </select>
+      </div>
+
+      { /* Table */ }
+      <div className="w-full overflow-scroll">
+        <table>
+          <thead>
+            {table.getHeaderGroups().map(headerGroup => (
+              <tr key={headerGroup.id}>
+              {headerGroup.headers.map(header => {
+                return (
+                  <th key={header.id} colSpan={header.colSpan} className="pl-8 first:pl-0">
+                    {header.isPlaceholder ? null : (
+                      <div>
+                        {flexRender(
+                          header.column.columnDef.header,
+                          header.getContext()
+                        )}
+                        {header.column.getCanFilter() ? (
+                          <div>
+                            <ColumnFilter column={header.column} table={table} />
+                          </div>
+                        ) : null}
+                      </div>
+                    )}
+                  </th>
+                )
+              })}
+              </tr>
+            ))}
+          </thead>
+          {loading ? (
+            <tbody>
+              <tr>
+                <td colSpan={table.getVisibleLeafColumns.length} className="text-center">
+                  Loading...
                 </td>
-              ))}
-            </tr>
-          ))}
-        </tbody>)}
-      </table>
-      <Pagination table={table} />
+              </tr>
+            </tbody>
+          ) : (
+          <tbody>
+            {table.getRowModel().rows.map(row => (
+              <tr key={row.id}>
+                {row.getVisibleCells().map(cell => (
+                  <td key={cell.id} className="pl-8 first:pl-0">
+                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                  </td>
+                ))}
+              </tr>
+            ))}
+          </tbody>)}
+        </table>
+      </div>
+
+      { /* Pagination */ }
+      <div className="flex items-center gap-2 mt-3">
+        <button
+          className="border rounded p-1"
+          onClick={() => table.previousPage()}
+          disabled={!table.getCanPreviousPage()}>
+          {'<'}
+        </button>
+        <button
+          className="border rounded p-1"
+          onClick={() => table.nextPage()}
+          disabled={!table.getCanNextPage()}>
+          {'>'}
+        </button>
+        <span className="flex items-center gap-1">
+          <div>Page</div>
+          <strong>
+            {table.getState().pagination.pageIndex + 1} of {' '}
+            {table.getPageCount()}
+          </strong>
+        </span>
+        <span className="flex items-center gap-1">
+          | Go to page:
+          <input
+            type="number"
+            defaultValue={table.getState().pagination.pageIndex + 1}
+            onChange={e => {
+              const page = e.target.value ? Number(e.target.value) - 1 : 0
+              table.setPageIndex(page)
+            }}
+            className="border px-1 rounded w-16 dark:bg-bg-dark"
+          />
+        </span>
+      </div>
     </div>
   )
 }
@@ -74,7 +128,7 @@ function ColumnFilter({ column, table }: { column: Column<any, any>, table: Tabl
       <select
         value={(columnFilterValue ?? '') as string}
         onChange={e => column.setFilterValue(e.target.value)}
-        className="w-36 border shadow rounded dark:bg-bg-dk">
+        className="w-36 border shadow rounded dark:bg-bg-dark">
         <option value="">All</option>
         {
           Object.entries(CHAIN_CONFIGS).map(([key, value]) => (
@@ -90,60 +144,10 @@ function ColumnFilter({ column, table }: { column: Column<any, any>, table: Tabl
         value={(columnFilterValue ?? '') as string}
         onChange={e => column.setFilterValue(e.target.value)}
         placeholder={`Search...`}
-        className="w-36 border shadow rounded dark:bg-bg-dk"
+        className="w-36 border shadow rounded dark:bg-bg-dark"
       />
     );
   } else {
     return null;
   }
-}
-
-function Pagination({ table }: { table: Table<any> }) {
-  return (
-    <div className="flex items-center gap-2">
-      <button
-        className="border rounded p-1"
-        onClick={() => table.previousPage()}
-        disabled={!table.getCanPreviousPage()}>
-        {'<'}
-      </button>
-      <button
-        className="border rounded p-1"
-        onClick={() => table.nextPage()}
-        disabled={!table.getCanNextPage()}>
-        {'>'}
-      </button>
-      <span className="flex items-center gap-1">
-        <div>Page</div>
-        <strong>
-          {table.getState().pagination.pageIndex + 1} of {' '}
-          {table.getPageCount()}
-        </strong>
-      </span>
-      <span className="flex items-center gap-1">
-        | Go to page:
-        <input
-          type="number"
-          defaultValue={table.getState().pagination.pageIndex + 1}
-          onChange={e => {
-            const page = e.target.value ? Number(e.target.value) - 1 : 0
-            table.setPageIndex(page)
-          }}
-          className="border p-1 rounded w-16 dark:bg-bg-dk"
-        />
-      </span>
-      <select
-        value={table.getState().pagination.pageSize}
-        onChange={e => {
-          table.setPageSize(Number(e.target.value))
-        }}
-        className="dark:bg-bg-dk">
-        {[10, 20, 30, 40, 50].map(pageSize => (
-          <option key={pageSize} value={pageSize}>
-            Show {pageSize}
-          </option>
-        ))}
-      </select>
-    </div>
-  )
 }
