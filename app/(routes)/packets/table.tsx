@@ -18,6 +18,7 @@ export function PacketTable({ table, loading }: { table: Table<Packet>, loading:
           onChange={e => {
             table.setPageSize(Number(e.target.value))
           }}
+          aria-label="Rows per page"
           className="dark:bg-bg-dark">
           {[10, 20, 30, 40, 50].map(pageSize => (
             <option key={pageSize} value={pageSize}>
@@ -104,11 +105,12 @@ export function PacketTable({ table, loading }: { table: Table<Packet>, loading:
           <input
             type="number"
             defaultValue={table.getState().pagination.pageIndex + 1}
+            className="border px-1 rounded w-16 dark:bg-bg-dark"
+            aria-label="Go to page"
             onChange={e => {
               const page = e.target.value ? Number(e.target.value) - 1 : 0
               table.setPageIndex(page)
             }}
-            className="border px-1 rounded w-16 dark:bg-bg-dark"
           />
         </span>
       </div>
@@ -128,7 +130,8 @@ function ColumnFilter({ column, table }: { column: Column<any, any>, table: Tabl
       <select
         value={(columnFilterValue ?? '') as string}
         onChange={e => column.setFilterValue(e.target.value)}
-        className="w-36 border shadow rounded dark:bg-bg-dark">
+        className="w-36 border shadow rounded dark:bg-bg-dark"
+        aria-label={"Filter by " + column.columnDef.header as string}>
         <option value="">All</option>
         {
           Object.entries(CHAIN_CONFIGS).map(([key, value]) => (
@@ -145,6 +148,7 @@ function ColumnFilter({ column, table }: { column: Column<any, any>, table: Tabl
         onChange={e => column.setFilterValue(e.target.value)}
         placeholder={`Search...`}
         className="w-36 border shadow rounded dark:bg-bg-dark"
+        aria-label={"Filter by " + column.columnDef.header as string}
       />
     );
   } else {
