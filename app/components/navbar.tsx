@@ -2,16 +2,13 @@
 
 import { useState } from 'react';
 import { usePathname } from 'next/navigation';
+import { classNames } from 'utils/functions';
 import Link from 'next/link';
 import Image from "next/image";
 
 const tabs = [
   { name: 'Packets', href: '/packets' },
 ];
-
-function classNames(...classes: string[]) {
-  return classes.filter(Boolean).join(' ');
-}
 
 export default function Navbar() {
   const [nav, setNav] = useState(false);
@@ -22,7 +19,7 @@ export default function Navbar() {
   }
 
   return (
-    <nav className="w-full z-10 sticky top-0 bg-content-bg-light/85 dark:bg-bg-dark/85 border-b-[0.8px] border-gray-300 dark:border-gray-700 backdrop-blur-sm ease-in-out">
+    <nav className="w-full z-20 sticky top-0 bg-content-bg-light/85 dark:bg-bg-dark/85 border-b-[0.8px] border-gray-300 dark:border-gray-700 backdrop-blur-sm ease-in-out">
       <div className="h-16 min-w-0 xl:min-w-[80rem] max-w-screen-xl xl:w-4/5 mx-auto px-6 sm:px-8 flex justify-between sm:justify-start">
 
         <div className="flex items-center shrink-0 mr-10 pt-1">
@@ -39,10 +36,9 @@ export default function Navbar() {
               className={classNames(
                 pathname === item.href
                   ? 'border-fg-light border-opacity-60 dark:border-fg-dark dark:border-opacity-60'
-                  : 'border-transparent text-gray-600 dark:text-gray-300 hover:text-fg-light dark:hover:text-fg-dark',
-                    'inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium transition ease-in-out'
-              )}
-            >
+                  : 'border-transparent text-gray-600 dark:text-gray-300 hover:text-fg-light dark:hover:text-fg-dark'
+                  , 'inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium transition ease-in-out'
+              )}>
               {item.name}
             </Link>
           ))}
@@ -80,8 +76,7 @@ export default function Navbar() {
               ? 'right-0'
               : 'right-[-100%] hidden',
                 'fixed sm:hidden flex flex-col space-y-8 border-[0.8px] p-8 w-full h-screen top-16 border-gray-300 dark:border-gray-700 bg-content-bg-light dark:bg-bg-dark ease-in-out duration-[400ms]'
-          )}
-        >
+          )}>
           {tabs.map((item) => (
             <Link
               key={item.name}
@@ -91,8 +86,7 @@ export default function Navbar() {
                   ? 'decoration-fg-light/70 dark:decoration-fg-dark/70'
                   : 'text-gray-600 dark:text-gray-300 decoration-fg-light/0 dark:decoration-fg-dark/0',
                     'inline-flex items-center px-1 pt-1 text-lg font-bold underline underline-offset-8 decoration-2 rounded-md transition ease-in-out'
-              )}
-            >
+              )}>
               {item.name}
             </Link>
           ))}
