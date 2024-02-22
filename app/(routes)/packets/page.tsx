@@ -107,18 +107,23 @@ export default function Packets() {
   });
 
   useEffect(() => {
-    fetch("/api/mock-packets").then(res => res.json()).then(data => {
-      setPackets(data);
-      setLoading(false);
-    });
+    loadData();
   }, []);
 
-  const reloadData = () => {
+  const loadData = () => {
     setLoading(true);
-    fetch("/api/mock-packets?size=100").then(res => res.json()).then(data => {
-      setPackets(data);
-      setLoading(false);
-    });
+    async function fetchData() {
+      const res = await fetch("/api/mock-packets?size=100");
+      if (!res.ok) {
+        setError(true);
+        setLoading(false);
+      } else {
+        const data = await res.json();
+        setPackets(data);
+        setLoading(false);
+      }
+    }
+    fetchData();
   };
 
   const table = useReactTable({
@@ -136,15 +141,15 @@ export default function Packets() {
   return (
     <div className="w-full">
 
-      <button onClick={() => setError(true)}>
-        Open Modal
-      </button>
-      <Modal open={error} setOpen={setError} />
+      <Modal
+        open={error} setOpen={setError}
+        title="Error Loading"
+        content={<p>There was an issue fetching packet data</p>}
+      />
 
       <h2>Packets:</h2>
-
       <div className="flex flex-row justify-end">
-        <button onClick={() => reloadData()} className="bg-content-bg-light dark:bg-content-bg-dark border px-3 py-2 mr-2 rounded">
+        <button onClick={() => loadData()} className="bg-content-bg-light dark:bg-content-bg-dark border px-3 py-2 mr-2 rounded">
           Refresh
         </button>
 
