@@ -11,8 +11,6 @@ import {
 from "@tanstack/react-table";
 import { PacketTable } from "./table";
 import { Modal } from "components/modal";
-import { Popover } from "@headlessui/react";
-import { FiChevronDown } from "react-icons/fi";
 import { Packet, PacketStates } from "utils/types/packet";
 import { hideMiddleChars } from "utils/functions";
 
@@ -132,6 +130,11 @@ export default function Packets() {
     state: {
       columnVisibility
     },
+    initialState: {
+      pagination: {
+        pageSize: 20
+      }
+    },
     onColumnVisibilityChange: setColumnVisibility,
     getCoreRowModel: getCoreRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
@@ -139,47 +142,18 @@ export default function Packets() {
   });
 
   return (
-    <div className="w-full">
-
+    <div className="">
       <Modal
         open={error} setOpen={setError}
         title="Error Loading"
         content={<p>There was an issue fetching packet data</p>}
       />
 
-      <h2>Packets:</h2>
-      <div className="flex flex-row justify-end">
-        <button onClick={() => loadData()} className="bg-content-bg-light dark:bg-content-bg-dark border px-3 py-2 mr-2 rounded">
-          Refresh
+      <div className="flex flex-row justify-between mr-28">
+        <h1 className="font-medium text-2xl ml-1">Packets</h1>
+        <button onClick={() => loadData()} className="bg-content-bg-light dark:bg-content-bg-dark border px-3 py-2 mr-2 rounded z-10">
+          Reload
         </button>
-
-        <Popover>
-          {({ open }) => (<>
-            <Popover.Button className="bg-content-bg-light dark:bg-content-bg-dark border px-3 py-2 rounded flex flex-row">
-              Columns
-              <FiChevronDown className={open ? "mt-1 ml-1 rotate-180 transform ease-in-out" : "mt-1 ml-1"}/>
-            </Popover.Button>
-            <Popover.Panel className="absolute z-10 mt-2">
-              <div className="bg-content-bg-light dark:bg-content-bg-dark p-3 rounded">
-                {table.getAllLeafColumns().map(column => { return (
-                  <div key={column.id} className="px-1 py-[0.1rem]">
-                    <label>
-                      <input
-                        {...{
-                          type: 'checkbox',
-                          checked: column.getIsVisible(),
-                          onChange: column.getToggleVisibilityHandler(),
-                        }}
-                      />{' '}
-                      {column.columnDef.header as string}
-                    </label>
-                  </div>
-                  )
-                })}
-              </div>
-            </Popover.Panel>
-          </>)}
-        </Popover>
       </div>
 
       <PacketTable {...{table, loading}} />
