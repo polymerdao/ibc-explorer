@@ -37,7 +37,7 @@ export default function Navbar() {
                 pathname === item.href
                   ? 'border-fg-light border-opacity-60 dark:border-fg-dark dark:border-opacity-60'
                   : 'border-transparent text-gray-600 dark:text-gray-300 hover:text-fg-light dark:hover:text-fg-dark'
-                  , 'inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium transition ease-in-out'
+                  , 'inline-flex items-center px-1 pt-1 border-b-2 text-md font-medium transition ease-in-out'
               )}>
               {item.name}
             </Link>

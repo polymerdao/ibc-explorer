@@ -14,7 +14,7 @@
   }
 
   main {
-    @apply flex-1 w-full min-w-0 xl:min-w-[80rem] max-w-screen-xl xl:w-4/5 mx-auto px-4 sm:px-8 py-8;
+    @apply flex-1 w-full min-w-0 xl:min-w-[80rem] max-w-screen-xl xl:w-4/5 mx-auto px-4 sm:px-8 py-12;
   }
 
   h1 {
