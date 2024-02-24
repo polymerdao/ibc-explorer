@@ -33,20 +33,20 @@ export function PacketTable({ table, loading }: { table: Table<Packet>, loading:
                   open
                     ? 'scale-y-[-1]'
                     : ''
-                    , "mt-[0.28rem] ml-1 transition ease-in-out duration-200"
+                    , "mt-[0.28rem] ml-1.5 transition ease-in-out duration-200"
                 )}/>
               </Popover.Button>
               <Transition
-                enter="transition duration-100 ease-out"
+                enter="transition duration-200 ease-out"
                 enterFrom="transform scale-95 opacity-0 -translate-y-6"
                 enterTo="transform scale-100 opacity-100"
-                leave="transition duration-100 ease-out"
+                leave="transition duration-150 ease-out"
                 leaveFrom="transform scale-100 opacity-100"
-                leaveTo="transform scale-95 opacity-0 -translate-y-4">
-                <Popover.Panel className="absolute z-10 mt-3 right-0 w-56">
-                  <div className="bg-content-bg-light dark:bg-content-bg-dark p-3 pr-5 border rounded border-slate-500">
+                leaveTo="transform scale-95 opacity-0">
+                <Popover.Panel className="absolute z-10 mt-2 right-0 w-56">
+                  <div className="bg-content-bg-light dark:bg-content-bg-dark px-6 py-5 border rounded border-slate-500">
                     {table.getAllLeafColumns().map(column => { return (
-                      <div key={column.id} className="px-2 py-[0.12rem]">
+                      <div key={column.id} className="py-[0.13rem]">
                         <label>
                           <input
                             className="appearance-none border border-slate-500 bg-transparent rounded-lg w-3 h-3 mr-2 transition-colors
@@ -94,9 +94,9 @@ export function PacketTable({ table, loading }: { table: Table<Packet>, loading:
               <tr key={headerGroup.id}>
               {headerGroup.headers.map(header => {
                 return (
-                  <th key={header.id} colSpan={header.colSpan} className="pl-8 first:pl-0">
+                  <th key={header.id} colSpan={header.colSpan} className="pl-8 first:pl-0 border-b pb-4">
                     {header.isPlaceholder ? null : (
-                      <div>
+                      <div className="flex flex-col items-start">
                         {flexRender(
                           header.column.columnDef.header,
                           header.getContext()
@@ -105,7 +105,8 @@ export function PacketTable({ table, loading }: { table: Table<Packet>, loading:
                           <div>
                             <ColumnFilter column={header.column} table={table} />
                           </div>
-                        ) : null}
+                        ) : 
+                          <div className="h-[1.6rem] w-1"></div>}
                       </div>
                     )}
                   </th>
@@ -127,7 +128,7 @@ export function PacketTable({ table, loading }: { table: Table<Packet>, loading:
             {table.getRowModel().rows.map(row => (
               <tr
                 key={row.id} 
-                className="h-10 hover:bg-sky-100 dark:hover:bg-slate-800 transition-colors ease-in-out duration-300 even:bg-bg-light dark:even:bg-bg-dark"
+                className="h-10 hover:bg-sky-50 dark:hover:bg-slate-800 transition-colors ease-in-out duration-300 even:bg-bg-light dark:even:bg-bg-dark"
                 onDoubleClick={() => {
                   setSelectedRow(row.original);
                   setRowSelected(true); 
@@ -218,7 +219,7 @@ function ColumnFilter({ column, table }: { column: Column<any, any>, table: Tabl
       <select
         value={(columnFilterValue ?? '') as string}
         onChange={e => column.setFilterValue(e.target.value)}
-        className="w-36 border shadow rounded dark:bg-bg-dark"
+        className="w-36 border shadow rounded dark:bg-bg-dark font-medium"
         aria-label={"Filter by " + column.columnDef.header as string}>
         <option value="">All</option>
         {
