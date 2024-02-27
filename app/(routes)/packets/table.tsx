@@ -11,6 +11,7 @@ import { CHAIN_CONFIGS } from "utils/chains/configs";
 import { Packet } from "utils/types/packet";
 import { classNames } from "utils/functions";
 import { useState } from "react";
+import { Fragment } from 'react';
 
 export function PacketTable({ table, loading }: { table: Table<Packet>, loading: boolean }) {
   const [rowSelected, setRowSelected] = useState<boolean>(false);
@@ -20,14 +21,14 @@ export function PacketTable({ table, loading }: { table: Table<Packet>, loading:
     <div className="relative -top-[2.64rem]">
       {/* Table View Options */}
       <div className="flex flex-row justify-between items-end mb-3">
-        <span className="ml-1">
+        <span className="ml-1 text-slate-700 dark:text-slate-300">
           {table.getFilteredRowModel().rows.length} total packets
         </span>
 
         <div className="flex flex-col items-end">
           <Popover className="mb-6">
             {({ open }) => (<>
-              <Popover.Button className="bg-content-bg-light dark:bg-content-bg-dark border px-3 py-2 rounded flex flex-row">
+              <Popover.Button className="btn flex flex-row pr-[0.8rem]">
                 Columns
                 <FiChevronDown className={classNames(
                   open
@@ -37,19 +38,20 @@ export function PacketTable({ table, loading }: { table: Table<Packet>, loading:
                 )}/>
               </Popover.Button>
               <Transition
-                enter="transition duration-200 ease-out"
-                enterFrom="transform scale-95 opacity-0 -translate-y-6"
-                enterTo="transform scale-100 opacity-100"
-                leave="transition duration-150 ease-out"
+                as={Fragment}
+                enter="ease-out duration-200"
+                enterFrom="transform scale-95 opacity-0 -translate-y-6 z-30"
+                enterTo="transform scale-100 opacity-100 z-30"
+                leave="ease-in duration-200"
                 leaveFrom="transform scale-100 opacity-100"
                 leaveTo="transform scale-95 opacity-0">
                 <Popover.Panel className="absolute z-10 mt-2 right-0 w-56">
-                  <div className="bg-content-bg-light dark:bg-content-bg-dark px-6 py-5 border rounded border-slate-500">
+                  <div className="bg-content-bg-light dark:bg-content-bg-dark px-6 py-5 border rounded-md border-slate-500">
                     {table.getAllLeafColumns().map(column => { return (
                       <div key={column.id} className="py-[0.13rem]">
                         <label>
                           <input
-                            className="appearance-none border border-slate-500 bg-transparent rounded-lg w-3 h-3 mr-2 transition-colors
+                            className="appearance-none border border-slate-500 bg-transparent rounded-lg w-3 h-3 mr-2 transition-colors ease-in-out duration-150
                               checked:bg-emerald-500 checked:border-transparent"
                             {...{
                               type: 'checkbox',
@@ -74,7 +76,7 @@ export function PacketTable({ table, loading }: { table: Table<Packet>, loading:
               table.setPageSize(Number(e.target.value))
             }}
             aria-label="Rows per page"
-            className="dark:bg-bg-dark mr-1 bg-transparent">
+            className="mr-1 bg-transparent text-slate-700 dark:text-slate-300">
             {[10, 20, 50, 100].map(pageSize => (
               <option key={pageSize} value={pageSize}>
                 {pageSize} Rows / Page
@@ -85,16 +87,16 @@ export function PacketTable({ table, loading }: { table: Table<Packet>, loading:
         </div>
       </div>
 
-
       { /* Table */ }
-      <div className="w-full overflow-scroll border border-slate-500 rounded-md p-6 bg-content-bg-light dark:bg-content-bg-dark">
-        <table>
-          <thead>
+      <div className="w-full border border-slate-500 rounded-md bg-content-bg-light dark:bg-content-bg-dark overflow-y-auto table-height">
+        <div className="absolute top-[180px] left-[0.8px] w-[calc(100%-2px)] border-b-[1.6px] border-slate-500"></div>
+        <table className="w-full">
+          <thead className="sticky top-0 h-20 bg-content-bg-light dark:content-bg-dark">
             {table.getHeaderGroups().map(headerGroup => (
               <tr key={headerGroup.id}>
               {headerGroup.headers.map(header => {
                 return (
-                  <th key={header.id} colSpan={header.colSpan} className="pl-8 first:pl-0 border-b pb-4">
+                  <th key={header.id} colSpan={header.colSpan} className="pl-8 dark:bg-bg-dark">
                     {header.isPlaceholder ? null : (
                       <div className="flex flex-col items-start">
                         {flexRender(
@@ -128,13 +130,13 @@ export function PacketTable({ table, loading }: { table: Table<Packet>, loading:
             {table.getRowModel().rows.map(row => (
               <tr
                 key={row.id} 
-                className="h-10 hover:bg-sky-50 dark:hover:bg-slate-800 transition-colors ease-in-out duration-300 even:bg-bg-light dark:even:bg-bg-dark"
-                onDoubleClick={() => {
+                className="h-10 w-full hover:bg-sky-50 dark:hover:bg-slate-800 transition-colors ease-in-out duration-200 even:bg-bg-light dark:even:bg-bg-dark hover:cursor-pointer"
+                onClick={() => {
                   setSelectedRow(row.original);
                   setRowSelected(true); 
                 }}>
                 {row.getVisibleCells().map(cell => (
-                  <td key={cell.id} className="pl-8 first:pl-0">
+                  <td key={cell.id} className="pl-8">
                     {flexRender(cell.column.columnDef.cell, cell.getContext())}
                   </td>
                 ))}
@@ -219,7 +221,7 @@ function ColumnFilter({ column, table }: { column: Column<any, any>, table: Tabl
       <select
         value={(columnFilterValue ?? '') as string}
         onChange={e => column.setFilterValue(e.target.value)}
-        className="w-36 border shadow rounded dark:bg-bg-dark font-medium"
+        className="w-36 border border-slate-500 shadow-none rounded dark:bg-bg-dark font-medium text-slate-700 dark:text-slate-300"
         aria-label={"Filter by " + column.columnDef.header as string}>
         <option value="">All</option>
         {
@@ -236,7 +238,7 @@ function ColumnFilter({ column, table }: { column: Column<any, any>, table: Tabl
         value={(columnFilterValue ?? '') as string}
         onChange={e => column.setFilterValue(e.target.value)}
         placeholder={`Search...`}
-        className="w-36 border shadow rounded dark:bg-bg-dark"
+        className="inpt shadow-none w-36 border border-slate-500 shadow rounded dark:bg-bg-dark font-medium"
         aria-label={"Filter by " + column.columnDef.header as string}
       />
     );
