@@ -88,15 +88,17 @@ export function PacketTable({ table, loading }: { table: Table<Packet>, loading:
       </div>
 
       { /* Table */ }
-      <div className="w-full border border-slate-500 rounded-md bg-content-bg-light dark:bg-content-bg-dark overflow-y-auto table-height">
-        <div className="absolute top-[180px] left-[0.8px] w-[calc(100%-2px)] border-b-[1.6px] border-slate-500"></div>
+      <div className="w-full border border-slate-500 rounded-md bg-content-bg-light dark:bg-content-bg-dark overflow-y-auto table-height scroll-smooth">
+        <div className="absolute top-[181px] left-[0.8px] w-[calc(100%-2px)] border-b-[1.6px] border-slate-500"></div>
         <table className="w-full">
           <thead className="sticky top-0 h-20 bg-content-bg-light dark:content-bg-dark">
             {table.getHeaderGroups().map(headerGroup => (
               <tr key={headerGroup.id}>
               {headerGroup.headers.map(header => {
                 return (
-                  <th key={header.id} colSpan={header.colSpan} className="pl-8 dark:bg-bg-dark">
+                  <th key={header.id} colSpan={header.colSpan} 
+                    className="pl-8 pb-2 dark:bg-bg-dark min-w-[130px]"
+                    style={{width: header.column.columnDef.size}}>
                     {header.isPlaceholder ? null : (
                       <div className="flex flex-col items-start">
                         {flexRender(
@@ -130,7 +132,7 @@ export function PacketTable({ table, loading }: { table: Table<Packet>, loading:
             {table.getRowModel().rows.map(row => (
               <tr
                 key={row.id} 
-                className="h-10 w-full hover:bg-sky-50 dark:hover:bg-slate-800 transition-colors ease-in-out duration-200 even:bg-bg-light dark:even:bg-bg-dark hover:cursor-pointer"
+                className="h-12 w-full hover:bg-sky-50 dark:hover:bg-slate-800 transition-colors ease-in-out duration-200 even:bg-bg-light dark:even:bg-bg-dark hover:cursor-pointer"
                 onClick={() => {
                   setSelectedRow(row.original);
                   setRowSelected(true); 
