@@ -13,6 +13,7 @@ import { PacketTable } from "./table";
 import { Modal } from "components/modal";
 import { Packet, PacketStates } from "utils/types/packet";
 import { hideMiddleChars } from "utils/functions";
+import { HiMiniArrowLongRight } from "react-icons/hi2";
 
 const columnHelper = createColumnHelper<Packet>();
 const columns = [
@@ -33,7 +34,13 @@ const columns = [
   }),
   columnHelper.accessor('sourceChain', {
     header: 'Source Chain',
-    enableHiding: true
+    enableHiding: true,
+    cell: props => (
+      <div className="flex flex-row justify-between">
+        <span>{props.getValue()}</span>
+        <HiMiniArrowLongRight className="text-fg-light dark:text-fg-dark" />
+      </div>
+    )
   }),
   columnHelper.accessor('destChain', {
     header: 'Dest Chain',
@@ -66,7 +73,9 @@ const columns = [
       return <span>{Math.round(props.getValue() / 1000)} s</span>;
     },
     enableColumnFilter: false,
-    enableHiding: true
+    enableHiding: true,
+    size: 5000,
+    minSize: 1000
   }),
   columnHelper.accessor('fee', {
     header: 'Fee',

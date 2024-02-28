@@ -26,9 +26,12 @@
   ::-webkit-scrollbar-thumb {
     @apply rounded-lg bg-slate-300 dark:bg-slate-500;
   }
+  ::-webkit-scrollbar-corner {
+    @apply rounded-lg bg-bg-light dark:bg-bg-dark;
+  }
 
   .table-height {
-    @apply  max-h-[calc(100vh-18rem)] md:max-h-[calc(100vh-19rem)] xl:max-h-[calc(100vh-20rem)];
+    @apply  max-h-[calc(100vh-19.2rem)] md:max-h-[calc(100vh-19.7rem)] xl:max-h-[calc(100vh-20.3rem)];
   }
 
   h1 {
@@ -47,10 +50,6 @@
 
   .btn-accent {
     @apply text-sky-600 bg-sky-100 dark:text-sky-100 dark:bg-sky-950 dark:hover:bg-sky-950;
-  }
-
-  .inpt {
-    @apply pl-1
   }
   
   *:focus {
