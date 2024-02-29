@@ -9,8 +9,9 @@ import {
   getPaginationRowModel,
   useReactTable }
 from "@tanstack/react-table";
-import { PacketTable } from "./table";
+import { IbcTable } from "../../components/ibc-table";
 import { Modal } from "components/modal";
+import { RowDetails } from "./row-details";
 import { Packet, PacketStates } from "utils/types/packet";
 import { hideMiddleChars } from "utils/functions";
 import { HiMiniArrowLongRight } from "react-icons/hi2";
@@ -117,21 +118,41 @@ export default function Packets() {
     loadData();
   }, []);
 
-  const loadData = () => {
+  function loadData() {
     setLoading(true);
-    async function fetchData() {
-      const res = await fetch("/api/mock-packets?size=100");
-      if (!res.ok) {
-        setError(true);
-        setLoading(false);
-      } else {
-        const data = await res.json();
+    fetch("/api/mock-packets?size=100")
+      .then(res => {
+        if (!res.ok) {
+          console.error(res.status);
+          setError(true);
+          setLoading(false);
+        }
+        return res.json();
+      })
+      .then(data => {
         setPackets(data);
         setLoading(false);
-      }
-    }
-    fetchData();
-  };
+      }).catch(err => {
+        setError(true);
+        setLoading(false);
+      });
+  }
+
+  // const loadData = () => {
+  //   setLoading(true);
+  //   async function fetchData() {
+  //     const res = await fetch("/api/mock-packets?size=100");
+  //     if (!res.ok) {
+  //       setError(true);
+  //       setLoading(false);
+  //     } else {
+  //       const data = await res.json();
+  //       setPackets(data);
+  //       setLoading(false);
+  //     }
+  //   }
+  //   fetchData();
+  // };
 
   const table = useReactTable({
     data: packets,
@@ -165,7 +186,7 @@ export default function Packets() {
         </button>
       </div>
 
-      <PacketTable {...{table, loading}} />
+      <IbcTable {...{table, loading, rowDetails: RowDetails}} />
     </div>
   );
 }
