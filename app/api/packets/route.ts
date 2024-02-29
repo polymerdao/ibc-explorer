@@ -49,13 +49,15 @@ export async function GET(request: NextRequest) {
   let srcChainContracts: Array<[ethers.Contract, CHAIN]> = [];
   for (const chain in CHAIN_CONFIGS) {
     const chainId = chain as CHAIN;
-    const dispatcherAddress = dispatcher ?? CHAIN_CONFIGS[chainId].dispatcher;
-    const provider = new CachingJsonRpcProvider(CHAIN_CONFIGS[chainId].rpc, CHAIN_CONFIGS[chainId].id);
-    srcChainProviders[chainId] = provider;
-    const contract = new ethers.Contract(dispatcherAddress, Abi.abi, provider);
-    srcChainContracts.push([contract, chainId]);
-    const newSendLogs = (await contract.queryFilter('SendPacket', fromBlock, toBlock)) as Array<ethers.EventLog>;
-    sendLogs = sendLogs.concat(newSendLogs.map((eventLog) => [eventLog, chainId]));
+    const dispatcherAddresses = [dispatcher] ?? CHAIN_CONFIGS[chainId].dispatchers;
+    for (const dispatcherAddress in dispatcherAddresses) {
+      const provider = new CachingJsonRpcProvider(CHAIN_CONFIGS[chainId].rpc, CHAIN_CONFIGS[chainId].id);
+      srcChainProviders[chainId] = provider;
+      const contract = new ethers.Contract(dispatcherAddress, Abi.abi, provider);
+      srcChainContracts.push([contract, chainId]);
+      const newSendLogs = (await contract.queryFilter('SendPacket', fromBlock, toBlock)) as Array<ethers.EventLog>;
+      sendLogs = sendLogs.concat(newSendLogs.map((eventLog) => [eventLog, chainId]));
+    }
   }
 
   // Collect all packets and their properties from the send logs
