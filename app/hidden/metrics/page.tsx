@@ -2,12 +2,12 @@
 
 import React, { useEffect, useState } from 'react';
 import { BarList, Card, Divider, Flex, Grid, Metric, Text, Title } from '@tremor/react';
-import { CHAIN_CONFIGS } from '../chains';
-import DateTimeRangePicker from '../components/DateTimePicker';
+import { CHAIN_CONFIGS } from '../../chains';
+import DateTimeRangePicker from '../../components/DateTimePicker';
 import _ from 'lodash';
 import { Spinner } from '@nextui-org/react';
 import { IdentifiedChannel } from 'cosmjs-types/ibc/core/channel/v1/channel';
-import { calcMetrics } from './utils';
+import { calcMetrics } from '../../metrics/utils';
 
 interface MetricData {
   category: string;
