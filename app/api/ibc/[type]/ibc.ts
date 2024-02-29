@@ -6,9 +6,7 @@ import { QueryChannelsResponse } from 'cosmjs-types/ibc/core/channel/v1/query';
 export async function getTmClient(
   rpc: string
 ): Promise<QueryClient & IbcExtension> {
-  console.log('getTmClient');
   const tmClient = await Tendermint37Client.connect(rpc);
-  console.log('got TMclient');
   return QueryClient.withExtensions(tmClient, setupIbcExtension);
 }
 
@@ -45,7 +43,6 @@ export async function getClients(apiUrl: string) {
 }
 
 export async function getChannels(apiUrl: string) {
-  console.log('getChannels');
   const tmClient = await getTmClient(apiUrl);
   const channels = await tmClient.ibc.channel.allChannels();
   return (QueryChannelsResponse.toJSON(channels) as QueryChannelsResponse)
