@@ -1,5 +1,5 @@
 import { register, Gauge } from 'prom-client';
-import { calcMetrics } from '../utils';
+import { calcMetrics } from './utils';
 import { NextRequest } from 'next/server';
 
 export const dynamic = 'force-dynamic'; // defaults to auto
@@ -13,7 +13,10 @@ export async function GET(request: NextRequest) {
 
   let metrics;
   try {
-    metrics = await calcMetrics([oneHourAgo, now], "http://" + request.nextUrl.host);
+    metrics = await calcMetrics(
+      [oneHourAgo, now],
+      'http://' + request.nextUrl.host
+    );
   } catch (error) {
     console.error('Failed to calculate metrics:', error);
     return new Response('Internal Server Error', { status: 500 });
@@ -21,17 +24,19 @@ export async function GET(request: NextRequest) {
   for (let chainMetrics of metrics) {
     for (let metric of chainMetrics) {
       if (metric.stat == 0) {
-        continue
+        continue;
       }
 
       for (let stat of metric.data) {
-        let gauge = gauges[metric.key] ?? new Gauge({
-          name: metric.key,
-          help: metric.category,
-          labelNames: ['chainName', 'statName']
-        });
+        let gauge =
+          gauges[metric.key] ??
+          new Gauge({
+            name: metric.key,
+            help: metric.category,
+            labelNames: ['chainName', 'statName']
+          });
         gauge.labels(metric.chain, stat.name).set(stat.value);
-        gauges[metric.key] = gauge
+        gauges[metric.key] = gauge;
       }
     }
   }
@@ -43,5 +48,4 @@ export async function GET(request: NextRequest) {
       'Content-type': register.contentType
     }
   });
-
 }
