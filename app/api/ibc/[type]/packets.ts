@@ -27,7 +27,6 @@ export interface PacketData {
 }
 
 export async function getPackets(request: NextRequest, apiUrl: string) {
-  console.log('getPackets: ', apiUrl);
   const searchParams = request.nextUrl.searchParams;
   const from = searchParams.get('from');
   const to = searchParams.get('to');
