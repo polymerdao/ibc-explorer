@@ -5,11 +5,10 @@ import { Disclosure } from '@headlessui/react';
 import Image from "next/image";
 
 const navigation = [
-  { name: 'Metrics', href: '/' },
+  { name: 'Packets', href: '/packets' },
   { name: 'Clients', href: '/clients' },
   { name: 'Connections', href: '/connections' },
   { name: 'Channels', href: '/channels' },
-  { name: 'Packets', href: '/packets' },
 ];
 
 function classNames(...classes: string[]) {
