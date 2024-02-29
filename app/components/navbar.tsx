@@ -8,6 +8,7 @@ import Image from "next/image";
 
 const tabs = [
   { name: 'Packets', href: '/packets' },
+  { name: 'Connections', href: '/connections' }
 ];
 
 export default function Navbar() {
