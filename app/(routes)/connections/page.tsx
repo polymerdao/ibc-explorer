@@ -16,15 +16,27 @@ import { Modal } from "components/modal";
 const columnHelper = createColumnHelper<IdentifiedConnection>();
 const columns = [
   columnHelper.accessor('id', {
-    header: 'ID',
+    header: 'Connection ID',
     enableHiding: true
   }),
   columnHelper.accessor('clientId', {
-    header: 'Src Channel ID',
+    header: 'Client ID',
     enableHiding: true
   }),
   columnHelper.accessor('state', {
-    header: 'Dest Channel ID',
+    header: 'State',
+    enableHiding: true
+  }),
+  columnHelper.accessor('counterparty.connectionId', {
+    header: 'Counterparty Connection',
+    enableHiding: true
+  }),
+  columnHelper.accessor('counterparty.clientId', {
+    header: 'Counterparty Client',
+    enableHiding: true
+  }),
+  columnHelper.accessor('delayPeriod', {
+    header: 'Delay Period',
     enableHiding: true
   })
 ];
@@ -80,12 +92,14 @@ export default function Packets() {
     <div className="">
       <Modal
         open={error} setOpen={setError}
-        title="Error Loading"
-        content={<p>There was an issue fetching connection data</p>}
+        content={<>
+          <h1>Error</h1>
+          <p className="mt-2">There was an issue fetching connection data</p>
+        </>}
       />
 
       <div className="flex flex-row justify-between mr-28">
-        <h1 className="font-medium text-2xl ml-1">Connections</h1>
+        <h1 className="ml-1">Connections</h1>
         <button onClick={() => loadData()} className="btn btn-accent z-10 mr-4">
           Reload
         </button>

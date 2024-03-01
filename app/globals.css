@@ -21,7 +21,7 @@
     @apply w-2 h-2 rounded-lg bg-content-bg-light dark:bg-bg-dark;
   }
   ::-webkit-scrollbar-track {
-    @apply mt-[81px] rounded-lg bg-bg-light dark:bg-bg-dark;
+    @apply mt-[81.5px] rounded-lg bg-bg-light dark:bg-bg-dark;
   }
   ::-webkit-scrollbar-thumb {
     @apply rounded-lg bg-slate-300 dark:bg-slate-500;
@@ -35,7 +35,7 @@
   }
 
   h1 {
-    @apply text-2xl;
+    @apply text-2xl font-medium;
   }
   h2 {
     @apply text-xl;
