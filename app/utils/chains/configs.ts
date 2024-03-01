@@ -8,7 +8,6 @@ let baseDispatcher = process.env.DISPATCHER_ADDRESS_BASE!;
 let opDispatcherSimClient = process.env.DISPATCHER_ADDRESS_OPTIMISM_SIMCLIENT!;
 let baseDispatcherSimClient = process.env.DISPATCHER_ADDRESS_BASE_SIMCLIENT!;
 
-
 export const CHAIN_CONFIGS: {
   [key in CHAIN]: Chain;
 } = {
