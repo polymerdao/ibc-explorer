@@ -91,16 +91,17 @@ export async function getPackets(request: NextRequest, apiUrl: string) {
     (addr) => new ethers.Contract(addr!, Abi.abi, providerTo)
   );
 
-  const awaitedSendLogs = (await Promise.all(
-    contractFroms.map((contractFrom) => {
-      contractFrom.queryFilter('SendPacket', fromBlock, toBlock) as Promise<
-        ethers.EventLog[]
-      >;
-    })
-  )) as unknown as ethers.EventLog[];
-
-  const sendPacketLogs =
-    awaitedSendLogs.flat() as unknown as Array<ethers.EventLog>;
+  const sendPacketLogs = (
+    await Promise.all(
+      contractFroms.map((contractFrom) => {
+        return contractFrom.queryFilter(
+          'SendPacket',
+          fromBlock,
+          toBlock
+        ) as Promise<ethers.EventLog[]>;
+      })
+    )
+  ).flat();
 
   const unprocessedPacketKeys = new Set<string>();
 
@@ -114,8 +115,6 @@ export async function getPackets(request: NextRequest, apiUrl: string) {
       console.log('Skipping packet for channel: ', sourceChannelId);
       continue;
     }
-
-    console.log(packet);
 
     const channel = openChannels.find((channel) => {
       return (
@@ -168,19 +167,17 @@ export async function getPackets(request: NextRequest, apiUrl: string) {
   // If a packet reached the corresponding state, set it as the state for the packet and move on to the next packet
   // Otherwise move to the next state until SENT state is reached
 
-  console.log('acklogs');
-  const awaitedAckLogs = await Promise.all(
-    contractFroms.map((contractFrom) => {
-      contractFrom.queryFilter(
-        'Acknowledgement',
-        fromBlock,
-        toBlock
-      ) as Promise<Array<ethers.EventLog>>;
-    })
-  );
-
-  const ackLogs = awaitedAckLogs.flat() as unknown as Array<ethers.EventLog>;
-  console.log('Ack logs: ', ackLogs.length);
+  const ackLogs = (
+    await Promise.all(
+      contractFroms.map((contractFrom) => {
+        return contractFrom.queryFilter(
+          'Acknowledgement',
+          fromBlock,
+          toBlock
+        ) as Promise<Array<ethers.EventLog>>;
+      })
+    )
+  ).flat();
 
   for (const ackLog of ackLogs) {
     let [sourcePortAddress, sourceChannelId, sequence] = ackLog.args;
@@ -224,16 +221,16 @@ export async function getPackets(request: NextRequest, apiUrl: string) {
   // It seems that due to short circuiting POLY_ACK_RECV can be distinguished as a separate state so this state is skipped
 
   // TODO: use a more narrow from and to block for dest chain
-  const awaitedWriteAckLogs = await Promise.all(
-    contractTos.map((contractTo) => {
-      contractTo.queryFilter('WriteAckPacket', 1, 'latest') as Promise<
-        Array<ethers.EventLog>
-      >;
-    })
-  );
+  const writeAckLogs = (
+    await Promise.all(
+      contractTos.map((contractTo) => {
+        return contractTo.queryFilter('WriteAckPacket', 1, 'latest') as Promise<
+          Array<ethers.EventLog>
+        >;
+      })
+    )
+  ).flat();
 
-  const writeAckLogs =
-    awaitedWriteAckLogs.flat() as unknown as Array<ethers.EventLog>;
   for (const writeAckLog of writeAckLogs) {
     const [receiver, destChannelId, sequence, ack] = writeAckLog.args;
 
@@ -264,16 +261,15 @@ export async function getPackets(request: NextRequest, apiUrl: string) {
   }
 
   // TODO: use a more narrow from and to block for dest chain
-  const awaitedRecvPacketLogs = await Promise.all(
-    contractTos.map((contractTo) => {
-      contractTo.queryFilter('RecvPacket', 1, 'latest') as Promise<
-        Array<ethers.EventLog>
-      >;
-    })
-  );
-
-  const recvPacketLogs =
-    awaitedRecvPacketLogs.flat() as unknown as Array<ethers.EventLog>;
+  const recvPacketLogs = (
+    await Promise.all(
+      contractTos.map((contractTo) => {
+        return contractTo.queryFilter('RecvPacket', 1, 'latest') as Promise<
+          Array<ethers.EventLog>
+        >;
+      })
+    )
+  ).flat();
 
   for (const recvPacketLog of recvPacketLogs) {
     const [destPortAddress, destChannelId, sequence] = recvPacketLog.args;
