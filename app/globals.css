@@ -49,7 +49,7 @@
   }
 
   .btn-accent {
-    @apply text-sky-600 bg-sky-100 dark:text-sky-100 dark:bg-sky-950 dark:hover:bg-sky-950;
+    @apply text-sky-700 bg-sky-100 dark:text-sky-100 dark:bg-sky-950 dark:hover:bg-sky-950;
   }
   
   *:focus {

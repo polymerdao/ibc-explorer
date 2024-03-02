@@ -4,13 +4,19 @@ import { Packet, PacketStates } from "utils/types/packet";
 import { CHAIN, CHAIN_CONFIGS } from "utils/chains/configs";
 import { CachingJsonRpcProvider } from "api/utils/provider-cache";
 import { GetTmClient } from "api/utils/cosmos";
-import { GET as getChannels, IdentifiedChannel } from "api/channels/route";
+import { IdentifiedChannel } from "cosmjs-types/ibc/core/channel/v1/channel";
+import { QueryChannelsResponse } from "cosmjs-types/ibc/core/channel/v1/query";
 import Abi from "utils/dispatcher.json";
 
 export const dynamic = 'force-dynamic' // defaults to auto
 
+async function getChannels() {
+  const tmClient = await GetTmClient();
+  const channels = await tmClient.ibc.channel.allChannels();
+  return (QueryChannelsResponse.toJSON(channels) as QueryChannelsResponse).channels;
+}
+
 export async function GET(request: NextRequest) {
-  const apiUrl = process.env.API_URL!;
   const searchParams = request.nextUrl.searchParams;
   const from = searchParams.get('from');
   const to = searchParams.get('to')
@@ -21,10 +27,10 @@ export async function GET(request: NextRequest) {
   }
 
   const channelsResponse = await getChannels();
-  if (!channelsResponse.ok) {
+  if (!channelsResponse) {
     return NextResponse.error();
   }
-  const channels = await channelsResponse.json() as Array<IdentifiedChannel>;
+  const channels = channelsResponse as Array<IdentifiedChannel>;
   const openChannels = channels.filter((channel) => {
     return channel.state.toString() === "STATE_OPEN"
       && (channel.portId.startsWith(`polyibc.`) && channel.counterparty.portId.startsWith(`polyibc.`));
@@ -33,7 +39,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json([]);
   }
 
-  const tmClient = await GetTmClient(apiUrl)
+  const tmClient = await GetTmClient();
 
   const validChannelIds = new Set<string>();
   openChannels.forEach((channel) => {

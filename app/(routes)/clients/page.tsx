@@ -10,39 +10,27 @@ import {
   useReactTable }
 from "@tanstack/react-table";
 import { IbcTable } from "components/ibc-table";
-import { IdentifiedConnection } from "cosmjs-types/ibc/core/connection/v1/connection";
 import { Modal } from "components/modal";
+import { Client } from "utils/types/client";
 
-const columnHelper = createColumnHelper<IdentifiedConnection>();
+const columnHelper = createColumnHelper<Client>();
 const columns = [
-  columnHelper.accessor('id', {
-    header: 'Connection ID',
-    enableHiding: true
-  }),
   columnHelper.accessor('clientId', {
     header: 'Client ID',
     enableHiding: true
   }),
-  columnHelper.accessor('state', {
-    header: 'State',
+  columnHelper.accessor('clientState.revisionHeight', {
+    header: 'Revision Height',
     enableHiding: true
   }),
-  columnHelper.accessor('counterparty.connectionId', {
-    header: 'Counterparty Connection',
-    enableHiding: true
-  }),
-  columnHelper.accessor('counterparty.clientId', {
-    header: 'Counterparty Client',
-    enableHiding: true
-  }),
-  columnHelper.accessor('delayPeriod', {
-    header: 'Delay Period',
+  columnHelper.accessor('clientState.revisionNumber', {
+    header: 'Revision Number',
     enableHiding: true
   })
 ];
 
 export default function Packets() {
-  const [connections, setConnections] = useState<IdentifiedConnection[]>([]);
+  const [connections, setConnections] = useState<Client[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
@@ -53,7 +41,7 @@ export default function Packets() {
 
   function loadData() {
     setLoading(true);
-    fetch("/api/ibc/connections")
+    fetch("/api/ibc/clients")
       .then(res => {
         if (!res.ok) {
           console.error(res.status);
@@ -91,12 +79,12 @@ export default function Packets() {
         open={error} setOpen={setError}
         content={<>
           <h1>Error</h1>
-          <p className="mt-2">There was an issue fetching connection data</p>
+          <p className="mt-2">There was an issue fetching client data</p>
         </>}
       />
 
       <div className="flex flex-row justify-between mr-28">
-        <h1 className="ml-1">Connections</h1>
+        <h1 className="ml-1">Clients</h1>
         <button onClick={() => loadData()} className="btn btn-accent z-10 mr-4">
           Reload
         </button>

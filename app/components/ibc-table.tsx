@@ -1,7 +1,7 @@
 import { 
   Table,
   flexRender,
-  Column
+  Column,
 } from "@tanstack/react-table";
 import { Popover } from "@headlessui/react";
 import { Transition } from "@headlessui/react";
@@ -9,7 +9,9 @@ import { FiChevronDown } from "react-icons/fi";
 import { Modal } from "components/modal";
 import { CHAIN_CONFIGS } from "utils/chains/configs";
 import { Packet } from "utils/types/packet";
+import { Client } from "utils/types/client";
 import { IdentifiedConnection } from "cosmjs-types/ibc/core/connection/v1/connection";
+import { IdentifiedChannel } from "cosmjs-types/ibc/core/channel/v1/channel";
 import { classNames } from "utils/functions";
 import { useState } from "react";
 import { Fragment } from 'react';
@@ -20,11 +22,11 @@ interface IbcTableProps<TableType> {
   rowDetails?: (row: TableType) => JSX.Element
 }
 
-export function IbcTable<TableType extends Packet | IdentifiedConnection>
+export function IbcTable<TableType extends Packet | Client | IdentifiedChannel | IdentifiedConnection>
   ({ table, loading, rowDetails }: IbcTableProps<TableType>)
 {
   const [rowSelected, setRowSelected] = useState<boolean>(false);
-  const [selectedRow, setSelectedRow] = useState<Packet | IdentifiedConnection | null>(null);
+  const [selectedRow, setSelectedRow] = useState<TableType | null>(null);
 
   return (
     <div className="relative -top-[2.64rem]">
@@ -100,8 +102,13 @@ export function IbcTable<TableType extends Packet | IdentifiedConnection>
       { /* Table */ }
       <div className="w-full border border-slate-500 rounded-md bg-content-bg-light dark:bg-content-bg-dark overflow-y-auto table-height scroll-smooth min-h-72">
         {loading && 
-          <div className="absolute mt-40 z-10 w-full grid justify-items-center">
+          <div className="absolute mt-40 z-10 w-full grid justify-items-center font-mewdium">
             <div>Loading...</div>
+          </div>
+        }
+        {(!loading && !table.getFilteredRowModel().rows.length) &&
+          <div className="absolute mt-40 z-10 w-full grid justify-items-center font-medium">
+            <div>No results</div>
           </div>
         }
         <div className="absolute mt-20 left-[0.8px] w-[calc(100%-2px)] z-10 border-b-[1.6px] border-slate-500"></div>
@@ -148,7 +155,7 @@ export function IbcTable<TableType extends Packet | IdentifiedConnection>
                     rowDetails
                     ? "hover:cursor-pointer"
                     : ""
-                    , "h-12 w-full hover:bg-sky-50 dark:hover:bg-slate-800 transition-colors ease-in-out duration-200 even:bg-bg-light dark:even:bg-bg-dark"
+                    , "h-12 w-full hover:bg-sky-100 dark:hover:bg-sky-950 transition-colors ease-in-out duration-200 even:bg-bg-light dark:even:bg-bg-dark"
                   )}
                   onClick={() => {if (rowDetails) {
                     setSelectedRow(row.original);
