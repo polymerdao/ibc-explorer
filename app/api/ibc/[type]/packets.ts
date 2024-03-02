@@ -119,12 +119,8 @@ export async function getPackets(request: NextRequest, apiUrl: string) {
     const channel = openChannels.find((channel) => {
       return (
         channel.channelId === sourceChannelId &&
-        (channel.portId ===
-          `polyibc.${chainFrom}-proofs.${sourcePortAddress.slice(2)}` ||
-          channel.portId ===
-            `polyibc.${chainFrom}-sim.${sourcePortAddress.slice(2)}` ||
-          channel.portId ===
-            `polyibc.${chainFrom}.${sourcePortAddress.slice(2)}`)
+        channel.portId.startsWith(`polyibc.${chainFrom}`) &&
+        channel.portId.endsWith(sourcePortAddress.slice(2))
       );
     });
 
@@ -179,6 +175,7 @@ export async function getPackets(request: NextRequest, apiUrl: string) {
     )
   ).flat();
 
+  console.log('acklogs');
   for (const ackLog of ackLogs) {
     let [sourcePortAddress, sourceChannelId, sequence] = ackLog.args;
     const key = `${sourcePortAddress}-${ethers.decodeBytes32String(
@@ -238,8 +235,8 @@ export async function getPackets(request: NextRequest, apiUrl: string) {
       return (
         channel.counterparty.channelId ===
           ethers.decodeBytes32String(destChannelId) &&
-        channel.counterparty.portId ===
-          `polyibc.${chainTo}.${receiver.slice(2)}`
+        channel.counterparty.portId.startsWith(`polyibc.${chainTo}`) &&
+        channel.counterparty.portId.endsWith(receiver.slice(2))
       );
     });
 
@@ -278,8 +275,8 @@ export async function getPackets(request: NextRequest, apiUrl: string) {
       return (
         channel.counterparty.channelId ===
           ethers.decodeBytes32String(destChannelId) &&
-        channel.counterparty.portId ===
-          `polyibc.${chainTo}.${destPortAddress.slice(2)}`
+        channel.counterparty.portId.startsWith(`polyibc.${chainTo}`) &&
+        channel.counterparty.portId.endsWith(destPortAddress.slice(2))
       );
     });
 
