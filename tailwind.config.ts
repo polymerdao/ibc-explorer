@@ -15,7 +15,7 @@ const config: Config = {
         'content-bg-light': colors.white,
         'bg-dark': colors.slate[950],
         'fg-dark': colors.slate[50],
-        'content-bg-dark': colors.gray[900],
+        'content-bg-dark': colors.slate[900],
         'primary': colors.emerald,
         'secondary': colors.sky,
       }

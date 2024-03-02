@@ -9,7 +9,7 @@ import {
   getPaginationRowModel,
   useReactTable }
 from "@tanstack/react-table";
-import { IbcTable } from "../../components/ibc-table";
+import { IbcTable } from "components/ibc-table";
 import { Modal } from "components/modal";
 import { RowDetails } from "./row-details";
 import { Packet, PacketStates } from "utils/types/packet";

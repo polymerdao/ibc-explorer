@@ -10,39 +10,39 @@ import {
   useReactTable }
 from "@tanstack/react-table";
 import { IbcTable } from "components/ibc-table";
-import { IdentifiedConnection } from "cosmjs-types/ibc/core/connection/v1/connection";
+import { IdentifiedChannel } from "cosmjs-types/ibc/core/channel/v1/channel";
 import { Modal } from "components/modal";
 
-const columnHelper = createColumnHelper<IdentifiedConnection>();
+const columnHelper = createColumnHelper<IdentifiedChannel>();
 const columns = [
-  columnHelper.accessor('id', {
-    header: 'Connection ID',
-    enableHiding: true
-  }),
-  columnHelper.accessor('clientId', {
-    header: 'Client ID',
+  columnHelper.accessor('channelId', {
+    header: 'Channel ID',
     enableHiding: true
   }),
   columnHelper.accessor('state', {
     header: 'State',
     enableHiding: true
   }),
-  columnHelper.accessor('counterparty.connectionId', {
-    header: 'Counterparty Connection',
+  columnHelper.accessor('portId', {
+    header: 'Port ID',
     enableHiding: true
   }),
-  columnHelper.accessor('counterparty.clientId', {
-    header: 'Counterparty Client',
+  columnHelper.accessor('counterparty.channelId', {
+    header: 'Counterparty Channel',
     enableHiding: true
   }),
-  columnHelper.accessor('delayPeriod', {
-    header: 'Delay Period',
+  columnHelper.accessor('counterparty.portId', {
+    header: 'Counterparty Port',
+    enableHiding: true
+  }),
+  columnHelper.accessor('connectionHops', {
+    header: 'Connection Hops',
     enableHiding: true
   })
 ];
 
 export default function Packets() {
-  const [connections, setConnections] = useState<IdentifiedConnection[]>([]);
+  const [connections, setConnections] = useState<IdentifiedChannel[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
@@ -53,7 +53,7 @@ export default function Packets() {
 
   function loadData() {
     setLoading(true);
-    fetch("/api/ibc/connections")
+    fetch("/api/ibc/channels")
       .then(res => {
         if (!res.ok) {
           console.error(res.status);
@@ -91,12 +91,12 @@ export default function Packets() {
         open={error} setOpen={setError}
         content={<>
           <h1>Error</h1>
-          <p className="mt-2">There was an issue fetching connection data</p>
+          <p className="mt-2">There was an issue fetching channel data</p>
         </>}
       />
 
       <div className="flex flex-row justify-between mr-28">
-        <h1 className="ml-1">Connections</h1>
+        <h1 className="ml-1">Channels</h1>
         <button onClick={() => loadData()} className="btn btn-accent z-10 mr-4">
           Reload
         </button>
