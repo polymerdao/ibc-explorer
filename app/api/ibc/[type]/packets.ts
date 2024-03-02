@@ -42,12 +42,13 @@ export async function getPackets(request: NextRequest, apiUrl: string) {
   const openChannels = channels.filter((channel) => {
     return (
       channel.state.toString() === 'STATE_OPEN' &&
-      ((channel.portId.startsWith(`polyibc.${chainFrom}.`) &&
-        channel.counterparty.portId.startsWith(`polyibc.${chainTo}.`)) ||
-        (channel.portId.startsWith(`polyibc.${chainTo}.`) &&
-          channel.counterparty.portId.startsWith(`polyibc.${chainFrom}.`)))
+      ((channel.portId.startsWith(`polyibc.${chainFrom}`) &&
+        channel.counterparty.portId.startsWith(`polyibc.${chainTo}`)) ||
+        (channel.portId.startsWith(`polyibc.${chainTo}`) &&
+          channel.counterparty.portId.startsWith(`polyibc.${chainFrom}`)))
     );
   });
+
   if (openChannels.length === 0) {
     return [];
   }
@@ -63,9 +64,15 @@ export async function getPackets(request: NextRequest, apiUrl: string) {
   const toBlock = to ? Number(to) : 'latest';
   const chainFromId = chainFrom as CHAIN;
   const chainToId = chainTo as CHAIN;
-  const dispatcherFromAddress =
-    dispatcher ?? CHAIN_CONFIGS[chainFromId].dispatcher;
-  const dispatcherToAddress = CHAIN_CONFIGS[chainToId].dispatcher;
+  const dispatcherFromAddresses = [
+    dispatcher ?? CHAIN_CONFIGS[chainFromId].dispatcher!,
+    CHAIN_CONFIGS[chainFromId].simDispatcher!
+  ];
+
+  const dispatcherToAddresses = [
+    CHAIN_CONFIGS[chainToId].dispatcher,
+    CHAIN_CONFIGS[chainToId].simDispatcher
+  ];
 
   const providerFrom = new CachingJsonRpcProvider(
     CHAIN_CONFIGS[chainFromId].rpc,
@@ -75,22 +82,25 @@ export async function getPackets(request: NextRequest, apiUrl: string) {
     CHAIN_CONFIGS[chainToId].rpc,
     CHAIN_CONFIGS[chainToId].id
   );
-  const contractFrom = new ethers.Contract(
-    dispatcherFromAddress,
-    Abi.abi,
-    providerFrom
-  );
-  const contractTo = new ethers.Contract(
-    dispatcherToAddress,
-    Abi.abi,
-    providerTo
+
+  const contractFroms = dispatcherFromAddresses.map(
+    (addr) => new ethers.Contract(addr!, Abi.abi, providerFrom)
   );
 
-  const sendPacketLogs = (await contractFrom.queryFilter(
-    'SendPacket',
-    fromBlock,
-    toBlock
-  )) as Array<ethers.EventLog>;
+  const contractTos = dispatcherToAddresses.map(
+    (addr) => new ethers.Contract(addr!, Abi.abi, providerTo)
+  );
+
+  const awaitedSendLogs = (await Promise.all(
+    contractFroms.map((contractFrom) => {
+      contractFrom.queryFilter('SendPacket', fromBlock, toBlock) as Promise<
+        ethers.EventLog[]
+      >;
+    })
+  )) as unknown as ethers.EventLog[];
+
+  const sendPacketLogs =
+    awaitedSendLogs.flat() as unknown as Array<ethers.EventLog>;
 
   const unprocessedPacketKeys = new Set<string>();
 
@@ -98,16 +108,24 @@ export async function getPackets(request: NextRequest, apiUrl: string) {
   for (const sendPacketLog of sendPacketLogs) {
     let [sourcePortAddress, sourceChannelId, packet, sequence, timeout, fee] =
       sendPacketLog.args;
+
     sourceChannelId = ethers.decodeBytes32String(sourceChannelId);
     if (!validChannelIds.has(sourceChannelId)) {
       console.log('Skipping packet for channel: ', sourceChannelId);
       continue;
     }
 
+    console.log(packet);
+
     const channel = openChannels.find((channel) => {
       return (
         channel.channelId === sourceChannelId &&
-        channel.portId === `polyibc.${chainFrom}.${sourcePortAddress.slice(2)}`
+        (channel.portId ===
+          `polyibc.${chainFrom}-proofs.${sourcePortAddress.slice(2)}` ||
+          channel.portId ===
+            `polyibc.${chainFrom}-sim.${sourcePortAddress.slice(2)}` ||
+          channel.portId ===
+            `polyibc.${chainFrom}.${sourcePortAddress.slice(2)}`)
       );
     });
 
@@ -150,11 +168,18 @@ export async function getPackets(request: NextRequest, apiUrl: string) {
   // If a packet reached the corresponding state, set it as the state for the packet and move on to the next packet
   // Otherwise move to the next state until SENT state is reached
 
-  const ackLogs = (await contractFrom.queryFilter(
-    'Acknowledgement',
-    fromBlock,
-    toBlock
-  )) as Array<ethers.EventLog>;
+  console.log('acklogs');
+  const awaitedAckLogs = await Promise.all(
+    contractFroms.map((contractFrom) => {
+      contractFrom.queryFilter(
+        'Acknowledgement',
+        fromBlock,
+        toBlock
+      ) as Promise<Array<ethers.EventLog>>;
+    })
+  );
+
+  const ackLogs = awaitedAckLogs.flat() as unknown as Array<ethers.EventLog>;
   console.log('Ack logs: ', ackLogs.length);
 
   for (const ackLog of ackLogs) {
@@ -199,11 +224,16 @@ export async function getPackets(request: NextRequest, apiUrl: string) {
   // It seems that due to short circuiting POLY_ACK_RECV can be distinguished as a separate state so this state is skipped
 
   // TODO: use a more narrow from and to block for dest chain
-  const writeAckLogs = (await contractTo.queryFilter(
-    'WriteAckPacket',
-    1,
-    'latest'
-  )) as Array<ethers.EventLog>;
+  const awaitedWriteAckLogs = await Promise.all(
+    contractTos.map((contractTo) => {
+      contractTo.queryFilter('WriteAckPacket', 1, 'latest') as Promise<
+        Array<ethers.EventLog>
+      >;
+    })
+  );
+
+  const writeAckLogs =
+    awaitedWriteAckLogs.flat() as unknown as Array<ethers.EventLog>;
   for (const writeAckLog of writeAckLogs) {
     const [receiver, destChannelId, sequence, ack] = writeAckLog.args;
 
@@ -234,11 +264,16 @@ export async function getPackets(request: NextRequest, apiUrl: string) {
   }
 
   // TODO: use a more narrow from and to block for dest chain
-  const recvPacketLogs = (await contractTo.queryFilter(
-    'RecvPacket',
-    1,
-    'latest'
-  )) as Array<ethers.EventLog>;
+  const awaitedRecvPacketLogs = await Promise.all(
+    contractTos.map((contractTo) => {
+      contractTo.queryFilter('RecvPacket', 1, 'latest') as Promise<
+        Array<ethers.EventLog>
+      >;
+    })
+  );
+
+  const recvPacketLogs =
+    awaitedRecvPacketLogs.flat() as unknown as Array<ethers.EventLog>;
 
   for (const recvPacketLog of recvPacketLogs) {
     const [destPortAddress, destChannelId, sequence] = recvPacketLog.args;
