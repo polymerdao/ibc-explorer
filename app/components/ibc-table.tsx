@@ -20,19 +20,16 @@ interface IbcTableProps<TableType> {
   rowDetails?: (row: TableType) => JSX.Element
 }
 
-export function IbcTable<TableType extends Packet | IdentifiedConnection>
-  ({ table, loading, rowDetails }: IbcTableProps<TableType>)
-{
+export const IbcTable = <TableType extends Packet | IdentifiedConnection>({ table, loading, rowDetails }: IbcTableProps<TableType>) => {
   const [rowSelected, setRowSelected] = useState<boolean>(false);
   const [selectedRow, setSelectedRow] = useState<Packet | IdentifiedConnection | null>(null);
 
   return (
     <div className="relative -top-[2.64rem]">
-
       {/* Table View Options */}
       <div className="flex flex-row justify-between items-end mb-3">
         <span className="ml-1 text-slate-700 dark:text-slate-300">
-          {table.getFilteredRowModel().rows.length} total results
+          {table.getFilteredRowModel().rows.length} total packets
         </span>
 
         <div className="flex flex-col items-end">
@@ -55,20 +52,20 @@ export function IbcTable<TableType extends Packet | IdentifiedConnection>
                 leave="ease-in duration-200"
                 leaveFrom="transform scale-100 opacity-100"
                 leaveTo="transform scale-95 opacity-0">
-                <Popover.Panel className="absolute z-20 mt-2 right-0">
-                  <div className="bg-content-bg-light dark:bg-content-bg-dark pl-6 pr-9 py-5 border rounded-md border-slate-500">
+                <Popover.Panel className="absolute z-10 mt-2 right-0 w-56">
+                  <div className="bg-content-bg-light dark:bg-content-bg-dark px-6 py-5 border rounded-md border-slate-500">
                     {table.getAllLeafColumns().map(column => { return (
-                      <div key={column.id} className="py-[0.17rem]">
+                      <div key={column.id} className="py-[0.13rem]">
                         <label>
                           <input
-                            className="appearance-none border border-slate-500 bg-transparent rounded-lg w-3 h-3 mr-3 transition-colors ease-in-out duration-150
+                            className="appearance-none border border-slate-500 bg-transparent rounded-lg w-3 h-3 mr-2 transition-colors ease-in-out duration-150
                               checked:bg-emerald-500 checked:border-transparent"
                             {...{
                               type: 'checkbox',
                               checked: column.getIsVisible(),
                               onChange: column.getToggleVisibilityHandler(),
                             }}
-                          />
+                          />{' '}
                           {column.columnDef.header as string}
                         </label>
                       </div>
@@ -98,35 +95,29 @@ export function IbcTable<TableType extends Packet | IdentifiedConnection>
       </div>
 
       { /* Table */ }
-      <div className="w-full border border-slate-500 rounded-md bg-content-bg-light dark:bg-content-bg-dark overflow-y-auto table-height scroll-smooth min-h-72">
-        {loading && 
-          <div className="absolute mt-40 z-10 w-full grid justify-items-center">
-            <div>Loading...</div>
-          </div>
-        }
-        <div className="absolute mt-20 left-[0.8px] w-[calc(100%-2px)] z-10 border-b-[1.6px] border-slate-500"></div>
-        <table
-          className="min-w-full"
-          style={{width: table.getCenterTotalSize()}}>
+      <div className="w-full border border-slate-500 rounded-md bg-content-bg-light dark:bg-content-bg-dark overflow-y-auto table-height scroll-smooth">
+        <div className="absolute top-[181px] left-[0.8px] w-[calc(100%-2px)] border-b-[1.6px] border-slate-500"></div>
+        <table className="w-full">
           <thead className="sticky top-0 h-20 bg-content-bg-light dark:content-bg-dark">
             {table.getHeaderGroups().map(headerGroup => (
               <tr key={headerGroup.id}>
               {headerGroup.headers.map(header => {
                 return (
                   <th key={header.id} colSpan={header.colSpan} 
-                    className="pl-8 pb-2 dark:bg-bg-dark last:pr-6 whitespace-nowrap"
-                    style={{width: header.getSize()}}>
+                    className="pl-8 pb-2 dark:bg-bg-dark min-w-[130px]"
+                    style={{width: header.column.columnDef.size}}>
                     {header.isPlaceholder ? null : (
-                      <div className="h-12 flex flex-col items-start">
+                      <div className="flex flex-col items-start">
                         {flexRender(
                           header.column.columnDef.header,
                           header.getContext()
                         )}
-                        {header.column.getCanFilter() &&
+                        {header.column.getCanFilter() ? (
                           <div>
                             <ColumnFilter column={header.column} table={table} />
                           </div>
-                        }
+                        ) : 
+                          <div className="h-[1.6rem] w-1"></div>}
                       </div>
                     )}
                   </th>
@@ -135,10 +126,12 @@ export function IbcTable<TableType extends Packet | IdentifiedConnection>
               </tr>
             ))}
           </thead>
-          <tbody className="min-h-32">
+          <tbody>
             {loading ? (
               <tr>
-                <td></td>
+                <td colSpan={table.getVisibleLeafColumns.length} className="text-center">
+                  Loading...
+                </td>
               </tr>
             ) : (
               table.getRowModel().rows.map(row => (
@@ -155,10 +148,7 @@ export function IbcTable<TableType extends Packet | IdentifiedConnection>
                     setRowSelected(true); 
                   }}}>
                   {row.getVisibleCells().map(cell => (
-                    <td
-                      key={cell.id}
-                      className="pl-8 last:pr-6"
-                      style={{width: cell.column.getSize()}}>
+                    <td key={cell.id} className="pl-8">
                       {flexRender(cell.column.columnDef.cell, cell.getContext())}
                     </td>
                   ))}
@@ -170,12 +160,11 @@ export function IbcTable<TableType extends Packet | IdentifiedConnection>
       </div>
 
       { /* Row Details Modal */}
-      {rowDetails && 
-        <Modal
-          open={rowSelected} setOpen={setRowSelected}
-          content={rowDetails(selectedRow as TableType)}
-        />
-      }
+      {rowDetails && <Modal
+        open={rowSelected} setOpen={setRowSelected}
+        title="Packet Details"
+        content={rowDetails(selectedRow as TableType)}
+      />}
 
       { /* Pagination */ }
       <div className="flex flex-row justify-center gap-2 mt-4">
@@ -222,7 +211,7 @@ function ColumnFilter({ column, table }: { column: Column<any, any>, table: Tabl
       <select
         value={(columnFilterValue ?? '') as string}
         onChange={e => column.setFilterValue(e.target.value)}
-        className="w-28 border h-6 border-slate-500 shadow-none rounded dark:bg-bg-dark font-medium text-slate-700 dark:text-slate-300"
+        className="w-36 border border-slate-500 shadow-none rounded dark:bg-bg-dark font-medium text-slate-700 dark:text-slate-300"
         aria-label={"Filter by " + column.columnDef.header as string}>
         <option value="">All</option>
         {
@@ -239,7 +228,7 @@ function ColumnFilter({ column, table }: { column: Column<any, any>, table: Tabl
         value={(columnFilterValue ?? '') as string}
         onChange={e => column.setFilterValue(e.target.value)}
         placeholder={`Search...`}
-        className="inpt shadow-none h-6 pl-1 w-36 border border-slate-500 rounded dark:bg-bg-dark font-medium"
+        className="inpt shadow-none w-36 border border-slate-500 shadow rounded dark:bg-bg-dark font-medium"
         aria-label={"Filter by " + column.columnDef.header as string}
       />
     );

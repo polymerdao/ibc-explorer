@@ -149,13 +149,11 @@ export async function GET(request: NextRequest) {
   let destChainContracts: Array<[ethers.Contract, CHAIN]> = [];
   for (const chain in CHAIN_CONFIGS) {
     const chainId = chain as CHAIN;
-    const dispatcherAddresses = [dispatcher] ?? CHAIN_CONFIGS[chainId].dispatchers;
-    for (const dispatcherAddress in dispatcherAddresses) {
-      const provider = new CachingJsonRpcProvider(CHAIN_CONFIGS[chainId].rpc, CHAIN_CONFIGS[chainId].id);
-      destChainProviders[chainId] = provider;
-      const contract = new ethers.Contract(dispatcherAddress, Abi.abi, provider);
-      destChainContracts.push([contract, chainId]);
-    }
+    const dispatcherAddress = CHAIN_CONFIGS[chainId].dispatcher;
+    const provider = new CachingJsonRpcProvider(CHAIN_CONFIGS[chainId].rpc, CHAIN_CONFIGS[chainId].id);
+    destChainProviders[chainId] = provider;
+    const contract = new ethers.Contract(dispatcherAddress, Abi.abi, provider);
+    destChainContracts.push([contract, chainId]);
   }
 
   // Match ack events on Polymer to packets

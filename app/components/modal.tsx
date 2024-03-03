@@ -2,7 +2,7 @@ import { Fragment } from 'react';
 import { Dialog, Transition } from '@headlessui/react';
 import { FiX } from 'react-icons/fi';
 
-export function Modal({open, setOpen, content}: {open: boolean, setOpen: (open: boolean) => void, content: JSX.Element}) {
+export function Modal({open, setOpen, title, content}: {open: boolean, setOpen: (open: boolean) => void, title: string, content: JSX.Element}) {
   return (
 
     <Transition appear show={open} as={Fragment}>
@@ -36,7 +36,10 @@ export function Modal({open, setOpen, content}: {open: boolean, setOpen: (open: 
                   onClick={() => setOpen(false)}>
                   <FiX className="w-6 h-6" />
                 </button>
-                <div className="mb-2 pr-4 text-wrap">
+                <Dialog.Title className="text-2xl font-medium pr-10">
+                  {title}
+                </Dialog.Title>
+                <div className="mt-4 mb-2 pr-4 text-wrap">
                   {content}
                 </div>
               </Dialog.Panel>

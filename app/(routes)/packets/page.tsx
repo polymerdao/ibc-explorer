@@ -25,6 +25,7 @@ const columns = [
   columnHelper.accessor('state', {
     header: 'State',
     cell: props => <span>{ stateToString(props.getValue()) }</span>,
+    enableColumnFilter: false,
     enableHiding: true
   }),
   columnHelper.accessor('sendTx', {
@@ -38,15 +39,13 @@ const columns = [
     cell: props => (
       <div className="flex flex-row justify-between">
         <span>{props.getValue()}</span>
-        <HiMiniArrowLongRight className="mt-1 text-fg-light dark:text-fg-dark" />
+        <HiMiniArrowLongRight className="text-fg-light dark:text-fg-dark" />
       </div>
-    ),
-    minSize: 170
+    )
   }),
   columnHelper.accessor('destChain', {
     header: 'Dest Chain',
-    enableHiding: true,
-    minSize: 170
+    enableHiding: true
   }),
   columnHelper.accessor('sourcePortAddress', {
     header: 'Src Port Address',
@@ -76,8 +75,8 @@ const columns = [
     },
     enableColumnFilter: false,
     enableHiding: true,
-    size: 175,
-    minSize: 175
+    size: 5000,
+    minSize: 1000
   }),
   columnHelper.accessor('fee', {
     header: 'Fee',
@@ -87,8 +86,7 @@ const columns = [
   columnHelper.accessor('sequence', {
     header: 'Sequence',
     enableColumnFilter: false,
-    enableHiding: true,
-    minSize: 120
+    enableHiding: true
   }),
   columnHelper.accessor('rcvTx', {
     header: 'Rcv Tx',
@@ -140,14 +138,27 @@ export default function Packets() {
       });
   }
 
+  // const loadData = () => {
+  //   setLoading(true);
+  //   async function fetchData() {
+  //     const res = await fetch("/api/mock-packets?size=100");
+  //     if (!res.ok) {
+  //       setError(true);
+  //       setLoading(false);
+  //     } else {
+  //       const data = await res.json();
+  //       setPackets(data);
+  //       setLoading(false);
+  //     }
+  //   }
+  //   fetchData();
+  // };
+
   const table = useReactTable({
     data: packets,
     columns,
     state: {
       columnVisibility
-    },
-    defaultColumn: {
-      minSize: 150
     },
     initialState: {
       pagination: {
@@ -162,16 +173,14 @@ export default function Packets() {
 
   return (
     <div className="">
-      <Modal 
+      <Modal
         open={error} setOpen={setError}
-        content={<>
-          <h1>Error</h1>
-          <p className="mt-2">There was an issue fetching packet data</p>
-        </>}
+        title="Error Loading"
+        content={<p>There was an issue fetching packet data</p>}
       />
 
       <div className="flex flex-row justify-between mr-28">
-        <h1 className="ml-1">Packets</h1>
+        <h1 className="font-medium text-2xl ml-1">Packets</h1>
         <button onClick={() => loadData()} className="btn btn-accent z-10 mr-4">
           Reload
         </button>
