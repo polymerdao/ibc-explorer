@@ -25,18 +25,18 @@ export function Modal({open, setOpen, title, content}: {open: boolean, setOpen: 
             <Transition.Child
               as={Fragment}
               enter="ease-out duration-200"
-              enterFrom="opacity-0 -translate-y-6"
+              enterFrom="opacity-0 translate-y-6"
               enterTo="opacity-100 translate-y-0"
               leave="ease-in duration-150"
               leaveFrom="opacity-100 translate-y-0"
-              leaveTo="opacity-0 translate-y-12">
+              leaveTo="opacity-0 translate-y-6">
               <Dialog.Panel
                 className="w-fit max-w-full min-w-36 transform border border-slate-800 dark:border-slate-300 rounded-md bg-bg-light dark:bg-bg-dark p-6 transition-all">
                 <button className="absolute top-0 right-0 m-4"
                   onClick={() => setOpen(false)}>
                   <FiX className="w-6 h-6" />
                 </button>
-                <Dialog.Title className="text-2xl font-medium pr-10">
+                <Dialog.Title className="text-lg font-medium pr-10">
                   {title}
                 </Dialog.Title>
                 <div className="mt-4 mb-2 pr-4 text-wrap">
