@@ -4,7 +4,7 @@
 
 @layer base {
   body {
-    @apply h-screen flex flex-col items-center bg-bg-light text-fg-light antialiased;
+    @apply min-h-screen flex flex-col items-center bg-bg-light text-fg-light antialiased;
   }
 
   @media (prefers-color-scheme: dark) {
@@ -14,21 +14,7 @@
   }
 
   main {
-    @apply flex-1 w-full min-w-0 xl:min-w-[80rem] max-w-screen-xl xl:w-4/5 mx-auto px-4 sm:px-8 pt-6 md:pt-8 xl:pt-10 pb-6;
-  }
-
-  ::-webkit-scrollbar {
-    @apply w-2 h-2 rounded-lg bg-content-bg-light dark:bg-bg-dark;
-  }
-  ::-webkit-scrollbar-track {
-    @apply mt-[81px] rounded-lg bg-bg-light dark:bg-bg-dark;
-  }
-  ::-webkit-scrollbar-thumb {
-    @apply rounded-lg bg-slate-300 dark:bg-slate-500;
-  }
-
-  .table-height {
-    @apply  max-h-[calc(100vh-18rem)] md:max-h-[calc(100vh-19rem)] xl:max-h-[calc(100vh-20rem)];
+    @apply flex-1 w-full min-w-0 xl:min-w-[80rem] max-w-screen-xl xl:w-4/5 mx-auto px-4 sm:px-8 py-12;
   }
 
   h1 {
@@ -40,23 +26,6 @@
   h3 {
     @apply text-lg;
   }
-
-  .btn {
-    @apply px-4 py-2 rounded-md bg-content-bg-light dark:bg-bg-dark dark:hover:bg-content-bg-dark dark:hover:text-white border border-slate-300 dark:border-slate-500 hover:border-transparent transition ease-in-out duration-200 font-medium;
-  }
-
-  .btn-accent {
-    @apply text-sky-600 bg-sky-100 dark:text-sky-100 dark:bg-sky-950 dark:hover:bg-sky-950;
-  }
-
-  .inpt {
-    @apply pl-1
-  }
-  
-  *:focus {
-    @apply outline-none;
-  }
-
 }
 
 @layer utilities {

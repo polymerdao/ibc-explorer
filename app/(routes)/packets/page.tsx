@@ -151,7 +151,7 @@ export default function Packets() {
 
       <div className="flex flex-row justify-between mr-28">
         <h1 className="font-medium text-2xl ml-1">Packets</h1>
-        <button onClick={() => loadData()} className="btn btn-accent z-10 mr-4">
+        <button onClick={() => loadData()} className="bg-content-bg-light dark:bg-content-bg-dark border px-3 py-2 mr-2 rounded z-10">
           Reload
         </button>
       </div>
