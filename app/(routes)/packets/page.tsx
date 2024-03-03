@@ -10,7 +10,6 @@ import {
   useReactTable }
 from "@tanstack/react-table";
 import { PacketTable } from "./table";
-import { Modal } from "components/modal";
 import { Popover } from "@headlessui/react";
 import { FiChevronDown } from "react-icons/fi";
 import { Packet, PacketStates } from "utils/types/packet";
@@ -95,7 +94,6 @@ const columns = [
 export default function Packets() {
   const [packets, setPackets] = useState<Packet[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(false);
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({
     'sequence': false,
     'destPortAddress': false,
@@ -135,12 +133,6 @@ export default function Packets() {
 
   return (
     <div className="w-full">
-
-      <button onClick={() => setError(true)}>
-        Open Modal
-      </button>
-      <Modal open={error} setOpen={setError} />
-
       <h2>Packets:</h2>
 
       <div className="flex flex-row justify-end">
@@ -154,7 +146,7 @@ export default function Packets() {
               Columns
               <FiChevronDown className={open ? "mt-1 ml-1 rotate-180 transform ease-in-out" : "mt-1 ml-1"}/>
             </Popover.Button>
-            <Popover.Panel className="absolute z-10 mt-2">
+            <Popover.Panel className="absolute z-9 mt-2">
               <div className="bg-content-bg-light dark:bg-content-bg-dark p-3 rounded">
                 {table.getAllLeafColumns().map(column => { return (
                   <div key={column.id} className="px-1 py-[0.1rem]">
