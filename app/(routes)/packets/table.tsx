@@ -9,20 +9,13 @@ import { FiChevronDown } from "react-icons/fi";
 import { Modal } from "components/modal";
 import { CHAIN_CONFIGS } from "utils/chains/configs";
 import { Packet } from "utils/types/packet";
-import { IdentifiedConnection } from "cosmjs-types/ibc/core/connection/v1/connection";
 import { classNames } from "utils/functions";
 import { useState } from "react";
 import { Fragment } from 'react';
 
-interface IbcTableProps<TableType> {
-  table: Table<TableType>,
-  loading: boolean,
-  rowDetails?: (row: TableType) => JSX.Element
-}
-
-export const IbcTable = <TableType extends Packet | IdentifiedConnection>({ table, loading, rowDetails }: IbcTableProps<TableType>) => {
+export function PacketTable({ table, loading }: { table: Table<Packet>, loading: boolean }) {
   const [rowSelected, setRowSelected] = useState<boolean>(false);
-  const [selectedRow, setSelectedRow] = useState<Packet | IdentifiedConnection | null>(null);
+  const [selectedRow, setSelectedRow] = useState<Packet | null>(null);
 
   return (
     <div className="relative -top-[2.64rem]">
@@ -39,9 +32,9 @@ export const IbcTable = <TableType extends Packet | IdentifiedConnection>({ tabl
                 Columns
                 <FiChevronDown className={classNames(
                   open
-                  ? "scale-y-[-1]"
-                  : ""
-                  , "mt-[0.28rem] ml-1.5 transition ease-in-out duration-200"
+                    ? 'scale-y-[-1]'
+                    : ''
+                    , "mt-[0.28rem] ml-1.5 transition ease-in-out duration-200"
                 )}/>
               </Popover.Button>
               <Transition
@@ -126,45 +119,64 @@ export const IbcTable = <TableType extends Packet | IdentifiedConnection>({ tabl
               </tr>
             ))}
           </thead>
-          <tbody>
-            {loading ? (
+          {loading ? (
+            <tbody>
               <tr>
                 <td colSpan={table.getVisibleLeafColumns.length} className="text-center">
                   Loading...
                 </td>
               </tr>
-            ) : (
-              table.getRowModel().rows.map(row => (
-                <tr
-                  key={row.id} 
-                  className={classNames(
-                    rowDetails
-                    ? "hover:cursor-pointer"
-                    : ""
-                    , "h-12 w-full hover:bg-sky-50 dark:hover:bg-slate-800 transition-colors ease-in-out duration-200 even:bg-bg-light dark:even:bg-bg-dark"
-                  )}
-                  onClick={() => {if (rowDetails) {
-                    setSelectedRow(row.original);
-                    setRowSelected(true); 
-                  }}}>
-                  {row.getVisibleCells().map(cell => (
-                    <td key={cell.id} className="pl-8">
-                      {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                    </td>
-                  ))}
-                </tr>
-              ))
-            )}
-          </tbody>
+            </tbody>
+          ) : (
+          <tbody>
+            {table.getRowModel().rows.map(row => (
+              <tr
+                key={row.id} 
+                className="h-12 w-full hover:bg-sky-50 dark:hover:bg-slate-800 transition-colors ease-in-out duration-200 even:bg-bg-light dark:even:bg-bg-dark hover:cursor-pointer"
+                onClick={() => {
+                  setSelectedRow(row.original);
+                  setRowSelected(true); 
+                }}>
+                {row.getVisibleCells().map(cell => (
+                  <td key={cell.id} className="pl-8">
+                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                  </td>
+                ))}
+              </tr>
+            ))}
+          </tbody>)}
         </table>
       </div>
 
-      { /* Row Details Modal */}
-      {rowDetails && <Modal
+      { /* Packet Details Modal */}
+      <Modal
         open={rowSelected} setOpen={setRowSelected}
         title="Packet Details"
-        content={rowDetails(selectedRow as TableType)}
-      />}
+        content={<>
+          <div className="flex flex-col gap-2">
+            <div className="flex flex-row justify-between">
+              <h3>Packet ID</h3>
+              <p>{selectedRow?.id}</p>
+            </div>
+            <div className="flex flex-row justify-between">
+              <h3>Source Chain</h3>
+              <p>{selectedRow?.sourceChain}</p>
+            </div>
+            <div className="flex flex-row justify-between">
+              <h3>Destination Chain</h3>
+              <p>{selectedRow?.destChain}</p>
+            </div>
+            <div className="flex flex-row justify-between">
+              <h3>Received Tx</h3>
+              <p>{selectedRow?.rcvTx}</p>
+            </div>
+            <div className="flex flex-row justify-between">
+              <h3>Acknowledged Tx</h3>
+              <p>{selectedRow?.ackTx}</p>
+            </div>
+          </div>
+        </>}
+      />
 
       { /* Pagination */ }
       <div className="flex flex-row justify-center gap-2 mt-4">
