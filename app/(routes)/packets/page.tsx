@@ -37,7 +37,7 @@ const columns = [
     enableHiding: true,
     cell: props => (
       <div className="flex flex-row justify-between">
-        <span>{props.getValue()}</span>
+        <span className="whitespace-nowrap mr-1">{props.getValue()}</span>
         <HiMiniArrowLongRight className="mt-1 text-fg-light dark:text-fg-dark" />
       </div>
     ),
@@ -110,6 +110,7 @@ export default function Packets() {
     'sequence': false,
     'destPortAddress': false,
     'destChannelId': false,
+    'Round-trip': false,
     'fee': false,
     'id': false,
     'rcvTx': false,
@@ -184,8 +185,14 @@ export default function Packets() {
 
 function stateToString(state: PacketStates) {
   switch (state) {
-    case PacketStates.SENT || PacketStates.POLY_RECV: return 'Relaying';
-    case PacketStates.RECV || PacketStates.WRITE_ACK || PacketStates.POLY_WRITE_ACK: return 'Confirming';
-    case PacketStates.ACK: return 'Delivered';
+    case PacketStates.SENT:
+    case PacketStates.POLY_RECV:
+      return 'Relaying'
+    case PacketStates.RECV:
+    case PacketStates.WRITE_ACK:
+    case PacketStates.POLY_WRITE_ACK:
+      return 'Confirming'
+    case PacketStates.ACK:
+      return 'Delivered'
   }
 }
