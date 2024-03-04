@@ -245,18 +245,18 @@ export async function GET(request: NextRequest) {
     }
 
     const key = `0x${channel.portId.split(".")[2]}-${channel.channelId}-${sequence}`;
-    const recvBlock = await destChainProviders[destChain].getBlock(recvPacketEvent.blockNumber);
-
-    if (recvBlock!.timestamp < packets[key].createTime) {
-      continue;
-    }
-
-    if (key in unprocessedPacketKeys) {
-      packets[key].state = PacketStates.RECV;
-      unprocessedPacketKeys.delete(key);
-    }
-
     if (packets[key]) {
+      const recvBlock = await destChainProviders[destChain].getBlock(recvPacketEvent.blockNumber);
+
+      if (recvBlock!.timestamp < packets[key].createTime) {
+        continue;
+      }
+
+      if (key in unprocessedPacketKeys) {
+        packets[key].state = PacketStates.RECV;
+        unprocessedPacketKeys.delete(key);
+      }
+
       packets[key].rcvTx = recvPacketEvent.transactionHash;
     }
   }
