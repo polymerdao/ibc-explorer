@@ -18,7 +18,7 @@ export interface Packet {
 }
 
 export enum PacketStates {
-  SENT,
+  SENT = 1,
   ACK,
   POLY_WRITE_ACK,
   WRITE_ACK,

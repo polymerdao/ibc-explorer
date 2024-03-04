@@ -30,6 +30,12 @@
     @apply rounded-lg bg-bg-light dark:bg-bg-dark;
   }
 
+  input[type="number"]::-webkit-inner-spin-button,
+  input[type="number"]::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+
   .table-height {
     @apply  max-h-[calc(100vh-19.2rem)] md:max-h-[calc(100vh-19.7rem)] xl:max-h-[calc(100vh-20.3rem)];
   }

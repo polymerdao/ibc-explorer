@@ -5,7 +5,7 @@ import {
 } from "@tanstack/react-table";
 import { Popover } from "@headlessui/react";
 import { Transition } from "@headlessui/react";
-import { FiChevronDown } from "react-icons/fi";
+import { FiChevronDown, FiChevronLeft, FiChevronRight } from "react-icons/fi";
 import { Modal } from "components/modal";
 import { CHAIN_CONFIGS } from "utils/chains/configs";
 import { Packet } from "utils/types/packet";
@@ -121,7 +121,12 @@ export function IbcTable<TableType extends Packet | Client | IdentifiedChannel |
               {headerGroup.headers.map(header => {
                 return (
                   <th key={header.id} colSpan={header.colSpan} 
-                    className="pl-8 pb-2 dark:bg-bg-dark last:pr-6 whitespace-nowrap"
+                    className={classNames(
+                      header.id === 'destChain'
+                      ? "pl-4"
+                      : "pl-8"
+                      , "pb-2 dark:bg-bg-dark last:pr-6 whitespace-nowrap"
+                    )}
                     style={{width: header.getSize()}}>
                     {header.isPlaceholder ? null : (
                       <div className="h-12 flex flex-col items-start">
@@ -164,7 +169,12 @@ export function IbcTable<TableType extends Packet | Client | IdentifiedChannel |
                   {row.getVisibleCells().map(cell => (
                     <td
                       key={cell.id}
-                      className="pl-8 last:pr-6"
+                      className={classNames(
+                        cell.column.id === 'destChain'
+                        ? "pl-4"
+                        : "pl-8"
+                        , "last:pr-6"
+                      )}
                       style={{width: cell.column.getSize()}}>
                       {flexRender(cell.column.columnDef.cell, cell.getContext())}
                     </td>
@@ -187,17 +197,17 @@ export function IbcTable<TableType extends Packet | Client | IdentifiedChannel |
       { /* Pagination */ }
       <div className="flex flex-row justify-center gap-2 mt-4">
         <button
-          className="border rounded p-1"
+          className="rounded p-2 disabled:opacity-75 enabled:hover:bg-content-bg-light enabled:dark:hover:bg-content-bg-dark transition-colors ease-in-out duration-200"
           onClick={() => table.previousPage()}
           disabled={!table.getCanPreviousPage()}>
-          {'<'}
+          <FiChevronLeft className="w-5 h-5"/>
         </button>
         <span className="flex items-center gap-1">
           Page
           <input
             type="number"
             defaultValue={table.getState().pagination.pageIndex + 1}
-            className="border px-1 rounded w-16 dark:bg-bg-dark w-12 bg-transparent text-center"
+            className="border border-slate-500/50 px-1 py-0.5 rounded w-[3.3rem] text-center mx-1 bg-content-bg-light dark:bg-content-bg-dark"
             aria-label="Go to page"
             onChange={e => {
               const page = e.target.value ? Number(e.target.value) - 1 : 0
@@ -207,10 +217,10 @@ export function IbcTable<TableType extends Packet | Client | IdentifiedChannel |
           of {table.getPageCount()}
         </span>
         <button
-          className="border rounded p-1"
+          className="rounded p-2 disabled:opacity-75 enabled:hover:bg-content-bg-light enabled:dark:hover:bg-content-bg-dark transition-colors ease-in-out duration-200"
           onClick={() => table.nextPage()}
           disabled={!table.getCanNextPage()}>
-          {'>'}
+          <FiChevronRight className="w-5 h-5"/>
         </button>
       </div>
     </div>
@@ -229,7 +239,7 @@ function ColumnFilter({ column, table }: { column: Column<any, any>, table: Tabl
       <select
         value={(columnFilterValue ?? '') as string}
         onChange={e => column.setFilterValue(e.target.value)}
-        className="w-28 border h-6 border-slate-500 shadow-none rounded dark:bg-bg-dark font-medium text-slate-700 dark:text-slate-300"
+        className="w-28 border h-6 border-slate-500 shadow-none rounded dark:bg-bg-dark font-medium text-slate-700 dark:text-slate-300 dark:bg-content-bg-dark"
         aria-label={"Filter by " + column.columnDef.header as string}>
         <option value="">All</option>
         {
@@ -246,7 +256,7 @@ function ColumnFilter({ column, table }: { column: Column<any, any>, table: Tabl
         value={(columnFilterValue ?? '') as string}
         onChange={e => column.setFilterValue(e.target.value)}
         placeholder={`Search...`}
-        className="inpt shadow-none h-6 pl-1 w-36 border border-slate-500 rounded dark:bg-bg-dark font-medium"
+        className="inpt shadow-none h-6 pl-1 w-36 border border-slate-500 rounded dark:bg-bg-dark font-medium dark:bg-content-bg-dark"
         aria-label={"Filter by " + column.columnDef.header as string}
       />
     );
