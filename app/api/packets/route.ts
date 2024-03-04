@@ -20,7 +20,7 @@ export async function GET(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams;
   const from = searchParams.get('from');
   const to = searchParams.get('to')
-  const dispatcher = searchParams.get('dispatcher');
+  // const dispatcher = searchParams.get('dispatcher');
 
   if (!from) {
     return NextResponse.error();
@@ -32,14 +32,14 @@ export async function GET(request: NextRequest) {
   }
   const channels = channelsResponse as Array<IdentifiedChannel>;
   const openChannels = channels.filter((channel) => {
-    return channel.state.toString() === "STATE_OPEN"
-      && (channel.portId.startsWith(`polyibc.`) && channel.counterparty.portId.startsWith(`polyibc.`));
+    return (
+      channel.portId.startsWith(`polyibc.`) &&
+      channel.counterparty.portId.startsWith(`polyibc.`)
+    );
   })
   if (openChannels.length === 0) {
     return NextResponse.json([]);
   }
-
-  const tmClient = await GetTmClient();
 
   const validChannelIds = new Set<string>();
   openChannels.forEach((channel) => {
@@ -55,8 +55,8 @@ export async function GET(request: NextRequest) {
   let srcChainContracts: Array<[ethers.Contract, CHAIN]> = [];
   for (const chain in CHAIN_CONFIGS) {
     const chainId = chain as CHAIN;
-    const dispatcherAddresses = [dispatcher] ?? CHAIN_CONFIGS[chainId].dispatchers;
-    for (const dispatcherAddress in dispatcherAddresses) {
+    const dispatcherAddresses = CHAIN_CONFIGS[chainId].dispatchers;
+    for (const dispatcherAddress of dispatcherAddresses) {
       const provider = new CachingJsonRpcProvider(CHAIN_CONFIGS[chainId].rpc, CHAIN_CONFIGS[chainId].id);
       srcChainProviders[chainId] = provider;
       const contract = new ethers.Contract(dispatcherAddress, Abi.abi, provider);
@@ -81,7 +81,12 @@ export async function GET(request: NextRequest) {
     }
 
     const channel = openChannels.find((channel) => {
-      return channel.channelId === srcChannelId && channel.portId === `polyibc.${srcChain}.${srcPortAddress.slice(2)}`;
+      // return channel.channelId === srcChannelId && channel.portId === `polyibc.${srcChain}.${srcPortAddress.slice(2)}`;
+      return (
+        channel.channelId === srcChannelId &&
+        channel.portId.startsWith(`polyibc.${srcChain}`) &&
+        channel.portId.endsWith(srcPortAddress.slice(2))
+      );
     })
     if (!channel) {
       console.warn("No channel found for packet: ", srcChannelId, srcPortAddress);
@@ -155,14 +160,16 @@ export async function GET(request: NextRequest) {
   let destChainContracts: Array<[ethers.Contract, CHAIN]> = [];
   for (const chain in CHAIN_CONFIGS) {
     const chainId = chain as CHAIN;
-    const dispatcherAddresses = [dispatcher] ?? CHAIN_CONFIGS[chainId].dispatchers;
-    for (const dispatcherAddress in dispatcherAddresses) {
+    const dispatcherAddresses = CHAIN_CONFIGS[chainId].dispatchers;
+    for (const dispatcherAddress of dispatcherAddresses) {
       const provider = new CachingJsonRpcProvider(CHAIN_CONFIGS[chainId].rpc, CHAIN_CONFIGS[chainId].id);
       destChainProviders[chainId] = provider;
       const contract = new ethers.Contract(dispatcherAddress, Abi.abi, provider);
       destChainContracts.push([contract, chainId]);
     }
   }
+
+  const tmClient = await GetTmClient();
 
   // Match ack events on Polymer to packets
   for (const key of unprocessedPacketKeys) {
@@ -195,7 +202,11 @@ export async function GET(request: NextRequest) {
     const [receiver, destChannelId, sequence, ack] = writeAckEvent.args;
 
     const channel = openChannels.find((channel) => {
-      return channel.counterparty.channelId === ethers.decodeBytes32String(destChannelId) && channel.counterparty.portId === `polyibc.${destChain}.${receiver.slice(2)}`;
+      return (
+        channel.counterparty.channelId === ethers.decodeBytes32String(destChannelId) && 
+        channel.counterparty.portId.startsWith(`polyibc.${destChain}`) &&
+        channel.counterparty.portId.endsWith(receiver.slice(2))
+      );
     })
 
     if (!channel) {
