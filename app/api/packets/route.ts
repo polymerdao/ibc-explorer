@@ -20,7 +20,6 @@ export async function GET(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams;
   const from = searchParams.get('from');
   const to = searchParams.get('to')
-  // const dispatcher = searchParams.get('dispatcher');
 
   if (!from) {
     return NextResponse.error();
