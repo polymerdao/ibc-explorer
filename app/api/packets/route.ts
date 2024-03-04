@@ -183,7 +183,7 @@ export async function GET(request: NextRequest) {
         unprocessedPacketKeys.delete(key);
       }
     } catch (e) {
-      return NextResponse.error();
+      continue;
     }
   }
 
@@ -234,7 +234,11 @@ export async function GET(request: NextRequest) {
     const [destPortAddress, destChannelId, sequence] = recvPacketEvent.args;
 
     const channel = openChannels.find((channel) => {
-      return channel.counterparty.channelId === ethers.decodeBytes32String(destChannelId) && channel.counterparty.portId === `polyibc.${destChain}.${destPortAddress.slice(2)}`;
+      return (
+        channel.counterparty.channelId === ethers.decodeBytes32String(destChannelId) &&
+        channel.counterparty.portId.startsWith(`polyibc.${destChain}`) &&
+        channel.counterparty.portId.endsWith(destPortAddress.slice(2))
+      )
     })
 
     if (!channel) {
@@ -271,7 +275,7 @@ export async function GET(request: NextRequest) {
         unprocessedPacketKeys.delete(key);
       }
     } catch (e) {
-      return NextResponse.error();
+      continue;
     }
   }
 
