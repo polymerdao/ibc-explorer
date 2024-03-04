@@ -73,6 +73,9 @@ export default function Packets() {
 
   const table = useReactTable({
     data: connections,
+    state: {
+      columnVisibility
+    },
     columns,
     initialState: {
       pagination: {

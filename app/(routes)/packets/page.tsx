@@ -122,7 +122,7 @@ export default function Packets() {
 
   function loadData() {
     setLoading(true);
-    fetch("/api/mock-packets?size=100")
+    fetch("/api/packets?from=1")
       .then(res => {
         if (!res.ok) {
           console.error(res.status);
