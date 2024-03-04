@@ -80,7 +80,6 @@ export async function GET(request: NextRequest) {
     }
 
     const channel = openChannels.find((channel) => {
-      // return channel.channelId === srcChannelId && channel.portId === `polyibc.${srcChain}.${srcPortAddress.slice(2)}`;
       return (
         channel.channelId === srcChannelId &&
         channel.portId.startsWith(`polyibc.${srcChain}`) &&
