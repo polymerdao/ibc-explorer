@@ -7,20 +7,25 @@ import {
   getCoreRowModel,
   getFilteredRowModel,
   getPaginationRowModel,
+  getSortedRowModel,
+  SortingState,
   useReactTable }
 from "@tanstack/react-table";
 import { IbcTable } from "components/ibc-table";
-import { IdentifiedChannel } from "cosmjs-types/ibc/core/channel/v1/channel";
+import { IdentifiedChannel, State } from "cosmjs-types/ibc/core/channel/v1/channel";
 import { Modal } from "components/modal";
 
 const columnHelper = createColumnHelper<IdentifiedChannel>();
 const columns = [
   columnHelper.accessor('channelId', {
     header: 'Channel ID',
-    enableHiding: true
+    enableHiding: true,
+    enableSorting: true,
+    sortingFn: 'alphanumeric'
   }),
   columnHelper.accessor('state', {
     header: 'State',
+    cell: props => <span>{ stateToString(props.getValue()) }</span>,
     enableHiding: true
   }),
   columnHelper.accessor('portId', {
@@ -46,6 +51,10 @@ export default function Packets() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
+  const [sorting, setSorting] = useState<SortingState>([{
+    id: 'channelId',
+    desc: true
+  }]);
 
   useEffect(() => {
     loadData();
@@ -74,7 +83,8 @@ export default function Packets() {
   const table = useReactTable({
     data: connections,
     state: {
-      columnVisibility
+      columnVisibility,
+      sorting
     },
     columns,
     initialState: {
@@ -84,6 +94,7 @@ export default function Packets() {
     },
     onColumnVisibilityChange: setColumnVisibility,
     getCoreRowModel: getCoreRowModel(),
+    getSortedRowModel: getSortedRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
     getPaginationRowModel: getPaginationRowModel()
   });
@@ -108,4 +119,19 @@ export default function Packets() {
       <IbcTable {...{table, loading}} />
     </div>
   );
+}
+
+function stateToString(state: State) {
+  const stringState = state.toString();
+  switch (stringState) {
+    case "STATE_OPEN": return 'Open'
+    case "STATE_CLOSED": return 'Closed'
+    case "STATE_INIT": return 'Initialized'
+    case "STATE_TRYOPEN":
+    case "UNRECOGNIZED":
+    case "STATE_UNINITIALIZED_UNSPECIFIED":
+      return 'Pending'
+    default:
+      return 'Pending'
+  }
 }
