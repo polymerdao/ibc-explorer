@@ -7,17 +7,22 @@ import {
   getCoreRowModel,
   getFilteredRowModel,
   getPaginationRowModel,
+  getSortedRowModel,
+  SortingState,
   useReactTable }
 from "@tanstack/react-table";
 import { IbcTable } from "components/ibc-table";
-import { IdentifiedConnection } from "cosmjs-types/ibc/core/connection/v1/connection";
+import { IdentifiedConnection, State } from "cosmjs-types/ibc/core/connection/v1/connection";
 import { Modal } from "components/modal";
 
 const columnHelper = createColumnHelper<IdentifiedConnection>();
 const columns = [
   columnHelper.accessor('id', {
     header: 'Connection ID',
-    enableHiding: true
+    cell: props => <span className="whitespace-nowrap">{props.getValue()}</span>,
+    enableHiding: true,
+    enableSorting: true,
+    sortingFn: 'alphanumeric'
   }),
   columnHelper.accessor('clientId', {
     header: 'Client ID',
@@ -25,6 +30,7 @@ const columns = [
   }),
   columnHelper.accessor('state', {
     header: 'State',
+    cell: props => <span>{ stateToString(props.getValue()) }</span>,
     enableHiding: true
   }),
   columnHelper.accessor('counterparty.connectionId', {
@@ -46,6 +52,10 @@ export default function Packets() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
+  const [sorting, setSorting] = useState<SortingState>([{
+    id: 'id',
+    desc: true
+  }]);
 
   useEffect(() => {
     loadData();
@@ -75,7 +85,8 @@ export default function Packets() {
     data: connections,
     columns,
     state: {
-      columnVisibility
+      columnVisibility,
+      sorting
     },
     initialState: {
       pagination: {
@@ -85,6 +96,7 @@ export default function Packets() {
     onColumnVisibilityChange: setColumnVisibility,
     getCoreRowModel: getCoreRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
+    getSortedRowModel: getSortedRowModel(),
     getPaginationRowModel: getPaginationRowModel()
   });
 
@@ -108,4 +120,17 @@ export default function Packets() {
       <IbcTable {...{table, loading}} />
     </div>
   );
+}
+
+function stateToString(state: State) {
+  const stringState = state.toString();
+  switch (stringState) {
+    case "STATE_OPEN": return 'Open'
+    case "STATE_INIT": return 'Initialized'
+    case "STATE_TRYOPEN":
+    case "STATE_UNINITIALIZED_UNSPECIFIED":
+      return 'Pending'
+    default:
+      return 'Pending'
+  }
 }
