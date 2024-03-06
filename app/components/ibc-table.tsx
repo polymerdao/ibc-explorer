@@ -3,8 +3,11 @@ import {
   flexRender,
   Column,
 } from "@tanstack/react-table";
-import { Popover } from "@headlessui/react";
-import { Transition } from "@headlessui/react";
+import {
+  Transition,
+  Popover,
+  Switch
+} from "@headlessui/react";
 import { FiChevronDown, FiChevronLeft, FiChevronRight } from "react-icons/fi";
 import { Modal } from "components/modal";
 import { CHAIN_CONFIGS } from "utils/chains/configs";
@@ -27,6 +30,7 @@ export function IbcTable<TableType extends Packet | Client | IdentifiedChannel |
 {
   const [rowSelected, setRowSelected] = useState<boolean>(false);
   const [selectedRow, setSelectedRow] = useState<TableType | null>(null);
+  const [showSims, setShowSims] = useState<boolean>(true);
 
   return (
     <div className="relative -top-[2.64rem]">
@@ -155,13 +159,19 @@ export function IbcTable<TableType extends Packet | Client | IdentifiedChannel |
             ) : (
               table.getRowModel().rows.map(row => (
                 <tr
-                  key={row.id} 
-                  className={classNames(
-                    rowDetails
-                    ? "hover:cursor-pointer"
-                    : ""
-                    , "h-12 w-full hover:bg-sky-100 dark:hover:bg-sky-950 transition-colors ease-in-out duration-200 even:bg-bg-light dark:even:bg-bg-dark"
-                  )}
+                  key={row.id}
+                  className={
+                  'h-12 w-full hover:bg-sky-100 dark:hover:bg-sky-950 transition-colors ease-in-out duration-200 even:bg-bg-light dark:even:bg-bg-dark ' +
+                  `${rowDetails ? 'hover:cursor-pointer ' : ''}` +
+                  `${row.getAllCells().some(cell => {
+                    if (typeof cell.renderValue() === 'string') {
+                      return (cell.renderValue() as string).toLowerCase().includes('sim');
+                    } else {
+                      return false;
+                    }
+                  })
+                    ? 'bg-orange-50 even:bg-orange-100 dark:bg-content-bg-dark dark:even-bg-bg-dark dark:text-orange-300 ' : ''}`
+                  }
                   onClick={() => {if (rowDetails) {
                     setSelectedRow(row.original);
                     setRowSelected(true); 
