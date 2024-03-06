@@ -31,6 +31,13 @@ export function RowDetails(selectedRow: Packet) {
           <p>{selectedRow.destChain}</p>
         </div>
         <Divider />
+
+        <div className="flex flex-row justify-between">
+          <p className="mr-8 font-semibold">Time Created</p>
+          <p>{new Date(selectedRow.createTime*1000).toLocaleString()}</p>
+        </div>
+
+        <Divider />
         <div className="flex flex-row justify-between">
           <p className="mr-8 font-semibold">Send Tx</p>
           <Link href={sourceUrl + selectedRow.sendTx} target="_blank"
@@ -53,7 +60,7 @@ export function RowDetails(selectedRow: Packet) {
         <Divider />
         <div className="flex flex-row justify-between">
           <p className="mr-8 font-semibold">Ack Tx</p>
-          {selectedRow.rcvTx ? (
+          {selectedRow.ackTx ? (
             <Link href={sourceUrl + selectedRow.ackTx} target="_blank"
               className="text-sky-600 dark:text-sky-400 whitespace-nowrap flex flex-row">
               {selectedRow.ackTx} <FiExternalLink className="mt-0.5 ml-0.5"/>
