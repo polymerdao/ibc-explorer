@@ -7,6 +7,8 @@ import {
   getCoreRowModel,
   getFilteredRowModel,
   getPaginationRowModel,
+  getSortedRowModel,
+  SortingState,
   useReactTable }
 from "@tanstack/react-table";
 import { IbcTable } from "components/ibc-table";
@@ -48,6 +50,13 @@ const columns = [
     enableHiding: true,
     minSize: 170
   }),
+  columnHelper.accessor('createTime', {
+    header: 'Create Time',
+    enableHiding: true,
+    cell: props => new Date(props.getValue()*1000).toLocaleString(),
+    enableSorting: true,
+    sortingFn: 'alphanumeric'
+  }),
   columnHelper.accessor('sourcePortAddress', {
     header: 'Src Port Address',
     cell: props => hideMiddleChars(props.getValue()),
@@ -71,8 +80,11 @@ const columns = [
     cell: props => {
       if (props.getValue() < 0) {
         return <span>...</span>;
+      } else if (props.getValue() < 300) {
+        return <span>{Math.round(props.getValue())} s</span>;
+      } else {
+        return <span>{Math.round(props.getValue() / 60)} m</span>;
       }
-      return <span>{Math.round(props.getValue() / 1000)} s</span>;
     },
     enableColumnFilter: false,
     enableHiding: true,
@@ -116,6 +128,10 @@ export default function Packets() {
     'rcvTx': false,
     'ackTx': false
   });
+  const [sorting, setSorting] = useState<SortingState>([{
+    id: 'createTime',
+    desc: true
+  }]);
 
   useEffect(() => {
     loadData();
@@ -145,7 +161,8 @@ export default function Packets() {
     data: packets,
     columns,
     state: {
-      columnVisibility
+      columnVisibility,
+      sorting
     },
     defaultColumn: {
       minSize: 150
@@ -158,6 +175,7 @@ export default function Packets() {
     onColumnVisibilityChange: setColumnVisibility,
     getCoreRowModel: getCoreRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
+    getSortedRowModel: getSortedRowModel(),
     getPaginationRowModel: getPaginationRowModel()
   });
 
