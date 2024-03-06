@@ -3,11 +3,7 @@ import {
   flexRender,
   Column,
 } from "@tanstack/react-table";
-import {
-  Transition,
-  Popover,
-  Switch
-} from "@headlessui/react";
+import { Transition, Popover } from "@headlessui/react";
 import { FiChevronDown, FiChevronLeft, FiChevronRight } from "react-icons/fi";
 import { Modal } from "components/modal";
 import { CHAIN_CONFIGS } from "utils/chains/configs";
@@ -30,7 +26,6 @@ export function IbcTable<TableType extends Packet | Client | IdentifiedChannel |
 {
   const [rowSelected, setRowSelected] = useState<boolean>(false);
   const [selectedRow, setSelectedRow] = useState<TableType | null>(null);
-  const [showSims, setShowSims] = useState<boolean>(true);
 
   return (
     <div className="relative -top-[2.64rem]">
