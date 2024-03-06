@@ -50,13 +50,6 @@ const columns = [
     enableHiding: true,
     minSize: 170
   }),
-  columnHelper.accessor('createTime', {
-    header: 'Create Time',
-    enableHiding: true,
-    cell: props => new Date(props.getValue()*1000).toLocaleString(),
-    enableSorting: true,
-    sortingFn: 'alphanumeric'
-  }),
   columnHelper.accessor('sourcePortAddress', {
     header: 'Src Port Address',
     cell: props => hideMiddleChars(props.getValue()),
@@ -111,6 +104,13 @@ const columns = [
     header: 'Ack Tx',
     cell: props => hideMiddleChars(props.getValue() ?? ''),
     enableHiding: true
+  }),
+  columnHelper.accessor('createTime', {
+    header: 'Create Time',
+    enableHiding: true,
+    cell: props => new Date(props.getValue()*1000).toLocaleString(),
+    enableSorting: true,
+    sortingFn: 'alphanumeric'
   })
 ];
 
@@ -126,7 +126,8 @@ export default function Packets() {
     'fee': false,
     'id': false,
     'rcvTx': false,
-    'ackTx': false
+    'ackTx': false,
+    'createTime': false
   });
   const [sorting, setSorting] = useState<SortingState>([{
     id: 'createTime',
