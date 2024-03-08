@@ -1,12 +1,12 @@
-import { ethers } from "ethers";
-import { NextRequest, NextResponse } from "next/server";
-import { Packet, PacketStates } from "utils/types/packet";
-import { CHAIN, CHAIN_CONFIGS } from "utils/chains/configs";
-import { CachingJsonRpcProvider } from "api/utils/provider-cache";
-import { GetTmClient } from "api/utils/cosmos";
-import { IdentifiedChannel } from "cosmjs-types/ibc/core/channel/v1/channel";
-import { QueryChannelsResponse } from "cosmjs-types/ibc/core/channel/v1/query";
-import Abi from "utils/dispatcher.json";
+import { ethers } from 'ethers';
+import { NextRequest, NextResponse } from 'next/server';
+import { Packet, PacketStates } from 'utils/types/packet';
+import { CHAIN, CHAIN_CONFIGS } from 'utils/chains/configs';
+import { CachingJsonRpcProvider } from 'api/utils/provider-cache';
+import { GetTmClient } from 'api/utils/cosmos';
+import { IdentifiedChannel } from 'cosmjs-types/ibc/core/channel/v1/channel';
+import { QueryChannelsResponse } from 'cosmjs-types/ibc/core/channel/v1/query';
+import Abi from 'utils/dispatcher.json';
 
 export const dynamic = 'force-dynamic' // defaults to auto
 
@@ -69,26 +69,24 @@ export async function GET(request: NextRequest) {
   const unprocessedPacketKeys = new Set<string>();
   const packets: Record<string, Packet> = {};
 
-  for (const sendLog of sendLogs) {
+  async function processSendLog(sendLog: [ethers.EventLog, CHAIN]) {
     const [sendEvent, srcChain] = sendLog;
     let [srcPortAddress, srcChannelId, packet, sequence, timeout, fee] = sendEvent.args;
     srcChannelId = ethers.decodeBytes32String(srcChannelId);
 
     if (!validChannelIds.has(srcChannelId)) {
       console.log("Skipping packet for channel: ", srcChannelId);
-      continue;
+      return;
     }
 
-    const channel = openChannels.find((channel) => {
-      return (
-        channel.channelId === srcChannelId &&
-        channel.portId.startsWith(`polyibc.${srcChain}`) &&
-        channel.portId.endsWith(srcPortAddress.slice(2))
-      );
-    })
+    const channel = openChannels.find(channel => (
+      channel.channelId === srcChannelId &&
+      channel.portId.startsWith(`polyibc.${srcChain}`) &&
+      channel.portId.endsWith(srcPortAddress.slice(2))
+    ));
     if (!channel) {
       console.warn("No channel found for packet: ", srcChannelId, srcPortAddress);
-      continue;
+      return;
     }
 
     const key = `${srcPortAddress}-${srcChannelId}-${sequence}`;
@@ -107,11 +105,12 @@ export async function GET(request: NextRequest) {
       state: PacketStates.SENT,
       createTime: srcBlock!.timestamp,
       sendTx: sendEvent.transactionHash,
-      sourceChain: channel.portId.split(".")[1] as CHAIN,
-      destChain: channel.counterparty.portId.split(".")[1] as CHAIN,
+      sourceChain: channel.portId.split(".")[1],
+      destChain: channel.counterparty.portId.split(".")[1],
     };
     unprocessedPacketKeys.add(key);
   }
+  await Promise.allSettled(sendLogs.map(processSendLog))
 
   /*
   ** Find the state of each packet
@@ -126,32 +125,45 @@ export async function GET(request: NextRequest) {
   */
 
   // Start by searching for ack events on the source chains
-  let ackLogs: Array<[ethers.EventLog, CHAIN]> = [];
-  for (const srcChainContract of srcChainContracts) {
-    const [contract, chain] = srcChainContract;
+  const ackLogsPromises = srcChainContracts.map(async ([contract, chain]) => {
     const newAckLogs = (await contract.queryFilter('Acknowledgement', fromBlock, toBlock)) as Array<ethers.EventLog>;
-    ackLogs = ackLogs.concat(newAckLogs.map((eventLog) => [eventLog, chain]));
+    return newAckLogs.map((eventLog) => [eventLog, chain] as [ethers.EventLog, CHAIN]);
+  });
+
+  const ackLogsResults = await Promise.allSettled(ackLogsPromises);
+  let ackLogs: Array<[ethers.EventLog, CHAIN]> = [];
+
+  for (const result of ackLogsResults) {
+    if (result.status === 'fulfilled') {
+      ackLogs = ackLogs.concat(result.value);
+    }
   }
 
-  for (const ackLog of ackLogs) {
+
+  async function processAckLog(ackLog: [ethers.EventLog, CHAIN]) {
     const [ackEvent, srcChain] = ackLog;
     let [srcPortAddress, srcChannelId, sequence] = ackEvent.args;
     const key = `${srcPortAddress}-${ethers.decodeBytes32String(srcChannelId)}-${sequence}`;
-    if (packets[key]) {
-      const srcProvider = srcChainProviders[srcChain];
-      const srcBlock = await srcProvider.getBlock(ackEvent.blockNumber);
-      if (srcBlock!.timestamp < packets[key].createTime) {
-        continue;
-      }
 
-      packets[key].endTime = srcBlock!.timestamp;
-      packets[key].state = PacketStates.ACK;
-      packets[key].ackTx = ackEvent.transactionHash;
-      unprocessedPacketKeys.delete(key);
-    } else {
+    if (!packets[key]) {
       console.log("No packet found for ack: ", key);
+      return;
     }
+
+    const srcProvider = srcChainProviders[srcChain];
+    const srcBlock = await srcProvider.getBlock(ackEvent.blockNumber);
+    if (srcBlock!.timestamp < packets[key].createTime) {
+      return;
+    }
+
+    packets[key].endTime = srcBlock!.timestamp;
+    packets[key].state = PacketStates.ACK;
+    packets[key].ackTx = ackEvent.transactionHash;
+    unprocessedPacketKeys.delete(key);
   }
+
+  // Wait for all promises to settle
+  await Promise.allSettled(ackLogs.map(processAckLog));
 
   // Set up providers and contracts to interact with the destination chains
   let destChainProviders: Record<CHAIN, CachingJsonRpcProvider> = {} as Record<CHAIN, CachingJsonRpcProvider>;
@@ -170,29 +182,33 @@ export async function GET(request: NextRequest) {
   const tmClient = await GetTmClient();
 
   // Match ack events on Polymer to packets
-  for (const key of unprocessedPacketKeys) {
+  const processPacket = async (key: string) => {
     const packet = packets[key];
 
     try {
       const ack = await tmClient.ibc.channel.packetAcknowledgement(packet.destPortAddress, packet.destChannelId, Number(packet.sequence));
-      console.log("Ack: ", ack);
       if (ack.acknowledgement) {
         packet.state = PacketStates.POLY_WRITE_ACK;
         unprocessedPacketKeys.delete(key);
       }
     } catch (e) {
-      continue;
     }
-  }
+  };
+
+  await Promise.allSettled(Array.from(unprocessedPacketKeys).map(processPacket));
 
   // It seems that due to short circuiting POLY_ACK_RECV can't be distinguished as a separate state so this state is skipped
 
-  // Match any write ack events on destination chains to packets
+  const writeAckLogsPromises = destChainContracts.map(async ([destContract, destChain]) => {
+    const newWriteAckLogs = await destContract.queryFilter('WriteAckPacket', 1, "latest");
+    return newWriteAckLogs.map((eventLog) => [eventLog, destChain] as [ethers.EventLog, CHAIN]);
+  });
+
   let writeAckLogs: Array<[ethers.EventLog, CHAIN]> = [];
-  for (const destChainContract of destChainContracts) {
-    const [destContract, destChain] = destChainContract;
-    const newWriteAckLogs = (await destContract.queryFilter('WriteAckPacket', 1, "latest")) as Array<ethers.EventLog>;
-    writeAckLogs = writeAckLogs.concat(newWriteAckLogs.map((eventLog) => [eventLog, destChain]));
+  for (const result of await Promise.allSettled(writeAckLogsPromises)) {
+    if (result.status === 'fulfilled') {
+      writeAckLogs = writeAckLogs.concat(result.value);
+    }
   }
 
   for (const writeAckLog of writeAckLogs) {
@@ -220,14 +236,20 @@ export async function GET(request: NextRequest) {
   }
 
   // Match any recv packet events on destination chains to packets
-  let recvPacketLogs: Array<[ethers.EventLog, CHAIN]> = [];
-  for (const destChainContract of destChainContracts) {
+  const recvPacketPromises = destChainContracts.map(async (destChainContract) => {
     const [destContract, destChain] = destChainContract;
-    const newRecvPacketLogs = (await destContract.queryFilter('RecvPacket', 1, "latest")) as Array<ethers.EventLog>;
-    recvPacketLogs = recvPacketLogs.concat(newRecvPacketLogs.map((eventLog) => [eventLog, destChain]));
+    const newRecvPacketLogs = await destContract.queryFilter('RecvPacket', 1, "latest");
+    return newRecvPacketLogs.map((eventLog) => [eventLog, destChain] as [ethers.EventLog, CHAIN]);
+  });
+
+  let recvPacketLogs: Array<[ethers.EventLog, CHAIN]> = [];
+  for (const result of await Promise.allSettled(recvPacketPromises)) {
+    if (result.status === 'fulfilled') {
+      recvPacketLogs = recvPacketLogs.concat(result.value);
+    }
   }
 
-  for (const recvPacketLog of recvPacketLogs) {
+  const promises = recvPacketLogs.map(async (recvPacketLog) => {
     const [recvPacketEvent, destChain] = recvPacketLog;
     const [destPortAddress, destChannelId, sequence] = recvPacketEvent.args;
 
@@ -236,12 +258,12 @@ export async function GET(request: NextRequest) {
         channel.counterparty.channelId === ethers.decodeBytes32String(destChannelId) &&
         channel.counterparty.portId.startsWith(`polyibc.${destChain}`) &&
         channel.counterparty.portId.endsWith(destPortAddress.slice(2))
-      )
-    })
+      );
+    });
 
     if (!channel) {
       console.log("Unable to find channel for recv packet: ", destChannelId, "receiver: ", destPortAddress);
-      continue;
+      return;
     }
 
     const key = `0x${channel.portId.split(".")[2]}-${channel.channelId}-${sequence}`;
@@ -249,7 +271,7 @@ export async function GET(request: NextRequest) {
       const recvBlock = await destChainProviders[destChain].getBlock(recvPacketEvent.blockNumber);
 
       if (recvBlock!.timestamp < packets[key].createTime) {
-        continue;
+        return;
       }
 
       if (key in unprocessedPacketKeys) {
@@ -259,34 +281,43 @@ export async function GET(request: NextRequest) {
 
       packets[key].rcvTx = recvPacketEvent.transactionHash;
     }
-  }
+  });
+
+  await Promise.allSettled(promises);
 
   // Match any write ack events on Polymer to packets
-  for (const key of unprocessedPacketKeys) {
-    const packet = packets[key];
+  await Promise.allSettled(
+    Array.from(unprocessedPacketKeys).map(async (key) => {
+      const packet = packets[key];
 
-    try {
-      const packetCommitment = await tmClient.ibc.channel.packetCommitment(packet.sourcePortAddress, packet.sourceChannelId, Number(packet.sequence));
-      console.log("Packet commitment: ", packetCommitment);
-      if (packetCommitment.commitment) {
-        packet.state = PacketStates.POLY_WRITE_ACK;
-        unprocessedPacketKeys.delete(key);
+      try {
+        const packetCommitment = await tmClient.ibc.channel.packetCommitment(packet.sourcePortAddress, packet.sourceChannelId, Number(packet.sequence));
+        if (packetCommitment.commitment) {
+          packet.state = PacketStates.POLY_WRITE_ACK;
+          unprocessedPacketKeys.delete(key);
+        }
+      } catch (e) {
       }
-    } catch (e) {
-      continue;
-    }
-  }
+    })
+  );
 
   // Match any recv packet events on Polymer to packets
-  for (const key of unprocessedPacketKeys) {
-    const packet = packets[key]
+  await Promise.allSettled(Array.from(unprocessedPacketKeys).map(async key => {
+    const packet = packets[key]; // Assuming `packets` is defined and contains the details for each key
 
-    const packetReceipt = await tmClient.ibc.channel.packetReceipt(packet.destPortAddress, packet.destChannelId, Number(packet.sequence));
-    if (packetReceipt.received) {
-      packet.state = PacketStates.POLY_RECV;
-      unprocessedPacketKeys.delete(key);
+    try {
+      const packetReceipt = await tmClient.ibc.channel.packetReceipt(
+        packet.destPortAddress, packet.destChannelId, Number(packet.sequence)
+      );
+
+      if (packetReceipt.received) {
+        packet.state = PacketStates.POLY_RECV;
+        unprocessedPacketKeys.delete(key);
+      }
+    } catch (error) {
+      console.error(`Error processing packet with key ${key}:`, error);
     }
-  }
+  }));
 
   const response: Packet[] = [];
   Object.keys(packets).forEach((key) => {
