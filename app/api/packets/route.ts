@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { Packet, PacketStates } from 'utils/types/packet';
 import { CHAIN, CHAIN_CONFIGS } from 'utils/chains/configs';
 import { CachingJsonRpcProvider } from 'api/utils/provider-cache';
-import { GetTmClient } from 'api/utils/cosmos';
+import { getCacheTTL, GetTmClient, SimpleCache } from 'api/utils/cosmos';
 import { IdentifiedChannel } from 'cosmjs-types/ibc/core/channel/v1/channel';
 import { QueryChannelsResponse } from 'cosmjs-types/ibc/core/channel/v1/query';
 import Abi from 'utils/dispatcher.json';
@@ -23,6 +23,12 @@ export async function GET(request: NextRequest) {
 
   if (!from) {
     return NextResponse.error();
+  }
+
+  const cache = SimpleCache.getInstance()
+  const allPackets = cache.get("allPackets");
+  if (allPackets) {
+    return NextResponse.json(allPackets);
   }
 
   const channelsResponse = await getChannels();
@@ -323,5 +329,7 @@ export async function GET(request: NextRequest) {
   Object.keys(packets).forEach((key) => {
     response.push(packets[key]);
   });
+
+  cache.set("allPackets", response, getCacheTTL());
   return NextResponse.json(response);
 }

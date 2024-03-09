@@ -9,7 +9,7 @@ interface ICache {
   set<T>(key: string, value: T, ttl: number): void;
 }
 
-class SimpleCache implements ICache {
+export class SimpleCache implements ICache {
   private static instance: SimpleCache;
   private cache: NodeCache;
 
@@ -17,7 +17,7 @@ class SimpleCache implements ICache {
     this.cache = new NodeCache({ stdTTL: defaultTTL });
   }
 
-  public static getInstance(defaultTTL: number = 60): SimpleCache {
+  public static getInstance(defaultTTL: number = getCacheTTL()): SimpleCache {
     if (!SimpleCache.instance) {
       SimpleCache.instance = new SimpleCache(defaultTTL);
     }
@@ -131,9 +131,13 @@ class CachingIbcExtension {
 }
 
 
+export function getCacheTTL() {
+  return process.env.CACHE_TTL ? parseInt(process.env.CACHE_TTL) : 60;
+}
+
 function setupCachingIbcExtension(base: QueryClient) {
   const ibcExtension = setupIbcExtension(base);
-  const cacheTTL = process.env.CACHE_TTL ? parseInt(process.env.CACHE_TTL) : 60;
+  const cacheTTL = getCacheTTL();
   return new CachingIbcExtension(ibcExtension, cacheTTL).ibc;
 }
 
