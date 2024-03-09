@@ -1,4 +1,4 @@
-  import { ethers } from 'ethers';
+import { ethers } from 'ethers';
 import * as flatCache from 'flat-cache';
 
 export class CachingJsonRpcProvider extends ethers.JsonRpcProvider {
