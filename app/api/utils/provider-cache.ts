@@ -4,9 +4,13 @@ import * as flatCache from 'flat-cache';
 export class CachingJsonRpcProvider extends ethers.JsonRpcProvider {
   private cache;
 
-  constructor(url: string, network?: ethers.Networkish) {
+  constructor(
+    url: string,
+    network?: ethers.Networkish,
+    cache: string = '/tmp'
+  ) {
     super(url, network);
-    this.cache = flatCache.load('ethCache', '/tmp');
+    this.cache = flatCache.load('ethCache', cache);
   }
 
   private async fetchDataWithCache<T>(
@@ -16,7 +20,6 @@ export class CachingJsonRpcProvider extends ethers.JsonRpcProvider {
     // Check if the data is already in the cache
     const cachedData = this.cache.getKey(cacheKey);
     if (cachedData) {
-      console.log('CACHE HIT: ', cacheKey);
       return cachedData;
     }
 
@@ -53,7 +56,9 @@ export class CachingJsonRpcProvider extends ethers.JsonRpcProvider {
 
   async getLogs(filter: ethers.Filter): Promise<Array<ethers.Log>> {
     return await this.fetchDataWithCache(
-      `${this._network.chainId}_logs_${filter.address}_${filter.fromBlock}_${filter.toBlock}`,
+      `${this._network.chainId}_logs_${filter.topics![0]!.toString()}_${
+        filter.address
+      }_${filter.fromBlock}_${filter.toBlock}`,
       async () => await super.getLogs(filter)
     );
   }

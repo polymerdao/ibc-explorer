@@ -46,8 +46,7 @@ export async function GET(request: NextRequest) {
     validChannelIds.add(channel.channelId);
   });
 
-  const fromBlock = Number(from);
-  const toBlock = to ? Number(to) : 'latest';
+  const blockStep = 30;
 
   // Collect send logs from all chains
   let sendLogs: Array<[ethers.EventLog, CHAIN]> = [];
@@ -55,16 +54,19 @@ export async function GET(request: NextRequest) {
     CHAIN,
     CachingJsonRpcProvider
   >;
+  let srcChainHeights: Record<CHAIN, number> = {} as Record<CHAIN, number>;
   let srcChainContracts: Array<[ethers.Contract, CHAIN]> = [];
   for (const chain in CHAIN_CONFIGS) {
     const chainId = chain as CHAIN;
     const dispatcherAddresses = CHAIN_CONFIGS[chainId].dispatchers;
     const provider = new CachingJsonRpcProvider(
       CHAIN_CONFIGS[chainId].rpc,
-      CHAIN_CONFIGS[chainId].id
+      CHAIN_CONFIGS[chainId].id,
+      CHAIN_CONFIGS[chainId].cache
     );
     srcChainProviders[chainId] = provider;
-    let latestBlock = await provider.getBlockNumber();
+    const latestBlock = await provider.getBlockNumber();
+    srcChainHeights[chainId] = latestBlock - (latestBlock % blockStep);
 
     for (const dispatcherAddress of dispatcherAddresses) {
       const contract = new ethers.Contract(
@@ -76,8 +78,9 @@ export async function GET(request: NextRequest) {
       srcChainContracts.push([contract, chainId]);
 
       // query the last 100000 blocks ~2.5 days
-      let fromBlock = latestBlock - 100000;
-      let toBlock = latestBlock;
+      const toBlock = srcChainHeights[chainId];
+      const fromBlock = toBlock > 100000 ? toBlock - 100000 : 1;
+      console.log(`SendPacket fromBlock: ${fromBlock}, toBlock: ${toBlock}`);
 
       const newSendLogs = (await contract.queryFilter(
         'SendPacket',
@@ -157,6 +160,10 @@ export async function GET(request: NextRequest) {
 
   // Start by searching for ack events on the source chains
   const ackLogsPromises = srcChainContracts.map(async ([contract, chain]) => {
+    const toBlock = srcChainHeights[chain];
+    const fromBlock = toBlock > 100000 ? toBlock - 100000 : 1;
+
+    console.log(`Ack fromBlock: ${fromBlock}, toBlock: ${toBlock}`);
     const newAckLogs = (await contract.queryFilter(
       'Acknowledgement',
       fromBlock,
@@ -215,7 +222,8 @@ export async function GET(request: NextRequest) {
     for (const dispatcherAddress of dispatcherAddresses) {
       const provider = new CachingJsonRpcProvider(
         CHAIN_CONFIGS[chainId].rpc,
-        CHAIN_CONFIGS[chainId].id
+        CHAIN_CONFIGS[chainId].id,
+        CHAIN_CONFIGS[chainId].cache
       );
       destChainProviders[chainId] = provider;
       const contract = new ethers.Contract(
