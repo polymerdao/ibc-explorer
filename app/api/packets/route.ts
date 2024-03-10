@@ -46,8 +46,8 @@ export async function GET(request: NextRequest) {
     validChannelIds.add(channel.channelId);
   });
 
-  const blockStep = 60;
-  const blockLookback = 1000 * blockStep;
+  const blockStep = 100;
+  const blockLookback = 10 * blockStep;
 
   // Collect send logs from all chains
   let sendLogs: Array<[ethers.EventLog, CHAIN]> = [];
@@ -57,6 +57,7 @@ export async function GET(request: NextRequest) {
   >;
   let srcChainHeights: Record<CHAIN, number> = {} as Record<CHAIN, number>;
   let srcChainContracts: Array<[ethers.Contract, CHAIN]> = [];
+
   for (const chain in CHAIN_CONFIGS) {
     const chainId = chain as CHAIN;
     const dispatcherAddresses = CHAIN_CONFIGS[chainId].dispatchers;
@@ -82,21 +83,29 @@ export async function GET(request: NextRequest) {
       // query the last blockLookback blocks
       const toBlock = srcChainHeights[chainId];
       let fromBlock = toBlock > blockLookback ? toBlock - blockLookback : 1;
-
+      let sendLogPromises: Array<Promise<ethers.EventLog[]>> = [];
       while (fromBlock < toBlock) {
-        console.log(
-          `SendPacket fromBlock: ${fromBlock}, toBlock: ${fromBlock + 2999}`
-        );
-        const newSendLogs = (await contract.queryFilter(
+        const newSendLogsPromise = contract.queryFilter(
           'SendPacket',
           fromBlock,
-          fromBlock + 9999
-        )) as Array<ethers.EventLog>;
-
-        sendLogs = sendLogs.concat(
-          newSendLogs.map((eventLog) => [eventLog, chainId])
+          fromBlock + blockStep - 1
         );
-        fromBlock += 10000;
+
+        sendLogPromises = sendLogPromises.concat(
+          newSendLogsPromise as Promise<ethers.EventLog[]>
+        );
+        fromBlock += blockStep;
+      }
+
+      let awaitedLogResults = await Promise.allSettled(sendLogPromises);
+
+      for (const result of awaitedLogResults) {
+        if (result.status === 'fulfilled') {
+          console.log('result fulfilled');
+          sendLogs = sendLogs.concat(
+            result.value.map((eventLog) => [eventLog, chainId])
+          );
+        }
       }
     }
   }
@@ -171,16 +180,28 @@ export async function GET(request: NextRequest) {
     const toBlock = srcChainHeights[chain];
     let fromBlock = toBlock > blockLookback ? toBlock - blockLookback : 1;
     let ackLogs: Array<[ethers.EventLog, CHAIN]> = [];
-
+    let ackLogPromises: Array<Promise<ethers.EventLog[]>> = [];
     while (fromBlock < toBlock) {
-      console.log(`Ack fromBlock: ${fromBlock}, toBlock: ${fromBlock + 2999}`);
-      const newAckLogs = (await contract.queryFilter(
+      const newAckLogPromises = contract.queryFilter(
         'Acknowledgement',
         fromBlock,
-        fromBlock + 9999
-      )) as Array<ethers.EventLog>;
-      ackLogs = ackLogs.concat(newAckLogs.map((eventLog) => [eventLog, chain]));
-      fromBlock += 10000;
+        fromBlock + blockStep - 1
+      );
+
+      ackLogPromises = ackLogPromises.concat(
+        newAckLogPromises as Promise<ethers.EventLog[]>
+      );
+      fromBlock += blockStep;
+    }
+
+    let awaitedLogResults = await Promise.allSettled(ackLogPromises);
+
+    for (const result of awaitedLogResults) {
+      if (result.status === 'fulfilled') {
+        ackLogs = ackLogs.concat(
+          result.value.map((eventLog) => [eventLog, chain])
+        );
+      }
     }
     return ackLogs;
   });
