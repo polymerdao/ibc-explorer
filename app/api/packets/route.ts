@@ -46,7 +46,8 @@ export async function GET(request: NextRequest) {
     validChannelIds.add(channel.channelId);
   });
 
-  const blockStep = 30;
+  const blockStep = 60;
+  const blockLookback = 1000 * blockStep;
 
   // Collect send logs from all chains
   let sendLogs: Array<[ethers.EventLog, CHAIN]> = [];
@@ -67,6 +68,7 @@ export async function GET(request: NextRequest) {
     srcChainProviders[chainId] = provider;
     const latestBlock = await provider.getBlockNumber();
     srcChainHeights[chainId] = latestBlock - (latestBlock % blockStep);
+    console.log('STARTING HEIGHT: ', srcChainHeights[chainId]);
 
     for (const dispatcherAddress of dispatcherAddresses) {
       const contract = new ethers.Contract(
@@ -77,19 +79,25 @@ export async function GET(request: NextRequest) {
 
       srcChainContracts.push([contract, chainId]);
 
-      // query the last 100000 blocks ~2.5 days
+      // query the last blockLookback blocks
       const toBlock = srcChainHeights[chainId];
-      const fromBlock = toBlock > 100000 ? toBlock - 100000 : 1;
-      console.log(`SendPacket fromBlock: ${fromBlock}, toBlock: ${toBlock}`);
+      let fromBlock = toBlock > blockLookback ? toBlock - blockLookback : 1;
 
-      const newSendLogs = (await contract.queryFilter(
-        'SendPacket',
-        fromBlock,
-        toBlock
-      )) as Array<ethers.EventLog>;
-      sendLogs = sendLogs.concat(
-        newSendLogs.map((eventLog) => [eventLog, chainId])
-      );
+      while (fromBlock < toBlock) {
+        console.log(
+          `SendPacket fromBlock: ${fromBlock}, toBlock: ${fromBlock + 2999}`
+        );
+        const newSendLogs = (await contract.queryFilter(
+          'SendPacket',
+          fromBlock,
+          fromBlock + 9999
+        )) as Array<ethers.EventLog>;
+
+        sendLogs = sendLogs.concat(
+          newSendLogs.map((eventLog) => [eventLog, chainId])
+        );
+        fromBlock += 10000;
+      }
     }
   }
 
@@ -161,17 +169,20 @@ export async function GET(request: NextRequest) {
   // Start by searching for ack events on the source chains
   const ackLogsPromises = srcChainContracts.map(async ([contract, chain]) => {
     const toBlock = srcChainHeights[chain];
-    const fromBlock = toBlock > 100000 ? toBlock - 100000 : 1;
+    let fromBlock = toBlock > blockLookback ? toBlock - blockLookback : 1;
+    let ackLogs: Array<[ethers.EventLog, CHAIN]> = [];
 
-    console.log(`Ack fromBlock: ${fromBlock}, toBlock: ${toBlock}`);
-    const newAckLogs = (await contract.queryFilter(
-      'Acknowledgement',
-      fromBlock,
-      toBlock
-    )) as Array<ethers.EventLog>;
-    return newAckLogs.map(
-      (eventLog) => [eventLog, chain] as [ethers.EventLog, CHAIN]
-    );
+    while (fromBlock < toBlock) {
+      console.log(`Ack fromBlock: ${fromBlock}, toBlock: ${fromBlock + 2999}`);
+      const newAckLogs = (await contract.queryFilter(
+        'Acknowledgement',
+        fromBlock,
+        fromBlock + 9999
+      )) as Array<ethers.EventLog>;
+      ackLogs = ackLogs.concat(newAckLogs.map((eventLog) => [eventLog, chain]));
+      fromBlock += 10000;
+    }
+    return ackLogs;
   });
 
   const ackLogsResults = await Promise.allSettled(ackLogsPromises);
@@ -424,5 +435,6 @@ export async function GET(request: NextRequest) {
     response.push(packets[key]);
   });
 
+  //cache.set('allPackets', response, getCacheTTL());
   return NextResponse.json(response);
 }
