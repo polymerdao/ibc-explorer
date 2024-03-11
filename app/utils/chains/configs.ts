@@ -8,6 +8,12 @@ let baseDispatcher = process.env.DISPATCHER_ADDRESS_BASE!;
 let opDispatcherSimClient = process.env.DISPATCHER_ADDRESS_OPTIMISM_SIMCLIENT!;
 let baseDispatcherSimClient = process.env.DISPATCHER_ADDRESS_BASE_SIMCLIENT!;
 
+
+let opClientName = process.env.OPTIMISM_CLIENT_NAME!;
+let baseClientName = process.env.BASE_CLIENT_NAME!;
+let opClientSimClientName = process.env.OPTIMISM_CLIENT_SIMCLIENT_NAME!;
+let baseClientSimClientName = process.env.BASE_CLIENT_SIMCLIENT_NAME!;
+
 let optimismRPC =
   process.env.OPTIMISM_RPC ||
   'https://opt-sepolia.g.alchemy.com/v2/iMhzwCPw18v9Byeh59cedtUKbul_jFF3'; // "https://opt-sepolia.g.alchemy.com/v2/jKvLhhXvtnWdNeZrKst0demxnwJcYH1o"
@@ -23,6 +29,7 @@ export const CHAIN_CONFIGS: {
     display: 'Optimism',
     rpc: optimismRPC,
     dispatchers: [opDispatcher, opDispatcherSimClient],
+    clients: [opClientName, opClientSimClientName],
     blockTime: 2,
     icon: OptimismIcon,
   },
@@ -31,6 +38,7 @@ export const CHAIN_CONFIGS: {
     display: 'Base',
     rpc: baseRPC,
     dispatchers: [baseDispatcher, baseDispatcherSimClient],
+    clients: [baseClientName, baseClientSimClientName],
     blockTime: 2,
     icon: BaseIcon,
   },
