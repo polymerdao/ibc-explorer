@@ -87,7 +87,7 @@ export async function GET(request: NextRequest) {
       const toBlock = latestBlock - (latestBlock % blockStep);
       let fromBlock = toBlock > blockLookback ? toBlock - blockLookback : 1;
 
-      while (fromBlock < toBlock) {
+      while (fromBlock < latestBlock) {
         const newSendLogs = (await contract.queryFilter(
           'SendPacket',
           fromBlock,
@@ -185,7 +185,7 @@ export async function GET(request: NextRequest) {
     let fromBlock = toBlock > blockLookback ? toBlock - blockLookback : 1;
     let ackLogs: Array<[ethers.EventLog, CHAIN]> = [];
 
-    while (fromBlock < toBlock) {
+    while (fromBlock < latestBlock) {
       const newAckLogs = (await contract.queryFilter(
         'Acknowledgement',
         fromBlock,
