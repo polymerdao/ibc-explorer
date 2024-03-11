@@ -3,21 +3,15 @@ import { NextRequest, NextResponse } from 'next/server';
 import { Packet, PacketStates } from 'utils/types/packet';
 import { CHAIN, CHAIN_CONFIGS } from 'utils/chains/configs';
 import { CachingJsonRpcProvider } from 'api/utils/provider-cache';
-import { getCacheTTL, GetTmClient, SimpleCache } from 'api/utils/cosmos';
+import { getCacheTTL, SimpleCache } from 'api/utils/cosmos';
 import { IdentifiedChannel } from 'cosmjs-types/ibc/core/channel/v1/channel';
-import { QueryChannelsResponse } from 'cosmjs-types/ibc/core/channel/v1/query';
 import Abi from 'utils/dispatcher.json';
+import { getChannelsConcurrently } from '@/api/ibc/[type]/route';
 
 export const dynamic = 'force-dynamic'; // defaults to auto
 
 function getLookbackTime() {
   return process.env.LOOKBACK_TIME ? parseInt(process.env.LOOKBACK_TIME) : 10 * 60 * 60;
-}
-
-async function getChannels() {
-  const tmClient = await GetTmClient();
-  const channels = await tmClient.ibc.channel.allChannels();
-  return (QueryChannelsResponse.toJSON(channels) as QueryChannelsResponse).channels;
 }
 
 export async function GET(request: NextRequest) {
@@ -27,7 +21,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json(allPackets);
   }
 
-  const channelsResponse = await getChannels();
+  const channelsResponse = await getChannelsConcurrently();
   if (!channelsResponse) {
     return NextResponse.error();
   }
@@ -37,7 +31,7 @@ export async function GET(request: NextRequest) {
       channel.portId.startsWith(`polyibc.`) &&
       channel.counterparty.portId.startsWith(`polyibc.`)
     );
-  })
+  });
   if (openChannels.length === 0) {
     return NextResponse.json([]);
   }
@@ -45,7 +39,7 @@ export async function GET(request: NextRequest) {
   const validChannelIds = new Set<string>();
   openChannels.forEach((channel) => {
     validChannelIds.add(channel.channelId);
-  })
+  });
 
   let sendLogs: Array<[ethers.EventLog, CHAIN]> = [];
   let srcChainProviders: Record<CHAIN, CachingJsonRpcProvider> = {} as Record<CHAIN, CachingJsonRpcProvider>;
@@ -77,7 +71,7 @@ export async function GET(request: NextRequest) {
     srcChannelId = ethers.decodeBytes32String(srcChannelId);
 
     if (!validChannelIds.has(srcChannelId)) {
-      console.log("Skipping packet for channel: ", srcChannelId);
+      console.log('Skipping packet for channel: ', srcChannelId);
       return;
     }
 
@@ -87,7 +81,7 @@ export async function GET(request: NextRequest) {
       channel.portId.endsWith(srcPortAddress.slice(2))
     ));
     if (!channel) {
-      console.warn("No channel found for packet: ", srcChannelId, srcPortAddress);
+      console.warn('No channel found for packet: ', srcChannelId, srcPortAddress);
       return;
     }
 
@@ -107,12 +101,13 @@ export async function GET(request: NextRequest) {
       state: PacketStates.SENT,
       createTime: srcBlock!.timestamp,
       sendTx: sendEvent.transactionHash,
-      sourceChain: channel.portId.split(".")[1],
-      destChain: channel.counterparty.portId.split(".")[1],
+      sourceChain: channel.portId.split('.')[1],
+      destChain: channel.counterparty.portId.split('.')[1]
     };
     unprocessedPacketKeys.add(key);
   }
-  await Promise.allSettled(sendLogs.map(processSendLog))
+
+  await Promise.allSettled(sendLogs.map(processSendLog));
 
   /*
   ** Find the state of each packet
@@ -148,7 +143,7 @@ export async function GET(request: NextRequest) {
     const key = `${srcPortAddress}-${ethers.decodeBytes32String(srcChannelId)}-${sequence}`;
 
     if (!packets[key]) {
-      console.log("No packet found for ack: ", key);
+      console.log('No packet found for ack: ', key);
       return;
     }
 
@@ -186,7 +181,7 @@ export async function GET(request: NextRequest) {
   }
 
   const writeAckLogsPromises = destChainContracts.map(async ([destContract, destChain, fromBlock]) => {
-    const newWriteAckLogs = await destContract.queryFilter('WriteAckPacket', fromBlock, "latest");
+    const newWriteAckLogs = await destContract.queryFilter('WriteAckPacket', fromBlock, 'latest');
     return newWriteAckLogs.map((eventLog) => [eventLog, destChain] as [ethers.EventLog, CHAIN]);
   });
 
@@ -203,14 +198,14 @@ export async function GET(request: NextRequest) {
 
     const channel = openChannels.find((channel) => {
       return (
-        channel.counterparty.channelId === ethers.decodeBytes32String(destChannelId) && 
+        channel.counterparty.channelId === ethers.decodeBytes32String(destChannelId) &&
         channel.counterparty.portId.startsWith(`polyibc.${destChain}`) &&
         channel.counterparty.portId.endsWith(receiver.slice(2))
       );
-    })
+    });
 
     if (!channel) {
-      console.log("Unable to find channel for write ack: ", destChannelId, "receiver: ", receiver);
+      console.log('Unable to find channel for write ack: ', destChannelId, 'receiver: ', receiver);
       continue;
     }
 
@@ -224,7 +219,7 @@ export async function GET(request: NextRequest) {
   // Match any recv packet events on destination chains to packets
   const recvPacketPromises = destChainContracts.map(async (destChainContract) => {
     const [destContract, destChain, fromBlock] = destChainContract;
-    const newRecvPacketLogs = await destContract.queryFilter('RecvPacket', fromBlock, "latest");
+    const newRecvPacketLogs = await destContract.queryFilter('RecvPacket', fromBlock, 'latest');
     return newRecvPacketLogs.map((eventLog) => [eventLog, destChain] as [ethers.EventLog, CHAIN]);
   });
 
