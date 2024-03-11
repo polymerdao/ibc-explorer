@@ -185,24 +185,6 @@ export async function GET(request: NextRequest) {
     }
   }
 
-  // const tmClient = await GetTmClient();
-
-  // Match ack events on Polymer to packets
-  // const processPacket = async (key: string) => {
-  //   const packet = packets[key];
-
-  //   try {
-  //     const ack = await tmClient.ibc.channel.packetAcknowledgement(packet.destPortAddress, packet.destChannelId, Number(packet.sequence));
-  //     if (ack.acknowledgement) {
-  //       packet.state = PacketStates.POLY_WRITE_ACK;
-  //       unprocessedPacketKeys.delete(key);
-  //     }
-  //   } catch (e) {
-  //   }
-  // };
-
-  // await Promise.allSettled(Array.from(unprocessedPacketKeys).map(processPacket));
-
   // It seems that due to short circuiting POLY_ACK_RECV can't be distinguished as a separate state so this state is skipped
 
   const writeAckLogsPromises = destChainContracts.map(async ([destContract, destChain]) => {
@@ -290,40 +272,6 @@ export async function GET(request: NextRequest) {
   });
 
   await Promise.allSettled(promises);
-
-  // Match any write ack events on Polymer to packets
-  // await Promise.allSettled(
-  //   Array.from(unprocessedPacketKeys).map(async (key) => {
-  //     const packet = packets[key];
-
-  //     try {
-  //       const packetCommitment = await tmClient.ibc.channel.packetCommitment(packet.sourcePortAddress, packet.sourceChannelId, Number(packet.sequence));
-  //       if (packetCommitment.commitment) {
-  //         packet.state = PacketStates.POLY_WRITE_ACK;
-  //         unprocessedPacketKeys.delete(key);
-  //       }
-  //     } catch (e) {
-  //     }
-  //   })
-  // );
-
-  // Match any recv packet events on Polymer to packets
-  // await Promise.allSettled(Array.from(unprocessedPacketKeys).map(async key => {
-  //   const packet = packets[key]; // Assuming `packets` is defined and contains the details for each key
-
-  //   try {
-  //     const packetReceipt = await tmClient.ibc.channel.packetReceipt(
-  //       packet.destPortAddress, packet.destChannelId, Number(packet.sequence)
-  //     );
-
-  //     if (packetReceipt.received) {
-  //       packet.state = PacketStates.POLY_RECV;
-  //       unprocessedPacketKeys.delete(key);
-  //     }
-  //   } catch (error) {
-  //     console.error(`Error processing packet with key ${key}:`, error);
-  //   }
-  // }));
 
   const response: Packet[] = [];
   Object.keys(packets).forEach((key) => {
