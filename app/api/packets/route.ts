@@ -59,6 +59,7 @@ export async function GET(request: NextRequest) {
     CachingJsonRpcProvider
   >;
   let srcChainHeights: Record<CHAIN, number> = {} as Record<CHAIN, number>;
+
   let srcChainContracts: Array<[ethers.Contract, CHAIN]> = [];
   for (const chain in CHAIN_CONFIGS) {
     const chainId = chain as CHAIN;
@@ -196,13 +197,13 @@ export async function GET(request: NextRequest) {
     }
 
     // final uncached part
-    const newSendLogs = (await contract.queryFilter(
-      'SendPacket',
+    const newAckLogs = (await contract.queryFilter(
+      'Acknowledgement',
       fromBlock - blockStep,
       latestBlock
     )) as Array<ethers.EventLog>;
 
-    ackLogs = ackLogs.concat(newSendLogs.map((eventLog) => [eventLog, chain]));
+    ackLogs = ackLogs.concat(newAckLogs.map((eventLog) => [eventLog, chain]));
 
     return ackLogs;
   });
@@ -248,6 +249,7 @@ export async function GET(request: NextRequest) {
     CHAIN,
     CachingJsonRpcProvider
   >;
+  let destChainHeights: Record<CHAIN, number> = {} as Record<CHAIN, number>;
   let destChainContracts: Array<[ethers.Contract, CHAIN]> = [];
   for (const chain in CHAIN_CONFIGS) {
     const chainId = chain as CHAIN;
@@ -265,6 +267,7 @@ export async function GET(request: NextRequest) {
         Abi.abi,
         provider
       );
+      destChainHeights[chainId] = await provider.getBlockNumber();
       destChainContracts.push([contract, chainId]);
     }
   }
@@ -296,10 +299,24 @@ export async function GET(request: NextRequest) {
 
   const writeAckLogsPromises = destChainContracts.map(
     async ([destContract, destChain]) => {
+      const latestBlock = destChainHeights[destChain];
+      const toBlock = latestBlock - (latestBlock % blockStep);
+      let fromBlock = toBlock > blockLookback ? toBlock - blockLookback : 1;
+
+      while (fromBlock < latestBlock) {
+        const newWriteAckLogs = await destContract.queryFilter(
+          'WriteAckPacket',
+          fromBlock,
+          fromBlock + blockStep - 1
+        );
+        return newWriteAckLogs.map(
+          (eventLog) => [eventLog, destChain] as [ethers.EventLog, CHAIN]
+        );
+      }
       const newWriteAckLogs = await destContract.queryFilter(
         'WriteAckPacket',
-        1,
-        'latest'
+        fromBlock - blockStep,
+        latestBlock
       );
       return newWriteAckLogs.map(
         (eventLog) => [eventLog, destChain] as [ethers.EventLog, CHAIN]
@@ -348,10 +365,25 @@ export async function GET(request: NextRequest) {
   const recvPacketPromises = destChainContracts.map(
     async (destChainContract) => {
       const [destContract, destChain] = destChainContract;
+      const latestBlock = destChainHeights[destChain];
+      const toBlock = latestBlock - (latestBlock % blockStep);
+      let fromBlock = toBlock > blockLookback ? toBlock - blockLookback : 1;
+
+      while (fromBlock < latestBlock) {
+        const newRecvPacketLogs = await destContract.queryFilter(
+          'RecvPacket',
+          fromBlock,
+          fromBlock + blockStep - 1
+        );
+        return newRecvPacketLogs.map(
+          (eventLog) => [eventLog, destChain] as [ethers.EventLog, CHAIN]
+        );
+      }
+
       const newRecvPacketLogs = await destContract.queryFilter(
         'RecvPacket',
-        1,
-        'latest'
+        fromBlock - blockStep,
+        latestBlock
       );
       return newRecvPacketLogs.map(
         (eventLog) => [eventLog, destChain] as [ethers.EventLog, CHAIN]
@@ -458,6 +490,5 @@ export async function GET(request: NextRequest) {
     response.push(packets[key]);
   });
 
-  //cache.set('allPackets', response, getCacheTTL());
   return NextResponse.json(response);
 }
