@@ -63,11 +63,11 @@ export async function GET(request: NextRequest) {
     const provider = new CachingJsonRpcProvider(
       CHAIN_CONFIGS[chainId].rpc,
       CHAIN_CONFIGS[chainId].id,
-      CHAIN_CONFIGS[chainId].cache
+      CHAIN_CONFIGS[chainId].cache,
+      BigInt(blockStep)
     );
     srcChainProviders[chainId] = provider;
-    const latestBlock = await provider.getBlockNumber();
-    srcChainHeights[chainId] = latestBlock - (latestBlock % blockStep);
+    srcChainHeights[chainId] = await provider.getBlockNumber();
     console.log('STARTING HEIGHT: ', srcChainHeights[chainId]);
 
     for (const dispatcherAddress of dispatcherAddresses) {
@@ -80,7 +80,8 @@ export async function GET(request: NextRequest) {
       srcChainContracts.push([contract, chainId]);
 
       // query the last blockLookback blocks
-      const toBlock = srcChainHeights[chainId];
+      const latestBlock = srcChainHeights[chainId];
+      const toBlock = latestBlock - (latestBlock % blockStep);
       let fromBlock = toBlock > blockLookback ? toBlock - blockLookback : 1;
 
       while (fromBlock < toBlock) {
@@ -95,6 +96,17 @@ export async function GET(request: NextRequest) {
         );
         fromBlock += blockStep;
       }
+
+      // final uncached part
+      const newSendLogs = (await contract.queryFilter(
+        'SendPacket',
+        fromBlock - blockStep,
+        latestBlock
+      )) as Array<ethers.EventLog>;
+
+      sendLogs = sendLogs.concat(
+        newSendLogs.map((eventLog) => [eventLog, chainId])
+      );
     }
   }
 
@@ -165,7 +177,8 @@ export async function GET(request: NextRequest) {
 
   // Start by searching for ack events on the source chains
   const ackLogsPromises = srcChainContracts.map(async ([contract, chain]) => {
-    const toBlock = srcChainHeights[chain];
+    const latestBlock = srcChainHeights[chain];
+    const toBlock = latestBlock - (latestBlock % blockStep);
     let fromBlock = toBlock > blockLookback ? toBlock - blockLookback : 1;
     let ackLogs: Array<[ethers.EventLog, CHAIN]> = [];
 
@@ -178,6 +191,16 @@ export async function GET(request: NextRequest) {
       ackLogs = ackLogs.concat(newAckLogs.map((eventLog) => [eventLog, chain]));
       fromBlock += blockStep;
     }
+
+    // final uncached part
+    const newSendLogs = (await contract.queryFilter(
+      'SendPacket',
+      fromBlock - blockStep,
+      latestBlock
+    )) as Array<ethers.EventLog>;
+
+    ackLogs = ackLogs.concat(newSendLogs.map((eventLog) => [eventLog, chain]));
+
     return ackLogs;
   });
 
@@ -230,7 +253,8 @@ export async function GET(request: NextRequest) {
       const provider = new CachingJsonRpcProvider(
         CHAIN_CONFIGS[chainId].rpc,
         CHAIN_CONFIGS[chainId].id,
-        CHAIN_CONFIGS[chainId].cache
+        CHAIN_CONFIGS[chainId].cache,
+        BigInt(blockStep)
       );
       destChainProviders[chainId] = provider;
       const contract = new ethers.Contract(

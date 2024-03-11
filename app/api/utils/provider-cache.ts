@@ -3,14 +3,17 @@ import * as flatCache from 'flat-cache';
 
 export class CachingJsonRpcProvider extends ethers.JsonRpcProvider {
   private cache;
+  private blockStep;
 
   constructor(
     url: string,
     network?: ethers.Networkish,
-    cache: string = '/tmp'
+    cache: string = '/tmp',
+    blockStep: BigInt = BigInt(1000)
   ) {
     super(url, network);
     this.cache = flatCache.load('ethCache', cache);
+    this.blockStep = blockStep;
   }
 
   private async fetchDataWithCache<T>(
@@ -55,6 +58,14 @@ export class CachingJsonRpcProvider extends ethers.JsonRpcProvider {
   }
 
   async getLogs(filter: ethers.Filter): Promise<Array<ethers.Log>> {
+    // don't cache non-aligned ranges
+    const to = BigInt(filter.toBlock ? filter.toBlock : 0);
+    const from = BigInt(filter.fromBlock ? filter.fromBlock : 0);
+    const step = to - from + BigInt(1);
+    if (step != this.blockStep) {
+      console.log('CACHE MISS: misaligned step=', step);
+      return await super.getLogs(filter);
+    }
     return await this.fetchDataWithCache(
       `${this._network.chainId}_logs_${filter.topics![0]!.toString()}_${
         filter.address
