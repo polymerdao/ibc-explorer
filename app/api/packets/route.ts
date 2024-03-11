@@ -8,7 +8,7 @@ import { IdentifiedChannel } from 'cosmjs-types/ibc/core/channel/v1/channel';
 import { QueryChannelsResponse } from 'cosmjs-types/ibc/core/channel/v1/query';
 import Abi from 'utils/dispatcher.json';
 
-export const dynamic = 'force-dynamic' // defaults to auto
+export const dynamic = 'force-dynamic'; // defaults to auto
 
 async function getChannels() {
   const tmClient = await GetTmClient();
@@ -19,40 +19,52 @@ async function getChannels() {
 export async function GET(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams;
   const from = searchParams.get('from');
-  const to = searchParams.get('to')
+  const to = searchParams.get('to');
 
   if (!from) {
     return NextResponse.error();
   }
 
-  const cache = SimpleCache.getInstance()
-  const allPackets = cache.get("allPackets");
+  const cache = SimpleCache.getInstance();
+  const allPackets = cache.get('allPackets');
   if (allPackets) {
     return NextResponse.json(allPackets);
   }
 
-  const channelsResponse = await getChannels();
-  if (!channelsResponse) {
+  try {
+    const packets = await getPackets(from, to);
+    cache.set('allPackets', packets, getCacheTTL());
+    return NextResponse.json(packets);
+  } catch (e) {
     return NextResponse.error();
   }
+}
+
+export async function getPackets(from: string, to: string | null) {
+  const channelsResponse = await getChannels();
+  if (!channelsResponse) {
+    console.error('No channels found');
+    throw new Error('No channels found');
+  }
+
   const channels = channelsResponse as Array<IdentifiedChannel>;
   const openChannels = channels.filter((channel) => {
     return (
       channel.portId.startsWith(`polyibc.`) &&
       channel.counterparty.portId.startsWith(`polyibc.`)
     );
-  })
+  });
   if (openChannels.length === 0) {
-    return NextResponse.json([]);
+    return [];
   }
 
   const validChannelIds = new Set<string>();
   openChannels.forEach((channel) => {
     validChannelIds.add(channel.channelId);
-  })
+  });
 
   const fromBlock = Number(from);
-  const toBlock = to ? Number(to) : "latest";
+  const toBlock = to ? Number(to) : 'latest';
 
   // Collect send logs from all chains
   let sendLogs: Array<[ethers.EventLog, CHAIN]> = [];
@@ -62,11 +74,15 @@ export async function GET(request: NextRequest) {
     const chainId = chain as CHAIN;
     const dispatcherAddresses = CHAIN_CONFIGS[chainId].dispatchers;
     for (const dispatcherAddress of dispatcherAddresses) {
+      console.log('dispatcherAddress: ', dispatcherAddress);
+      console.log(`rpc: ${CHAIN_CONFIGS[chainId].rpc}, id: ${CHAIN_CONFIGS[chainId].id}`)
       const provider = new CachingJsonRpcProvider(CHAIN_CONFIGS[chainId].rpc, CHAIN_CONFIGS[chainId].id);
       srcChainProviders[chainId] = provider;
       const contract = new ethers.Contract(dispatcherAddress, Abi.abi, provider);
       srcChainContracts.push([contract, chainId]);
+      console.log('fromBlock: ', fromBlock, 'toBlock: ', toBlock)
       const newSendLogs = (await contract.queryFilter('SendPacket', fromBlock, toBlock)) as Array<ethers.EventLog>;
+      console.log('newSendLogs: ', newSendLogs);
       sendLogs = sendLogs.concat(newSendLogs.map((eventLog) => [eventLog, chainId]));
     }
   }
@@ -81,7 +97,7 @@ export async function GET(request: NextRequest) {
     srcChannelId = ethers.decodeBytes32String(srcChannelId);
 
     if (!validChannelIds.has(srcChannelId)) {
-      console.log("Skipping packet for channel: ", srcChannelId);
+      console.log('Skipping packet for channel: ', srcChannelId);
       return;
     }
 
@@ -91,9 +107,10 @@ export async function GET(request: NextRequest) {
       channel.portId.endsWith(srcPortAddress.slice(2))
     ));
     if (!channel) {
-      console.warn("No channel found for packet: ", srcChannelId, srcPortAddress);
+      console.warn('No channel found for packet: ', srcChannelId, srcPortAddress);
       return;
     }
+    1;
 
     const key = `${srcPortAddress}-${srcChannelId}-${sequence}`;
     const srcProvider = srcChainProviders[srcChain];
@@ -111,13 +128,15 @@ export async function GET(request: NextRequest) {
       state: PacketStates.SENT,
       createTime: srcBlock!.timestamp,
       sendTx: sendEvent.transactionHash,
-      sourceChain: channel.portId.split(".")[1],
-      destChain: channel.counterparty.portId.split(".")[1],
+      sourceChain: channel.portId.split('.')[1],
+      destChain: channel.counterparty.portId.split('.')[1]
     };
     unprocessedPacketKeys.add(key);
   }
-  await Promise.allSettled(sendLogs.map(processSendLog))
 
+  await Promise.allSettled(sendLogs.map(processSendLog));
+
+  console.log('Fetched send logs');
   /*
   ** Find the state of each packet
   ** States could be like:
@@ -152,7 +171,7 @@ export async function GET(request: NextRequest) {
     const key = `${srcPortAddress}-${ethers.decodeBytes32String(srcChannelId)}-${sequence}`;
 
     if (!packets[key]) {
-      console.log("No packet found for ack: ", key);
+      console.log('No packet found for ack: ', key);
       return;
     }
 
@@ -206,7 +225,7 @@ export async function GET(request: NextRequest) {
   // It seems that due to short circuiting POLY_ACK_RECV can't be distinguished as a separate state so this state is skipped
 
   const writeAckLogsPromises = destChainContracts.map(async ([destContract, destChain]) => {
-    const newWriteAckLogs = await destContract.queryFilter('WriteAckPacket', 1, "latest");
+    const newWriteAckLogs = await destContract.queryFilter('WriteAckPacket', 1, 'latest');
     return newWriteAckLogs.map((eventLog) => [eventLog, destChain] as [ethers.EventLog, CHAIN]);
   });
 
@@ -223,14 +242,14 @@ export async function GET(request: NextRequest) {
 
     const channel = openChannels.find((channel) => {
       return (
-        channel.counterparty.channelId === ethers.decodeBytes32String(destChannelId) && 
+        channel.counterparty.channelId === ethers.decodeBytes32String(destChannelId) &&
         channel.counterparty.portId.startsWith(`polyibc.${destChain}`) &&
         channel.counterparty.portId.endsWith(receiver.slice(2))
       );
-    })
+    });
 
     if (!channel) {
-      console.log("Unable to find channel for write ack: ", destChannelId, "receiver: ", receiver);
+      console.log('Unable to find channel for write ack: ', destChannelId, 'receiver: ', receiver);
       continue;
     }
 
@@ -244,7 +263,7 @@ export async function GET(request: NextRequest) {
   // Match any recv packet events on destination chains to packets
   const recvPacketPromises = destChainContracts.map(async (destChainContract) => {
     const [destContract, destChain] = destChainContract;
-    const newRecvPacketLogs = await destContract.queryFilter('RecvPacket', 1, "latest");
+    const newRecvPacketLogs = await destContract.queryFilter('RecvPacket', 1, 'latest');
     return newRecvPacketLogs.map((eventLog) => [eventLog, destChain] as [ethers.EventLog, CHAIN]);
   });
 
@@ -268,11 +287,11 @@ export async function GET(request: NextRequest) {
     });
 
     if (!channel) {
-      console.log("Unable to find channel for recv packet: ", destChannelId, "receiver: ", destPortAddress);
+      console.log('Unable to find channel for recv packet: ', destChannelId, 'receiver: ', destPortAddress);
       return;
     }
 
-    const key = `0x${channel.portId.split(".")[2]}-${channel.channelId}-${sequence}`;
+    const key = `0x${channel.portId.split('.')[2]}-${channel.channelId}-${sequence}`;
     if (packets[key]) {
       const recvBlock = await destChainProviders[destChain].getBlock(recvPacketEvent.blockNumber);
 
@@ -330,6 +349,5 @@ export async function GET(request: NextRequest) {
     response.push(packets[key]);
   });
 
-  cache.set("allPackets", response, getCacheTTL());
-  return NextResponse.json(response);
+  return response;
 }
