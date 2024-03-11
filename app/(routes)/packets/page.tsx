@@ -140,7 +140,7 @@ export default function Packets() {
 
   function loadData() {
     setLoading(true);
-    fetch("/api/packets?from=1")
+    fetch("/api/packets")
       .then(res => {
         if (!res.ok) {
           console.error(res.status);

@@ -27,6 +27,9 @@ export class CachingJsonRpcProvider extends ethers.JsonRpcProvider {
 
   // Override the method to add caching
   async getBlock(blockHashOrBlockTag: string | number): Promise<ethers.Block | null> {
+    if (blockHashOrBlockTag == 'latest') {
+      return await super.getBlock(blockHashOrBlockTag);
+    }
     return await this.fetchDataWithCache(
       `${this._network.chainId}_block_${blockHashOrBlockTag}`,
       async () => await super.getBlock(blockHashOrBlockTag)
