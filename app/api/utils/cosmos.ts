@@ -1,51 +1,22 @@
 import { IbcExtension, QueryClient, setupIbcExtension } from '@cosmjs/stargate';
 import { Tendermint37Client } from '@cosmjs/tendermint-rpc';
-import NodeCache from 'node-cache';
 import { Height } from 'cosmjs-types/ibc/core/client/v1/client';
 import * as process from 'process';
-
-interface ICache {
-  get<T>(key: string): T | undefined;
-  set<T>(key: string, value: T, ttl: number): void;
-}
-
-export class SimpleCache implements ICache {
-  private static instance: SimpleCache;
-  private cache: NodeCache;
-
-  private constructor(defaultTTL: number) {
-    this.cache = new NodeCache({ stdTTL: defaultTTL });
-  }
-
-  public static getInstance(defaultTTL: number = getCacheTTL()): SimpleCache {
-    if (!SimpleCache.instance) {
-      SimpleCache.instance = new SimpleCache(defaultTTL);
-    }
-    return SimpleCache.instance;
-  }
-
-  get<T>(key: string): T | undefined {
-    return this.cache.get(key);
-  }
-
-  set<T>(key: string, value: T, ttl: number = 0): void {
-    this.cache.set(key, value, ttl);
-  }
-}
+import { ICache, SimpleCache } from '@/api/utils/cache';
 
 class CachingIbcExtension {
   private cache: ICache;
   private ttl: number;
 
   constructor(private ibcExtension: IbcExtension, ttl: number = 60) {
-    this.cache = SimpleCache.getInstance(ttl);
+    this.cache = SimpleCache.getInstance();
     this.ttl = ttl;
   }
 
   async cachedCall<T>(cacheKey: string, call: () => Promise<T>): Promise<T> {
-    let cachedResult: T | undefined = this.cache.get(cacheKey);
+    let cachedResult: T | null = await this.cache.get(cacheKey);
 
-    if (cachedResult !== undefined) {
+    if (cachedResult !== null) {
       return cachedResult;
     }
 
@@ -60,8 +31,7 @@ class CachingIbcExtension {
     const cachedChannel = {
       channel: (portId: string, channelId: string) =>
         this.cachedCall(`channel-${portId}-${channelId}`, () => channel.channel(portId, channelId)),
-      channels: (paginationKey?: Uint8Array) =>
-        this.cachedCall(`channels-${paginationKey}`, () => channel.channels(paginationKey)),
+      channels: (paginationKey?: Uint8Array) => channel.channels(paginationKey),
       allChannels: () =>
         this.cachedCall(`allChannels`, () => channel.allChannels()),
       connectionChannels: (connection: string, paginationKey?: Uint8Array) =>
@@ -118,11 +88,27 @@ class CachingIbcExtension {
       consensusStateTm: (clientId: string, height?: Height) =>
         this.cachedCall(`consensusStateTm-${clientId}-${height}`, () => client.consensusStateTm(clientId, height))
     };
+
+    const cachedConnection = {
+      connection: (connectionId: string) =>
+        this.cachedCall(`connection-${connectionId}`, () => this.ibcExtension.ibc.connection.connection(connectionId)),
+      connections: (paginationKey?: Uint8Array) =>
+        this.cachedCall(`connections-${paginationKey}`, () => this.ibcExtension.ibc.connection.connections(paginationKey)),
+      allConnections: () =>
+        this.ibcExtension.ibc.connection.allConnections(),
+      clientConnections: (clientId: string) =>
+        this.cachedCall(`clientConnections-${clientId}`, () => this.ibcExtension.ibc.connection.clientConnections(clientId)),
+      clientState: (connectionId: string) =>
+        this.cachedCall(`clientState-${connectionId}`, () => this.ibcExtension.ibc.connection.clientState(connectionId)),
+      consensusState: (connectionId: string, revisionNumber: number, revisionHeight: number) =>
+        this.cachedCall(`consensusState-${connectionId}-${revisionNumber}-${revisionHeight}`, () => this.ibcExtension.ibc.connection.consensusState(connectionId, revisionNumber, revisionHeight))
+    };
+
     return {
       ibc: {
         channel: cachedChannel,
         client: cachedClient,
-        connection: this.ibcExtension.ibc.connection,
+        connection: cachedConnection,
         transfer: this.ibcExtension.ibc.transfer,
         verified: this.ibcExtension.ibc.verified
       }
