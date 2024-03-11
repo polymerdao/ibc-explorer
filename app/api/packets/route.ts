@@ -8,7 +8,11 @@ import { IdentifiedChannel } from 'cosmjs-types/ibc/core/channel/v1/channel';
 import { QueryChannelsResponse } from 'cosmjs-types/ibc/core/channel/v1/query';
 import Abi from 'utils/dispatcher.json';
 
-export const dynamic = 'force-dynamic' // defaults to auto
+export const dynamic = 'force-dynamic'; // defaults to auto
+
+function getLookbackTime() {
+  return process.env.LOOKBACK_TIME ? parseInt(process.env.LOOKBACK_TIME) : 10 * 60 * 60;
+}
 
 async function getChannels() {
   const tmClient = await GetTmClient();
@@ -17,16 +21,8 @@ async function getChannels() {
 }
 
 export async function GET(request: NextRequest) {
-  const searchParams = request.nextUrl.searchParams;
-  const from = searchParams.get('from');
-  const to = searchParams.get('to')
-
-  if (!from) {
-    return NextResponse.error();
-  }
-
-  const cache = SimpleCache.getInstance()
-  const allPackets = cache.get("allPackets");
+  const cache = SimpleCache.getInstance();
+  const allPackets = cache.get('allPackets');
   if (allPackets) {
     return NextResponse.json(allPackets);
   }
@@ -51,22 +47,22 @@ export async function GET(request: NextRequest) {
     validChannelIds.add(channel.channelId);
   })
 
-  const fromBlock = Number(from);
-  const toBlock = to ? Number(to) : "latest";
-
-  // Collect send logs from all chains
   let sendLogs: Array<[ethers.EventLog, CHAIN]> = [];
   let srcChainProviders: Record<CHAIN, CachingJsonRpcProvider> = {} as Record<CHAIN, CachingJsonRpcProvider>;
-  let srcChainContracts: Array<[ethers.Contract, CHAIN]> = [];
+  let srcChainContracts: Array<[ethers.Contract, CHAIN, number]> = [];
   for (const chain in CHAIN_CONFIGS) {
     const chainId = chain as CHAIN;
     const dispatcherAddresses = CHAIN_CONFIGS[chainId].dispatchers;
     for (const dispatcherAddress of dispatcherAddresses) {
       const provider = new CachingJsonRpcProvider(CHAIN_CONFIGS[chainId].rpc, CHAIN_CONFIGS[chainId].id);
+      const block = await provider.getBlock('latest');
+      const blockNumber = block!.number;
+      const fromBlock = blockNumber - getLookbackTime() / CHAIN_CONFIGS[chainId].blockTime;
+
       srcChainProviders[chainId] = provider;
       const contract = new ethers.Contract(dispatcherAddress, Abi.abi, provider);
-      srcChainContracts.push([contract, chainId]);
-      const newSendLogs = (await contract.queryFilter('SendPacket', fromBlock, toBlock)) as Array<ethers.EventLog>;
+      srcChainContracts.push([contract, chainId, fromBlock]);
+      const newSendLogs = (await contract.queryFilter('SendPacket', fromBlock, 'latest')) as Array<ethers.EventLog>;
       sendLogs = sendLogs.concat(newSendLogs.map((eventLog) => [eventLog, chainId]));
     }
   }
@@ -131,8 +127,8 @@ export async function GET(request: NextRequest) {
   */
 
   // Start by searching for ack events on the source chains
-  const ackLogsPromises = srcChainContracts.map(async ([contract, chain]) => {
-    const newAckLogs = (await contract.queryFilter('Acknowledgement', fromBlock, toBlock)) as Array<ethers.EventLog>;
+  const ackLogsPromises = srcChainContracts.map(async ([contract, chain, fromBlock]) => {
+    const newAckLogs = (await contract.queryFilter('Acknowledgement', fromBlock, 'latest')) as Array<ethers.EventLog>;
     return newAckLogs.map((eventLog) => [eventLog, chain] as [ethers.EventLog, CHAIN]);
   });
 
@@ -173,40 +169,24 @@ export async function GET(request: NextRequest) {
 
   // Set up providers and contracts to interact with the destination chains
   let destChainProviders: Record<CHAIN, CachingJsonRpcProvider> = {} as Record<CHAIN, CachingJsonRpcProvider>;
-  let destChainContracts: Array<[ethers.Contract, CHAIN]> = [];
+  let destChainContracts: Array<[ethers.Contract, CHAIN, number]> = [];
   for (const chain in CHAIN_CONFIGS) {
     const chainId = chain as CHAIN;
     const dispatcherAddresses = CHAIN_CONFIGS[chainId].dispatchers;
     for (const dispatcherAddress of dispatcherAddresses) {
       const provider = new CachingJsonRpcProvider(CHAIN_CONFIGS[chainId].rpc, CHAIN_CONFIGS[chainId].id);
+      const block = await provider.getBlock('latest');
+      const blockNumber = block!.number;
+      const fromBlock = blockNumber - getLookbackTime() / CHAIN_CONFIGS[chainId].blockTime;
+
       destChainProviders[chainId] = provider;
       const contract = new ethers.Contract(dispatcherAddress, Abi.abi, provider);
-      destChainContracts.push([contract, chainId]);
+      destChainContracts.push([contract, chainId, fromBlock]);
     }
   }
 
-  const tmClient = await GetTmClient();
-
-  // Match ack events on Polymer to packets
-  const processPacket = async (key: string) => {
-    const packet = packets[key];
-
-    try {
-      const ack = await tmClient.ibc.channel.packetAcknowledgement(packet.destPortAddress, packet.destChannelId, Number(packet.sequence));
-      if (ack.acknowledgement) {
-        packet.state = PacketStates.POLY_WRITE_ACK;
-        unprocessedPacketKeys.delete(key);
-      }
-    } catch (e) {
-    }
-  };
-
-  await Promise.allSettled(Array.from(unprocessedPacketKeys).map(processPacket));
-
-  // It seems that due to short circuiting POLY_ACK_RECV can't be distinguished as a separate state so this state is skipped
-
-  const writeAckLogsPromises = destChainContracts.map(async ([destContract, destChain]) => {
-    const newWriteAckLogs = await destContract.queryFilter('WriteAckPacket', 1, "latest");
+  const writeAckLogsPromises = destChainContracts.map(async ([destContract, destChain, fromBlock]) => {
+    const newWriteAckLogs = await destContract.queryFilter('WriteAckPacket', fromBlock, "latest");
     return newWriteAckLogs.map((eventLog) => [eventLog, destChain] as [ethers.EventLog, CHAIN]);
   });
 
@@ -243,8 +223,8 @@ export async function GET(request: NextRequest) {
 
   // Match any recv packet events on destination chains to packets
   const recvPacketPromises = destChainContracts.map(async (destChainContract) => {
-    const [destContract, destChain] = destChainContract;
-    const newRecvPacketLogs = await destContract.queryFilter('RecvPacket', 1, "latest");
+    const [destContract, destChain, fromBlock] = destChainContract;
+    const newRecvPacketLogs = await destContract.queryFilter('RecvPacket', fromBlock, "latest");
     return newRecvPacketLogs.map((eventLog) => [eventLog, destChain] as [ethers.EventLog, CHAIN]);
   });
 
@@ -291,45 +271,11 @@ export async function GET(request: NextRequest) {
 
   await Promise.allSettled(promises);
 
-  // Match any write ack events on Polymer to packets
-  await Promise.allSettled(
-    Array.from(unprocessedPacketKeys).map(async (key) => {
-      const packet = packets[key];
-
-      try {
-        const packetCommitment = await tmClient.ibc.channel.packetCommitment(packet.sourcePortAddress, packet.sourceChannelId, Number(packet.sequence));
-        if (packetCommitment.commitment) {
-          packet.state = PacketStates.POLY_WRITE_ACK;
-          unprocessedPacketKeys.delete(key);
-        }
-      } catch (e) {
-      }
-    })
-  );
-
-  // Match any recv packet events on Polymer to packets
-  await Promise.allSettled(Array.from(unprocessedPacketKeys).map(async key => {
-    const packet = packets[key]; // Assuming `packets` is defined and contains the details for each key
-
-    try {
-      const packetReceipt = await tmClient.ibc.channel.packetReceipt(
-        packet.destPortAddress, packet.destChannelId, Number(packet.sequence)
-      );
-
-      if (packetReceipt.received) {
-        packet.state = PacketStates.POLY_RECV;
-        unprocessedPacketKeys.delete(key);
-      }
-    } catch (error) {
-      console.error(`Error processing packet with key ${key}:`, error);
-    }
-  }));
-
   const response: Packet[] = [];
   Object.keys(packets).forEach((key) => {
     response.push(packets[key]);
   });
 
-  cache.set("allPackets", response, getCacheTTL());
+  cache.set('allPackets', response, getCacheTTL());
   return NextResponse.json(response);
 }
