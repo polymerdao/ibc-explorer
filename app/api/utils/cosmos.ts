@@ -118,11 +118,27 @@ class CachingIbcExtension {
       consensusStateTm: (clientId: string, height?: Height) =>
         this.cachedCall(`consensusStateTm-${clientId}-${height}`, () => client.consensusStateTm(clientId, height))
     };
+
+    const cachedConnection = {
+      connection: (connectionId: string) =>
+        this.cachedCall(`connection-${connectionId}`, () => this.ibcExtension.ibc.connection.connection(connectionId)),
+      connections: (paginationKey?: Uint8Array) =>
+        this.cachedCall(`connections-${paginationKey}`, () => this.ibcExtension.ibc.connection.connections(paginationKey)),
+      allConnections: () =>
+        this.cachedCall(`allConnections`, () => this.ibcExtension.ibc.connection.allConnections()),
+      clientConnections: (clientId: string) =>
+        this.cachedCall(`clientConnections-${clientId}`, () => this.ibcExtension.ibc.connection.clientConnections(clientId)),
+      clientState: (connectionId: string) =>
+        this.cachedCall(`clientState-${connectionId}`, () => this.ibcExtension.ibc.connection.clientState(connectionId)),
+      consensusState: (connectionId: string, revisionNumber: number, revisionHeight: number) =>
+        this.cachedCall(`consensusState-${connectionId}-${revisionNumber}-${revisionHeight}`, () => this.ibcExtension.ibc.connection.consensusState(connectionId, revisionNumber, revisionHeight))
+    }
+
     return {
       ibc: {
         channel: cachedChannel,
         client: cachedClient,
-        connection: this.ibcExtension.ibc.connection,
+        connection: cachedConnection,
         transfer: this.ibcExtension.ibc.transfer,
         verified: this.ibcExtension.ibc.verified
       }
