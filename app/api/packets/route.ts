@@ -46,6 +46,9 @@ export async function GET(request: NextRequest) {
     validChannelIds.add(channel.channelId);
   });
 
+  //////////////////////////////////////////////////////////////////
+  //    WARNING!!! Changing this will invalidate entire cache     //
+  //////////////////////////////////////////////////////////////////
   const blockStep = 1000;
   const blockLookback = 20 * blockStep;
 
