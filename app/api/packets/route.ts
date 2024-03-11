@@ -50,7 +50,7 @@ export async function GET(request: NextRequest) {
   //    WARNING!!! Changing this will invalidate entire cache     //
   //////////////////////////////////////////////////////////////////
   const blockStep = 1000;
-  const blockLookback = 20 * blockStep;
+  const blockLookback = 10 * blockStep;
 
   // Collect send logs from all chains
   let sendLogs: Array<[ethers.EventLog, CHAIN]> = [];
