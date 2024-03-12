@@ -4,7 +4,6 @@ import { Packet, PacketStates } from 'utils/types/packet';
 import { CHAIN, CHAIN_CONFIGS } from 'utils/chains/configs';
 import { CachingJsonRpcProvider } from 'api/utils/provider-cache';
 import { getCacheTTL, GetTmClient, SimpleCache } from 'api/utils/cosmos';
-import { IdentifiedChannel } from 'cosmjs-types/ibc/core/channel/v1/channel';
 import Abi from 'utils/dispatcher.json';
 
 import { getChannelsConcurrently } from '@/api/utils/peptide';
@@ -25,13 +24,13 @@ export async function GET(request: NextRequest) {
   let sendLogs: Array<[ethers.EventLog, CHAIN, string]> = [];
   let srcChainProviders: Record<CHAIN, CachingJsonRpcProvider> = {} as Record<CHAIN, CachingJsonRpcProvider>;
   let srcChainContracts: Array<[ethers.Contract, CHAIN, number, string]> = [];
-  for (const chain in CHAIN_CONFIGS) {
+
+  let chainPromises = Object.keys(CHAIN_CONFIGS).map(async (chain) => {
     const chainId = chain as CHAIN;
     const dispatcherAddresses = CHAIN_CONFIGS[chainId].dispatchers;
     const clients = CHAIN_CONFIGS[chainId].clients;
 
-    for (let i=0; i < dispatcherAddresses.length; i++) {
-      let dispatcherAddress = dispatcherAddresses[i];
+    const dispatcherPromises = dispatcherAddresses.map(async (dispatcherAddress, i) => {
       let client = clients[i];
       const provider = new CachingJsonRpcProvider(CHAIN_CONFIGS[chainId].rpc, CHAIN_CONFIGS[chainId].id);
       const block = await provider.getBlock('latest');
@@ -45,8 +44,12 @@ export async function GET(request: NextRequest) {
       console.log(`Getting sent packets for chain ${chainId} from block ${fromBlock} for client ${client} and dispatcher ${dispatcherAddress}`)
       const newSendLogs = (await contract.queryFilter('SendPacket', fromBlock, 'latest')) as Array<ethers.EventLog>;
       sendLogs = sendLogs.concat(newSendLogs.map((eventLog) => [eventLog, chainId, client]));
-    }
-  }
+    });
+
+    await Promise.all(dispatcherPromises);
+  });
+
+  await Promise.all(chainPromises);
 
   console.log("Getting a tm client")
   const tmClient = await GetTmClient();
@@ -77,7 +80,6 @@ export async function GET(request: NextRequest) {
     }
 
     const key = `${portId}-${srcChannelId}-${sequence}`;
-    console.log("send key", key)
     const srcProvider = srcChainProviders[srcChain];
     const srcBlock = await srcProvider.getBlock(sendEvent.blockNumber);
 
@@ -144,13 +146,13 @@ export async function GET(request: NextRequest) {
   // Set up providers and contracts to interact with the destination chains
   let destChainProviders: Record<CHAIN, CachingJsonRpcProvider> = {} as Record<CHAIN, CachingJsonRpcProvider>;
   let destChainContracts: Array<[ethers.Contract, CHAIN, number, string]> = [];
-  for (const chain in CHAIN_CONFIGS) {
+
+  chainPromises = Object.keys(CHAIN_CONFIGS).map(async (chain) => {
     const chainId = chain as CHAIN;
     const dispatcherAddresses = CHAIN_CONFIGS[chainId].dispatchers;
     const clients = CHAIN_CONFIGS[chainId].clients;
 
-    for (let i=0; i < dispatcherAddresses.length; i++) {
-      let dispatcherAddress = dispatcherAddresses[i];
+    const dispatcherPromises = dispatcherAddresses.map(async (dispatcherAddress, i) => {
       let client = clients[i];
       const provider = new CachingJsonRpcProvider(CHAIN_CONFIGS[chainId].rpc, CHAIN_CONFIGS[chainId].id);
       const block = await provider.getBlock('latest');
@@ -160,8 +162,12 @@ export async function GET(request: NextRequest) {
       destChainProviders[chainId] = provider;
       const contract = new ethers.Contract(dispatcherAddress, Abi.abi, provider);
       destChainContracts.push([contract, chainId, fromBlock, client]);
-    }
-  }
+    });
+
+    await Promise.all(dispatcherPromises);
+  });
+
+  await Promise.all(chainPromises);
 
   const writeAckLogsPromises = destChainContracts.map(async ([destContract, destChain, fromBlock, client]) => {
     const newWriteAckLogs = await destContract.queryFilter('WriteAckPacket', fromBlock, 'latest');
@@ -197,7 +203,6 @@ export async function GET(request: NextRequest) {
     }
 
     const key = `${channel.channel.counterparty.portId}-${channel.channel.counterparty.channelId}-${sequence}`;
-    console.log("write ack key", key)
     if (key in unprocessedPacketKeys) {
       packets[key].state = PacketStates.WRITE_ACK;
       unprocessedPacketKeys.delete(key);
