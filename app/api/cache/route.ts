@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getCacheTTL, SimpleCache } from '@/api/utils/cosmos';
 import { getPackets } from '@/api/packets/route';
+import { SimpleCache } from '@/api/utils/cache';
 
 export const dynamic = 'force-dynamic'; // defaults to auto
 

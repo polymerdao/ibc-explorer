@@ -1,6 +1,7 @@
 import { ethers } from 'ethers';
 import * as flatCache from 'flat-cache';
-import { SimpleCache } from '@/api/utils/cosmos';
+
+import { SimpleCache } from '@/api/utils/cache';
 
 export class CachingJsonRpcProvider extends ethers.JsonRpcProvider {
   private cache;
