@@ -14,13 +14,7 @@ function getLookbackTime() {
   return process.env.LOOKBACK_TIME ? parseInt(process.env.LOOKBACK_TIME) : 10 * 60 * 60;
 }
 
-export async function GET(request: NextRequest) {
-  const cache = SimpleCache.getInstance();
-  const allPackets = cache.get('allPackets');
-  if (allPackets) {
-    return NextResponse.json(allPackets);
-  }
-
+export async function getPackets() {
   let sendLogs: Array<[ethers.EventLog, CHAIN, string]> = [];
   let srcChainProviders: Record<CHAIN, CachingJsonRpcProvider> = {} as Record<CHAIN, CachingJsonRpcProvider>;
   let srcChainContracts: Array<[ethers.Contract, CHAIN, number, string]> = [];
@@ -270,7 +264,15 @@ export async function GET(request: NextRequest) {
   Object.keys(packets).forEach((key) => {
     response.push(packets[key]);
   });
+  return response;
+}
 
-  cache.set('allPackets', response, getCacheTTL());
-  return NextResponse.json(response);
+export async function GET(request: NextRequest) {
+  const cache = SimpleCache.getInstance();
+  const allPackets = cache.get('allPackets');
+  return NextResponse.json(allPackets || []);
+
+
+  // cache.set('allPackets', response, getCacheTTL());
+  // return NextResponse.json(response);
 }
