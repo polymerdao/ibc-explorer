@@ -2,7 +2,7 @@ import { ethers } from 'ethers';
 import { NextRequest, NextResponse } from 'next/server';
 import { Packet, PacketStates } from 'utils/types/packet';
 import { CHAIN, CHAIN_CONFIGS } from 'utils/chains/configs';
-import { CachingJsonRpcProvider } from 'api/utils/provider-cache';
+import { CachingJsonRpcProvider } from 'api/utils/provider';
 import { GetTmClient } from 'api/utils/cosmos';
 import Abi from 'utils/dispatcher.json';
 import { pLimit } from 'plimit-lit';
