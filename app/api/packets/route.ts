@@ -42,6 +42,7 @@ export async function GET(request: NextRequest) {
       const contract = new ethers.Contract(dispatcherAddress, Abi.abi, provider);
       srcChainContracts.push([contract, chainId, fromBlock, client]);
 
+      console.log(`Getting sent packets for chain ${chainId} from block ${fromBlock} for client ${client} and dispatcher ${dispatcherAddress}`)
       const newSendLogs = (await contract.queryFilter('SendPacket', fromBlock, 'latest')) as Array<ethers.EventLog>;
       sendLogs = sendLogs.concat(newSendLogs.map((eventLog) => [eventLog, chainId, client]));
     }
