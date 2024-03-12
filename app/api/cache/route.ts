@@ -10,7 +10,7 @@ export async function GET(request: NextRequest) {
   const AUTH_TOKEN = process.env.AUTH_TOKEN;
 
   if (!isLocalEnv() && request.headers.get('Authorization') !== `Bearer ${AUTH_TOKEN}`) {
-    console.error('Unauthorized request');
+    console.warn(`Unauthorized request to /api/cache with auth token ${request.headers.get('Authorization')}`);
     return NextResponse.error();
   }
 
