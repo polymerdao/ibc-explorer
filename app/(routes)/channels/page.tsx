@@ -1,19 +1,19 @@
 'use client';
 
-import { useEffect, useState } from "react";
+import { useEffect, useState } from 'react';
 import {
-  VisibilityState,
   createColumnHelper,
   getCoreRowModel,
   getFilteredRowModel,
   getPaginationRowModel,
   getSortedRowModel,
   SortingState,
-  useReactTable }
-from "@tanstack/react-table";
-import { IbcTable } from "components/ibc-table";
-import { IdentifiedChannel, State } from "cosmjs-types/ibc/core/channel/v1/channel";
-import { Modal } from "components/modal";
+  useReactTable,
+  VisibilityState
+} from '@tanstack/react-table';
+import { IbcTable } from 'components/ibc-table';
+import { IdentifiedChannel, State } from 'cosmjs-types/ibc/core/channel/v1/channel';
+import { Modal } from 'components/modal';
 
 const columnHelper = createColumnHelper<IdentifiedChannel>();
 const columns = [
@@ -122,14 +122,13 @@ export default function Packets() {
 }
 
 function stateToString(state: State) {
-  const stringState = state.toString();
-  switch (stringState) {
-    case "STATE_OPEN": return 'Open'
-    case "STATE_CLOSED": return 'Closed'
-    case "STATE_INIT": return 'Initialized'
-    case "STATE_TRYOPEN":
-    case "UNRECOGNIZED":
-    case "STATE_UNINITIALIZED_UNSPECIFIED":
+  switch (state) {
+    case State.STATE_OPEN: return 'Open'
+    case State.STATE_INIT: return 'Initialized'
+    case State.STATE_CLOSED: return 'Closed'
+    case State.STATE_TRYOPEN:
+    case State.UNRECOGNIZED:
+    case State.STATE_UNINITIALIZED_UNSPECIFIED:
       return 'Pending'
     default:
       return 'Pending'
