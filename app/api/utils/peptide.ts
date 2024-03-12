@@ -9,6 +9,12 @@ async function getChannels() {
   return (QueryChannelsResponse.toJSON(channels) as QueryChannelsResponse).channels;
 }
 
+export async function getPaginatedChannels() {
+  const tmClient = await GetTmClient();
+  const channels = await tmClient.ibc.channel.channels();
+  return (QueryChannelsResponse.toJSON(channels) as QueryChannelsResponse).channels;
+}
+
 export async function getChannelsConcurrently() {
   const tmClient = await GetTmClient();
   const connections = await tmClient.ibc.connection.allConnections();

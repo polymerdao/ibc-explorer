@@ -60,8 +60,7 @@ class CachingIbcExtension {
     const cachedChannel = {
       channel: (portId: string, channelId: string) =>
         this.cachedCall(`channel-${portId}-${channelId}`, () => channel.channel(portId, channelId)),
-      channels: (paginationKey?: Uint8Array) =>
-        this.cachedCall(`channels-${paginationKey}`, () => channel.channels(paginationKey)),
+      channels: (paginationKey?: Uint8Array) => channel.channels(paginationKey),
       allChannels: () =>
         this.cachedCall(`allChannels`, () => channel.allChannels()),
       connectionChannels: (connection: string, paginationKey?: Uint8Array) =>
@@ -125,14 +124,14 @@ class CachingIbcExtension {
       connections: (paginationKey?: Uint8Array) =>
         this.cachedCall(`connections-${paginationKey}`, () => this.ibcExtension.ibc.connection.connections(paginationKey)),
       allConnections: () =>
-        this.cachedCall(`allConnections`, () => this.ibcExtension.ibc.connection.allConnections()),
+        this.ibcExtension.ibc.connection.allConnections(),
       clientConnections: (clientId: string) =>
         this.cachedCall(`clientConnections-${clientId}`, () => this.ibcExtension.ibc.connection.clientConnections(clientId)),
       clientState: (connectionId: string) =>
         this.cachedCall(`clientState-${connectionId}`, () => this.ibcExtension.ibc.connection.clientState(connectionId)),
       consensusState: (connectionId: string, revisionNumber: number, revisionHeight: number) =>
         this.cachedCall(`consensusState-${connectionId}-${revisionNumber}-${revisionHeight}`, () => this.ibcExtension.ibc.connection.consensusState(connectionId, revisionNumber, revisionHeight))
-    }
+    };
 
     return {
       ibc: {

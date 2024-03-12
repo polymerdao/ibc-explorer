@@ -47,6 +47,8 @@ export async function GET(request: NextRequest) {
       sendLogs = sendLogs.concat(newSendLogs.map((eventLog) => [eventLog, chainId, client]));
     }
   }
+
+  console.log("Getting a tm client")
   const tmClient = await GetTmClient();
 
   // Collect all packets and their properties from the send logs

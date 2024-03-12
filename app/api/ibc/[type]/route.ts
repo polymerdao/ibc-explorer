@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getChannelsConcurrently, getClients, getConnections } from '@/api/utils/peptide';
+import { getChannelsConcurrently, getClients, getConnections, getPaginatedChannels } from '@/api/utils/peptide';
 
 export const dynamic = 'force-dynamic' // defaults to auto
 
@@ -10,7 +10,7 @@ export async function GET(request: NextRequest,
   try {
     switch (reqType) {
       case "channels":
-        return NextResponse.json(await getChannelsConcurrently());
+        return NextResponse.json(await getPaginatedChannels());
       case "connections":
         return NextResponse.json(await getConnections());
       case "clients":
