@@ -270,6 +270,6 @@ export async function getPackets() {
 
 export async function GET(request: NextRequest) {
   const cache = SimpleCache.getInstance();
-  const allPackets = cache.get('allPackets');
+  const allPackets = await cache.get('allPackets');
   return NextResponse.json(allPackets || []);
 }

@@ -1,17 +1,18 @@
 import { ethers } from 'ethers';
 import * as flatCache from 'flat-cache';
+import { SimpleCache } from '@/api/utils/cosmos';
 
 export class CachingJsonRpcProvider extends ethers.JsonRpcProvider {
   private cache;
 
   constructor(url: string, network?: ethers.Networkish) {
     super(url, network);
-    this.cache = flatCache.load('ethCache', "/tmp");
+    this.cache = SimpleCache.getInstance();
   }
 
   private async fetchDataWithCache<T>(cacheKey: string, fetchFunction: () => Promise<T>): Promise<T> {
     // Check if the data is already in the cache
-    const cachedData = this.cache.getKey(cacheKey);
+    const cachedData = await this.cache.get<T>(cacheKey);
     if (cachedData) {
       return cachedData;
     }
@@ -20,8 +21,7 @@ export class CachingJsonRpcProvider extends ethers.JsonRpcProvider {
     const data = await fetchFunction();
 
     // Store the new data in the cache
-    this.cache.setKey(cacheKey, data);
-    this.cache.save(true);
+    await this.cache.set(cacheKey, data);
     return data;
   }
 

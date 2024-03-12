@@ -1,35 +1,44 @@
 import { IbcExtension, QueryClient, setupIbcExtension } from '@cosmjs/stargate';
 import { Tendermint37Client } from '@cosmjs/tendermint-rpc';
-import NodeCache from 'node-cache';
+import Redis from 'ioredis';
 import { Height } from 'cosmjs-types/ibc/core/client/v1/client';
 import * as process from 'process';
 
 interface ICache {
-  get<T>(key: string): T | undefined;
-  set<T>(key: string, value: T, ttl: number): void;
+  get<T>(key: string): Promise<T | null>;
+  set<T>(key: string, value: T, ttl?: number): Promise<void>;
 }
 
 export class SimpleCache implements ICache {
   private static instance: SimpleCache;
-  private cache: NodeCache;
+  private redis: Redis;
 
-  private constructor(defaultTTL: number) {
-    this.cache = new NodeCache({ stdTTL: defaultTTL });
+  private constructor() {
+    this.redis = new Redis(); // Default connects to 127.0.0.1:6379
   }
 
-  public static getInstance(defaultTTL: number = getCacheTTL()): SimpleCache {
+  public static getInstance(): SimpleCache {
     if (!SimpleCache.instance) {
-      SimpleCache.instance = new SimpleCache(defaultTTL);
+      SimpleCache.instance = new SimpleCache();
     }
     return SimpleCache.instance;
   }
 
-  get<T>(key: string): T | undefined {
-    return this.cache.get(key);
+  async get<T>(key: string): Promise<T | null> {
+    const value = await this.redis.get(key);
+    return value ? JSON.parse(value) as T : null;
   }
 
-  set<T>(key: string, value: T, ttl: number = 0): void {
-    this.cache.set(key, value, ttl);
+  async set<T>(key: string, value: T, ttl: number = getCacheTTL()): Promise<void> {
+    const stringValue = JSON.stringify(value, (_key, val) =>
+      typeof val === 'bigint' ? val.toString() : val // Convert BigInt to string
+    );
+    // if ttl is set to -1 then the key should never expire
+    if (ttl === -1) {
+      await this.redis.set(key, stringValue);
+    } else {
+      await this.redis.set(key, stringValue, 'EX', ttl);
+    }
   }
 }
 
@@ -38,14 +47,14 @@ class CachingIbcExtension {
   private ttl: number;
 
   constructor(private ibcExtension: IbcExtension, ttl: number = 60) {
-    this.cache = SimpleCache.getInstance(ttl);
+    this.cache = SimpleCache.getInstance();
     this.ttl = ttl;
   }
 
   async cachedCall<T>(cacheKey: string, call: () => Promise<T>): Promise<T> {
-    let cachedResult: T | undefined = this.cache.get(cacheKey);
+    let cachedResult: T | null = await this.cache.get(cacheKey);
 
-    if (cachedResult !== undefined) {
+    if (cachedResult !== null) {
       return cachedResult;
     }
 

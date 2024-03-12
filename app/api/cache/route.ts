@@ -16,7 +16,7 @@ export async function GET(request: NextRequest) {
   try {
     const packets = await getPackets();
     console.log("Saving packets to cache");
-    cache.set('allPackets', packets, getCacheTTL());
+    await cache.set('allPackets', packets, -1);
     return NextResponse.json(packets);
   } catch (e) {
     console.error('Error fetching packets', e);
