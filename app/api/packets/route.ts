@@ -302,24 +302,25 @@ export async function GET(request: NextRequest) {
       const latestBlock = destChainHeights[destChain];
       const toBlock = latestBlock - (latestBlock % blockStep);
       let fromBlock = toBlock > blockLookback ? toBlock - blockLookback : 1;
+      let writeAckLogs: Array<[ethers.EventLog, CHAIN]> = [];
 
       while (fromBlock < latestBlock) {
-        const newWriteAckLogs = await destContract.queryFilter(
+        const newWriteAckLogs = (await destContract.queryFilter(
           'WriteAckPacket',
           fromBlock,
           fromBlock + blockStep - 1
-        );
-        return newWriteAckLogs.map(
-          (eventLog) => [eventLog, destChain] as [ethers.EventLog, CHAIN]
+        )) as Array<ethers.EventLog>;
+        writeAckLogs = writeAckLogs.concat(
+          newWriteAckLogs.map((eventLog) => [eventLog, destChain])
         );
       }
-      const newWriteAckLogs = await destContract.queryFilter(
+      const newWriteAckLogs = (await destContract.queryFilter(
         'WriteAckPacket',
         fromBlock - blockStep,
         latestBlock
-      );
-      return newWriteAckLogs.map(
-        (eventLog) => [eventLog, destChain] as [ethers.EventLog, CHAIN]
+      )) as Array<ethers.EventLog>;
+      return writeAckLogs.concat(
+        newWriteAckLogs.map((eventLog) => [eventLog, destChain])
       );
     }
   );
@@ -368,25 +369,27 @@ export async function GET(request: NextRequest) {
       const latestBlock = destChainHeights[destChain];
       const toBlock = latestBlock - (latestBlock % blockStep);
       let fromBlock = toBlock > blockLookback ? toBlock - blockLookback : 1;
+      let recvPacketLogs: Array<[ethers.EventLog, CHAIN]> = [];
 
       while (fromBlock < latestBlock) {
-        const newRecvPacketLogs = await destContract.queryFilter(
+        const newRecvPacketLogs = (await destContract.queryFilter(
           'RecvPacket',
           fromBlock,
           fromBlock + blockStep - 1
-        );
-        return newRecvPacketLogs.map(
-          (eventLog) => [eventLog, destChain] as [ethers.EventLog, CHAIN]
+        )) as Array<ethers.EventLog>;
+        recvPacketLogs = recvPacketLogs.concat(
+          newRecvPacketLogs.map((eventLog) => [eventLog, destChain])
         );
       }
 
-      const newRecvPacketLogs = await destContract.queryFilter(
+      const newRecvPacketLogs = (await destContract.queryFilter(
         'RecvPacket',
         fromBlock - blockStep,
         latestBlock
-      );
-      return newRecvPacketLogs.map(
-        (eventLog) => [eventLog, destChain] as [ethers.EventLog, CHAIN]
+      )) as Array<ethers.EventLog>;
+
+      return recvPacketLogs.concat(
+        newRecvPacketLogs.map((eventLog) => [eventLog, destChain])
       );
     }
   );
