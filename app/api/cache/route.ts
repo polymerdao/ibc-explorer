@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getCacheTTL, SimpleCache } from '@/api/utils/cosmos';
 import { getPackets } from '@/api/packets/route';
 
+export const dynamic = 'force-dynamic'; // defaults to auto
+
 export async function GET(request: NextRequest) {
   console.log('GET /api/cache');
   // const TOKEN = process.env.TOKEN;
