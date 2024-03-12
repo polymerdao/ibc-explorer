@@ -61,7 +61,6 @@ export async function getPackets() {
 
     let channel;
     try {
-      console.log(portId, srcChannelId)
       channel = await tmClient.ibc.channel.channel(portId, srcChannelId);
     } catch (e) {
       console.log('Skipping packet for channel: ', srcChannelId);
@@ -175,7 +174,7 @@ export async function getPackets() {
     }
   }
 
-  console.log("Processing write ack logs...")
+  console.log(`Processing ${writeAckLogs.length} write ack logs...`)
 
   for (const writeAckLog of writeAckLogs) {
     const [writeAckEvent, destChain, client] = writeAckLog;
@@ -184,7 +183,6 @@ export async function getPackets() {
 
     let channel
     try {
-      console.log(`polyibc.${client}.${receiver.slice(2)}`, destChannelId)
       channel = await tmClient.ibc.channel.channel(`polyibc.${client}.${receiver.slice(2)}`, destChannelId);
     } catch (e) {
       console.log('Skipping packet for channel: ', destChannelId);
@@ -225,7 +223,6 @@ export async function getPackets() {
 
     let channel;
     try {
-      console.log(`polyibc.${client}.${destPortAddress.slice(2)}`, destChannelId)
       channel = await tmClient.ibc.channel.channel(`polyibc.${client}.${destPortAddress.slice(2)}`, destChannelId);
     } catch (e) {
       console.log('Skipping packet for channel: ', destChannelId);
@@ -238,7 +235,6 @@ export async function getPackets() {
     }
 
     const key = `${channel.channel.counterparty.portId}-${channel.channel.counterparty.channelId}-${sequence}`;
-    console.log("recv key", key)
 
     if (packets[key]) {
       const recvBlock = await destChainProviders[destChain].getBlock(recvPacketEvent.blockNumber);
