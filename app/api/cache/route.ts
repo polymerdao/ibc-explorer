@@ -3,6 +3,7 @@ import { getCacheTTL, SimpleCache } from '@/api/utils/cosmos';
 import { getPackets } from '@/api/packets/route';
 
 export async function GET(request: NextRequest) {
+  console.log('GET /api/cache');
   // const TOKEN = process.env.TOKEN;
   //
   // if (request.headers.get('Authorization') !== `Bearer ${TOKEN}`) {

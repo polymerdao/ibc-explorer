@@ -3,10 +3,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { Packet, PacketStates } from 'utils/types/packet';
 import { CHAIN, CHAIN_CONFIGS } from 'utils/chains/configs';
 import { CachingJsonRpcProvider } from 'api/utils/provider-cache';
-import { getCacheTTL, GetTmClient, SimpleCache } from 'api/utils/cosmos';
+import { GetTmClient, SimpleCache } from 'api/utils/cosmos';
 import Abi from 'utils/dispatcher.json';
-
-import { getChannelsConcurrently } from '@/api/utils/peptide';
 
 export const dynamic = 'force-dynamic'; // defaults to auto
 
@@ -267,8 +265,4 @@ export async function GET(request: NextRequest) {
   const cache = SimpleCache.getInstance();
   const allPackets = cache.get('allPackets');
   return NextResponse.json(allPackets || []);
-
-
-  // cache.set('allPackets', response, getCacheTTL());
-  // return NextResponse.json(response);
 }
