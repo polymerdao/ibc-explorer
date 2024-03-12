@@ -30,7 +30,7 @@ export async function GET(request: NextRequest) {
     // Set cache concurrently
     await Promise.all([
       cache.set('allChannels', channels, -1),
-      // cache.set('allPackets', packets, -1),
+      cache.set('allPackets', packets, -1),
     ]);
 
     console.log(`Fetched packets and channels in ${Date.now() - start}ms`);

@@ -65,7 +65,7 @@ export async function getPackets() {
 
     let channel;
     try {
-      console.log(`Getting channel for port ${portId} and channel ${srcChannelId}`);
+      console.log(`Getting channel for port ${portId} and channel ${srcChannelId} and sequence ${sequence}`);
       channel = await tmClient.ibc.channel.channel(portId, srcChannelId);
     } catch (e) {
       console.log('Skipping packet for channel: ', srcChannelId);
@@ -201,7 +201,7 @@ export async function getPackets() {
     }
 
     const key = `${channel.channel.counterparty.portId}-${channel.channel.counterparty.channelId}-${sequence}`;
-    if (key in unprocessedPacketKeys) {
+    if (unprocessedPacketKeys.has(key)) {
       packets[key].state = PacketStates.WRITE_ACK;
       unprocessedPacketKeys.delete(key);
     }
@@ -249,7 +249,7 @@ export async function getPackets() {
         return;
       }
 
-      if (key in unprocessedPacketKeys) {
+      if (unprocessedPacketKeys.has(key)) {
         packets[key].state = PacketStates.RECV;
         unprocessedPacketKeys.delete(key);
       }
