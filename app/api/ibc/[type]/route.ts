@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getChannelsConcurrently, getClients, getConnections, getPaginatedChannels } from '@/api/utils/peptide';
+import { getClients, getConnections } from '@/api/utils/peptide';
+import { SimpleCache } from '@/api/utils/cache';
 
 export const dynamic = 'force-dynamic' // defaults to auto
 
@@ -7,10 +8,13 @@ export async function GET(request: NextRequest,
   {params}: {params: { type: "channels" | "connections" | "clients" }}
 ) {
   const reqType = params.type;
+  const cache = SimpleCache.getInstance();
+
   try {
     switch (reqType) {
       case "channels":
-        return NextResponse.json(await getPaginatedChannels());
+        const channels = await cache.get('allChannels');
+        return NextResponse.json(channels || []);
       case "connections":
         return NextResponse.json(await getConnections());
       case "clients":
