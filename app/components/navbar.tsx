@@ -22,7 +22,7 @@ export default function Navbar() {
   }
 
   return (
-    <nav className="w-full z-20 sticky top-0 bg-content-bg-light/85 dark:bg-bg-dark/85 border-b-[0.8px] border-gray-300 dark:border-gray-700 backdrop-blur-sm ease-in-out">
+    <nav className="w-full z-20 sticky top-0 bg-content-bg-light dark:bg-bg-dark border-b-[0.8px] border-gray-300 dark:border-gray-700 ease-in-out">
       <div className="h-16 min-w-0 xl:min-w-[80rem] max-w-screen-xl xl:w-4/5 mx-auto px-6 sm:px-8 flex justify-between sm:justify-start">
 
         <div className="flex items-center shrink-0 mr-10 pt-1">
