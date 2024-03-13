@@ -2,8 +2,23 @@
 @tailwind components;
 @tailwind utilities;
 
+:root {
+  --background-start-rgb: #f1f5f9;
+  --background-middle-rgb: #FFFFFF;
+  --background-end-rgb: #f1f5f9;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background-start-rgb: #020617;
+    --background-middle-rgb: #0f172a;
+    --background-end-rgb: #020617;
+  }
+}
+
 @layer base {
   body {
+    background: linear-gradient(203deg in hsl shorter hue, var(--background-start-rgb) 47%, var(--background-middle-rgb), var(--background-end-rgb) 77%);
     @apply h-screen flex flex-col items-center bg-bg-light text-fg-light antialiased;
   }
 
