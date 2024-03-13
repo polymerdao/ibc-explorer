@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getPackets } from '@/api/packets/route';
 import { SimpleCache } from '@/api/utils/cache';
 import { isLocalEnv } from '@/api/utils/helpers';
 import { getChannelsConcurrently } from '@/api/utils/peptide';
+import { getPackets } from '@/api/packets/helpers';
 
 export const dynamic = 'force-dynamic'; // defaults to auto
 
