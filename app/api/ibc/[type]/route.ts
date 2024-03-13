@@ -1,28 +1,24 @@
-import { getChannels, getClients, getConnections } from "./ibc";
-import { NextRequest, NextResponse } from "next/server";
-import { getPackets } from "./packets";
+import { NextRequest, NextResponse } from 'next/server';
+import { getChannelsConcurrently, getClients, getConnections, getPaginatedChannels } from '@/api/utils/peptide';
 
 export const dynamic = 'force-dynamic' // defaults to auto
+
 export async function GET(request: NextRequest,
-                          {params}: { params: { type: "channels" | "connections" | "clients" | "packets" } }
+  {params}: {params: { type: "channels" | "connections" | "clients" }}
 ) {
-  const type = params.type
-
-  let apiUrl = process.env.API_URL!;
-
+  const reqType = params.type;
   try {
-    switch (type) {
+    switch (reqType) {
       case "channels":
-        let data = await getChannels(apiUrl);
-        return Response.json(data)
+        return NextResponse.json(await getPaginatedChannels());
       case "connections":
-        return Response.json(await getConnections(apiUrl))
+        return NextResponse.json(await getConnections());
       case "clients":
-        return Response.json(await getClients(apiUrl))
-      case "packets":
-        return Response.json(await getPackets(request, apiUrl))
+        return NextResponse.json(await getClients());
     }
-  } catch (e) {
-    return NextResponse.error()
+  } catch {
+    return NextResponse.json({error: "An error occurred while fetching data"});
   }
 }
+
+

@@ -1,26 +1,19 @@
 # ibc-explorer
-IBC dashboard
+IBC Dashboard
 
 ## Local Dev Requirements
-Make sure you have npm and docker installed.
+Install Node and NPM. Install Docker to test production deployment images.
 
 ## Build React Frontend
 
 ```shell
-npm install && npm run build
-```
-
-## Run locally
-
-```shell
-export API_URL=http://localhost:8080
-export DISPATCHER_ADDRESS_OPTIMISM=0x82B4543D23dd102E0D13508019d510AF35dbe6b2
-export DISPATCHER_ADDRESS_BASE=0x756C7B2525E926ad8CAe3124E220B64D44D3e4d2
+cd ibc-explorer
+npm install
 npm run dev
 ```
 
 ## Run via Docker
-You can run via docker
+Alternatively you can run via Docker:
 
 ```shell
 docker build -t ibc-explorer .

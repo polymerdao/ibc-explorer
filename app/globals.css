@@ -1,3 +1,71 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer base {
+  body {
+    @apply h-screen flex flex-col items-center bg-bg-light text-fg-light antialiased;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    body {
+      @apply bg-bg-dark text-fg-dark;
+    }
+  }
+
+  main {
+    @apply flex-1 w-full min-w-0 xl:min-w-[80rem] max-w-screen-xl xl:w-4/5 mx-auto px-4 sm:px-8 pt-6 md:pt-8 xl:pt-10 pb-6;
+  }
+
+  ::-webkit-scrollbar {
+    @apply w-2 h-2 rounded-lg bg-content-bg-light dark:bg-bg-dark;
+  }
+  ::-webkit-scrollbar-track {
+    @apply mt-[81.5px] rounded-lg bg-bg-light dark:bg-bg-dark;
+  }
+  ::-webkit-scrollbar-thumb {
+    @apply rounded-lg bg-slate-300 dark:bg-slate-500;
+  }
+  ::-webkit-scrollbar-corner {
+    @apply rounded-lg bg-bg-light dark:bg-bg-dark;
+  }
+
+  input[type="number"]::-webkit-inner-spin-button,
+  input[type="number"]::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+
+  .table-height {
+    @apply  max-h-[calc(100vh-19.2rem)] md:max-h-[calc(100vh-19.7rem)] xl:max-h-[calc(100vh-20.3rem)];
+  }
+
+  h1 {
+    @apply text-2xl font-medium;
+  }
+  h2 {
+    @apply text-xl;
+  }
+  h3 {
+    @apply text-lg;
+  }
+
+  .btn {
+    @apply px-4 py-2 rounded-md bg-content-bg-light dark:bg-bg-dark dark:hover:bg-content-bg-dark dark:hover:text-white border border-slate-300 dark:border-slate-500 hover:border-transparent transition ease-in-out duration-200 font-medium;
+  }
+
+  .btn-accent {
+    @apply text-sky-700 bg-sky-100 dark:text-sky-100 dark:bg-sky-950 dark:hover:bg-sky-950;
+  }
+  
+  *:focus {
+    @apply outline-none;
+  }
+
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+}
