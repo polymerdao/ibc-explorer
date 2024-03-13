@@ -7,6 +7,7 @@ import { GetTmClient } from 'api/utils/cosmos';
 import Abi from 'utils/dispatcher.json';
 import { pLimit } from 'plimit-lit';
 import { SimpleCache } from '@/api/utils/cache';
+import { getConcurrencyLimit } from '@/api/utils/helpers';
 
 export const dynamic = 'force-dynamic'; // defaults to auto
 
@@ -14,7 +15,7 @@ function getLookbackTime() {
   return process.env.LOOKBACK_TIME ? parseInt(process.env.LOOKBACK_TIME) : 10 * 60 * 60;
 }
 
-const limit = pLimit(process.env.CONCURRENCY_LIMIT ? parseInt(process.env.CONCURRENCY_LIMIT) : 5); // Adjust this number to the maximum concurrency you want
+const limit = pLimit(getConcurrencyLimit()); // Adjust this number to the maximum concurrency you want
 
 
 export async function getPackets() {
