@@ -3,22 +3,29 @@
 @tailwind utilities;
 
 :root {
-  --background-start-rgb: #f1f5f9;
-  --background-middle-rgb: #FFFFFF;
-  --background-end-rgb: #f1f5f9;
+  --background-dark: #F1F5F9;
+  --background-accent: #FFFFFF;
+  --background-accent-light: #FFFFFF;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background-start-rgb: #020617;
-    --background-middle-rgb: #0f172a;
-    --background-end-rgb: #020617;
+    --background-dark: #020617;
+    --background-accent: #0F172A;
+    --background-accent-light: #082f4966;
   }
 }
 
 @layer base {
   body {
-    background: linear-gradient(203deg in hsl shorter hue, var(--background-start-rgb) 47%, var(--background-middle-rgb), var(--background-end-rgb) 77%);
+    background: linear-gradient(203deg in hsl shorter hue,
+      var(--background-dark) 15%,
+      var(--background-accent-light),
+      var(--background-dark) 35%,
+      var(--background-dark) 50%,
+      var(--background-accent),
+      var(--background-dark) 80%
+    );
     @apply h-screen flex flex-col items-center bg-bg-light text-fg-light antialiased;
   }
 
