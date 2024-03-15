@@ -114,7 +114,7 @@ export function IbcTable<TableType extends Packet | Client | IdentifiedChannel |
         <table
           className="min-w-full"
           style={{width: table.getCenterTotalSize()}}>
-          <thead className="sticky top-0 h-20 bg-content-bg-light dark:content-bg-dark">
+          <thead className="sticky top-0 bg-content-bg-light dark:content-bg-dark">
             {table.getHeaderGroups().map(headerGroup => (
               <tr key={headerGroup.id}>
               {headerGroup.headers.map(header => {
@@ -124,7 +124,7 @@ export function IbcTable<TableType extends Packet | Client | IdentifiedChannel |
                       header.id === 'destChain'
                       ? "pl-4"
                       : "pl-8"
-                      , "pb-2 dark:bg-bg-dark last:pr-6 whitespace-nowrap"
+                      , "pb-2 h-20 dark:bg-bg-dark last:pr-6 whitespace-nowrap"
                     )}
                     style={{width: header.getSize()}}>
                     {header.isPlaceholder ? null : (
