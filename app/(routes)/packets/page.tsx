@@ -116,6 +116,7 @@ const columns = [
 
 export default function Packets() {
   const [packets, setPackets] = useState<Packet[]>([]);
+  const [searchHash, setSearchHash] = useState<string>('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({
@@ -158,6 +159,26 @@ export default function Packets() {
       });
   }
 
+  function searchByHash() {
+    setLoading(true);
+    fetch(`/api/packets?txHash=${searchHash}`)
+      .then(res => {
+        if (!res.ok) {
+          console.error(res.status);
+          setError(true);
+          setLoading(false);
+        }
+        return res.json();
+      })
+      .then(data => {
+        // Load modal to show one packet
+        setLoading(false);
+      }).catch(err => {
+        setError(true);
+        setLoading(false);
+      });
+  }
+
   const table = useReactTable({
     data: packets,
     columns,
@@ -190,9 +211,24 @@ export default function Packets() {
         </>}
       />
 
-      <div className="flex flex-row justify-between mr-28">
-        <h1 className="ml-1">Packets</h1>
-        <button onClick={() => loadData()} className="btn btn-accent z-10 mr-4">
+      <h1 className="ml-1">Packets</h1>
+      <div className="flex flex-row justify-between mx-1 mt-4">
+        <div className="flex flex-row justify-left">
+          <input
+            type="text"
+            placeholder="Search by tx hash"
+            className="w-64 rounded-md border border-slate-300 dark:border-slate-500 px-3"
+            value={searchHash}
+            onChange={e => setSearchHash(e.target.value)}
+          />
+          <button
+            type="submit"
+            className="btn ml-2"
+            onClick={() => searchByHash()}>
+            Search
+          </button>
+        </div>
+        <button onClick={() => loadData()} className="btn btn-accent">
           Reload
         </button>
       </div>

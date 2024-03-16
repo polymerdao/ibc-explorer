@@ -11,8 +11,8 @@ let baseDispatcherSimClient = process.env.DISPATCHER_ADDRESS_BASE_SIMCLIENT!;
 
 let opClientName = process.env.OPTIMISM_CLIENT_NAME!;
 let baseClientName = process.env.BASE_CLIENT_NAME!;
-let opClientSimClientName = process.env.OPTIMISM_CLIENT_SIMCLIENT_NAME!;
-let baseClientSimClientName = process.env.BASE_CLIENT_SIMCLIENT_NAME!;
+let opSimClientName = process.env.OPTIMISM_CLIENT_SIMCLIENT_NAME!;
+let baseSimClientName = process.env.BASE_CLIENT_SIMCLIENT_NAME!;
 
 let optimismRPC =
   process.env.OPTIMISM_RPC ||
@@ -29,7 +29,7 @@ export const CHAIN_CONFIGS: {
     display: 'Optimism',
     rpc: optimismRPC,
     dispatchers: [opDispatcher, opDispatcherSimClient],
-    clients: [opClientName, opClientSimClientName],
+    clients: [opClientName, opSimClientName],
     blockTime: 2,
     icon: OptimismIcon,
   },
@@ -38,7 +38,7 @@ export const CHAIN_CONFIGS: {
     display: 'Base',
     rpc: baseRPC,
     dispatchers: [baseDispatcher, baseDispatcherSimClient],
-    clients: [baseClientName, baseClientSimClientName],
+    clients: [baseClientName, baseSimClientName],
     blockTime: 2,
     icon: BaseIcon,
   },

@@ -260,3 +260,62 @@ export async function getPackets() {
   });
   return response;
 }
+
+export async function getPacket(txHash: string) {
+  // let transaction: ethers.TransactionResponse | undefined;
+
+  // for (const chain of Object.keys(CHAIN_CONFIGS)) {
+  //   const chainId = chain as CHAIN;
+  //   const provider = new CachingJsonRpcProvider(CHAIN_CONFIGS[chainId].rpc, CHAIN_CONFIGS[chainId].id);
+  //   const currTx = await provider.getTransaction(txHash);
+  //   if (currTx) {
+  //     transaction = currTx;
+  //     break;
+  //   }
+  // };
+
+  // if (!transaction) {
+  //   return [];
+  // }
+
+  // const packet: Packet = {} as Packet;
+  // packet.sendTx = transaction.hash;
+  // packet.createTime = transaction.blockNumber!;
+  // return [packet];
+  let packets;
+
+  try {
+    const headers = {
+      'content-type': 'application/json',
+    };
+    const requestBody = {
+      query: `query SendPacket($txHash:String!){
+                sendPackets(where:{transactionHash:$txHash}){
+                  items{
+                    sourcePortAddress
+                    sourceChannelId
+                    packet
+                    sequence
+                    blockNumber
+                    transactionHash
+                  }
+                }
+              }`,
+      variables: { txHash }
+    };
+    const options = {
+      method: 'POST',
+      headers,
+      body: JSON.stringify(requestBody)
+    };
+    const response = await (await fetch(process.env.INDEXER_URL!, options)).json();
+    if (response?.data?.sendPackets.items.length > 0) {
+      packets = response.data.sendPackets.items;
+    }
+  }
+  catch (err) {
+    console.log('Error fetching packet: ', err);
+  }
+
+  return packets || [];
+}

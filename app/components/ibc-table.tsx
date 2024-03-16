@@ -28,18 +28,32 @@ export function IbcTable<TableType extends Packet | Client | IdentifiedChannel |
   const [selectedRow, setSelectedRow] = useState<TableType | null>(null);
 
   return (
-    <div className="relative -top-[2.64rem]">
+    <div className="relative mt-4">
 
       {/* Table View Options */}
-      <div className="flex flex-row justify-between items-end mb-3">
-        <span className="ml-1 text-slate-700 dark:text-slate-300">
+      <div className="flex flex-row justify-between items-end mb-3 mx-1 text-slate-700 dark:text-slate-300">
+        <span>
           {table.getFilteredRowModel().rows.length} total results
         </span>
 
-        <div className="flex flex-col items-end">
-          <Popover className="mb-6">
+        <div className="flex flex-row items-end space-x-3">
+          <select
+            value={table.getState().pagination.pageSize}
+            onChange={e => {
+              table.setPageSize(Number(e.target.value))
+            }}
+            aria-label="Rows per page"
+            className="mr-1 bg-transparent">
+            {[10, 20, 50, 100].map(pageSize => (
+              <option key={pageSize} value={pageSize}>
+                {pageSize} Rows / Page
+              </option>
+            ))}
+          </select>
+
+          <Popover>
             {({ open }) => (<>
-              <Popover.Button className="btn flex flex-row pr-[0.8rem]">
+              <Popover.Button className="flex flex-row h-[1.47rem]">
                 Columns
                 <FiChevronDown className={classNames(
                   open
@@ -80,20 +94,6 @@ export function IbcTable<TableType extends Packet | Client | IdentifiedChannel |
               </Transition>
             </>)}
           </Popover>
-
-          <select
-            value={table.getState().pagination.pageSize}
-            onChange={e => {
-              table.setPageSize(Number(e.target.value))
-            }}
-            aria-label="Rows per page"
-            className="mr-1 bg-transparent text-slate-700 dark:text-slate-300">
-            {[10, 20, 50, 100].map(pageSize => (
-              <option key={pageSize} value={pageSize}>
-                {pageSize} Rows / Page
-              </option>
-            ))}
-          </select>
 
         </div>
       </div>
