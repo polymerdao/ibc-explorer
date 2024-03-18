@@ -57,7 +57,7 @@ export function IbcTable<TableType extends Packet | Client | IdentifiedChannel |
                 leaveFrom="transform scale-100 opacity-100"
                 leaveTo="transform scale-95 opacity-0">
                 <Popover.Panel className="absolute z-20 mt-2 right-0">
-                  <div className="bg-content-bg-light dark:bg-content-bg-dark pl-6 pr-9 py-5 border rounded-md border-slate-500">
+                  <div className="bg-bg-light-accent dark:bg-bg-dark-accent pl-6 pr-9 py-5 border rounded-md border-slate-500">
                     {table.getAllLeafColumns().map(column => { return (
                       <div key={column.id} className="py-[0.17rem]">
                         <label>
@@ -99,7 +99,7 @@ export function IbcTable<TableType extends Packet | Client | IdentifiedChannel |
       </div>
 
       { /* Table */ }
-      <div className="w-full border border-slate-500 rounded-md bg-content-bg-light dark:bg-content-bg-dark overflow-y-auto table-height scroll-smooth min-h-72
+      <div className="w-full border border-slate-500 rounded-md bg-bg-light-accent dark:bg-bg-dark-accent overflow-y-auto table-height scroll-smooth min-h-72
         max-h-[calc(100vh-19rem)] xl:max-h-[calc(100vh-20rem)]">
         {loading && 
           <div className="absolute mt-40 z-10 w-full grid justify-items-center font-mewdium">
@@ -115,7 +115,7 @@ export function IbcTable<TableType extends Packet | Client | IdentifiedChannel |
         <table
           className="min-w-full"
           style={{width: table.getCenterTotalSize()}}>
-          <thead className="sticky top-0 bg-content-bg-light dark:content-bg-dark">
+          <thead className="sticky top-0 bg-bg-light-accent dark:bg-dark-accent">
             {table.getHeaderGroups().map(headerGroup => (
               <tr key={headerGroup.id}>
               {headerGroup.headers.map(header => {
@@ -195,13 +195,13 @@ export function IbcTable<TableType extends Packet | Client | IdentifiedChannel |
       { /* Pagination */ }
       <div className="flex flex-row justify-center items-center mt-4">
         <button
-          className="rounded p-2 disabled:opacity-60 enabled:hover:bg-content-bg-light enabled:dark:hover:bg-content-bg-dark transition-colors ease-in-out duration-200"
+          className="rounded p-2 disabled:opacity-60 enabled:hover:bg-bg-light-accent enabled:dark:hover:bg-bg-dark-accent transition-colors ease-in-out duration-200"
           onClick={() => table.setPageIndex(0)}
           disabled={!table.getCanPreviousPage()}>
           <FiChevronsLeft className="w-6 h-6"/>
         </button>
         <button
-          className="rounded p-2 disabled:opacity-60 enabled:hover:bg-content-bg-light enabled:dark:hover:bg-content-bg-dark transition-colors ease-in-out duration-200"
+          className="rounded p-2 disabled:opacity-60 enabled:hover:bg-bg-light-accent enabled:dark:hover:bg-bg-dark-accent transition-colors ease-in-out duration-200"
           onClick={() => table.previousPage()}
           disabled={!table.getCanPreviousPage()}>
           <FiChevronLeft className="w-5 h-5"/>
@@ -210,13 +210,13 @@ export function IbcTable<TableType extends Packet | Client | IdentifiedChannel |
         <span className="mx-4 font-medium">Page {table.getState().pagination.pageIndex + 1} of {table.getPageCount()}</span>
 
         <button
-          className="rounded p-2 disabled:opacity-60 enabled:hover:bg-content-bg-light enabled:dark:hover:bg-content-bg-dark transition-colors ease-in-out duration-200"
+          className="rounded p-2 disabled:opacity-60 enabled:hover:bg-bg-light-accent enabled:dark:hover:bg-bg-dark-accent transition-colors ease-in-out duration-200"
           onClick={() => table.nextPage()}
           disabled={!table.getCanNextPage()}>
           <FiChevronRight className="w-5 h-5"/>
         </button>
         <button
-          className="rounded p-2 disabled:opacity-60 enabled:hover:bg-content-bg-light enabled:dark:hover:bg-content-bg-dark transition-colors ease-in-out duration-200"
+          className="rounded p-2 disabled:opacity-60 enabled:hover:bg-bg-light-accent enabled:dark:hover:bg-bg-dark-accent transition-colors ease-in-out duration-200"
           onClick={() => table.setPageIndex(table.getPageCount() - 1)}
           disabled={!table.getCanNextPage()}>
           <FiChevronsRight className="w-6 h-6"/>
@@ -238,7 +238,7 @@ function ColumnFilter({ column, table }: { column: Column<any, any>, table: Tabl
       <select
         value={(columnFilterValue ?? '') as string}
         onChange={e => column.setFilterValue(e.target.value)}
-        className="w-28 border h-6 border-slate-500 shadow-none rounded dark:bg-bg-dark font-medium text-slate-700 dark:text-slate-300 dark:bg-content-bg-dark"
+        className="w-28 border h-6 border-slate-500 shadow-none rounded dark:bg-bg-dark font-medium text-slate-700 dark:text-slate-300 dark:bg-bg-dark-accent"
         aria-label={"Filter by " + column.columnDef.header as string}>
         <option value="">All</option>
         {
@@ -255,7 +255,7 @@ function ColumnFilter({ column, table }: { column: Column<any, any>, table: Tabl
         value={(columnFilterValue ?? '') as string}
         onChange={e => column.setFilterValue(e.target.value)}
         placeholder={`Search...`}
-        className="shadow-none h-6 pl-1 min-w-24 w-5/6 max-w-48 border border-slate-500 rounded dark:bg-bg-dark font-medium dark:bg-content-bg-dark"
+        className="shadow-none h-6 pl-1 min-w-24 w-5/6 max-w-48 border border-slate-500 rounded dark:bg-bg-dark font-medium dark:bg-bg-dark-accent"
         aria-label={"Filter by " + column.columnDef.header as string}
       />
     );

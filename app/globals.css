@@ -3,36 +3,39 @@
 @tailwind utilities;
 
 :root {
-  --background-dark: #F1F5F9;
+  --background-main: #F1F5F9;
   --background-accent: #FFFFFF;
   --background-accent-light: #FFFFFF;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background-dark: #020617;
-    --background-accent: #0F172A;
-    --background-accent-light: #082f4966;
-  }
+  --dark-background-main: #020617;
+  --dark-background-accent: #0F172A;
+  --dark-background-accent-light: #041429;
 }
 
 @layer base {
-  body {
+  :not(.dark) body {
     background: linear-gradient(203deg in hsl shorter hue,
-      var(--background-dark) 15%,
+      var(--background-main) 15%,
       var(--background-accent-light),
-      var(--background-dark) 35%,
-      var(--background-dark) 50%,
+      var(--background-main) 35%,
+      var(--background-main) 50%,
       var(--background-accent),
-      var(--background-dark) 80%
+      var(--background-main) 80%
     );
-    @apply h-screen flex flex-col items-center bg-bg-light text-fg-light antialiased;
   }
 
-  @media (prefers-color-scheme: dark) {
-    body {
-      @apply bg-bg-dark text-fg-dark;
-    }
+  .dark body {
+    background: linear-gradient(203deg in hsl shorter hue,
+      var(--dark-background-main) 15%,
+      var(--dark-background-accent-light),
+      var(--dark-background-main) 35%,
+      var(--dark-background-main) 50%,
+      var(--dark-background-accent),
+      var(--dark-background-main) 80%
+    );
+  }
+
+  body {
+    @apply h-screen flex flex-col items-center bg-bg-light text-fg-light dark:bg-bg-dark dark:text-fg-dark antialiased;
   }
 
   main {
@@ -40,7 +43,7 @@
   }
 
   ::-webkit-scrollbar {
-    @apply w-2 h-2 rounded-lg bg-content-bg-light dark:bg-bg-dark;
+    @apply w-2 h-2 rounded-lg bg-bg-light-accent dark:bg-bg-dark;
   }
   ::-webkit-scrollbar-track {
     @apply mt-[81.5px] rounded-lg bg-bg-light dark:bg-bg-dark;
@@ -63,7 +66,7 @@
   }
 
   .btn {
-    @apply px-4 py-2 rounded-md bg-content-bg-light dark:bg-bg-dark dark:hover:bg-content-bg-dark dark:hover:text-white border border-slate-300 dark:border-slate-500 hover:border-transparent transition ease-in-out duration-200 font-medium;
+    @apply px-4 py-2 rounded-md bg-bg-light-accent dark:bg-bg-dark dark:hover:bg-bg-dark-accent dark:hover:text-white border border-slate-300 dark:border-slate-500 hover:border-transparent transition ease-in-out duration-200 font-medium;
   }
 
   .btn-accent {
