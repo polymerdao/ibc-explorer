@@ -9,6 +9,9 @@
 # testing
 /coverage
 
+# mock endpoints
+/app/api/mock-*/*.ts
+
 # next.js
 /.next/
 /out/

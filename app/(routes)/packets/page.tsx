@@ -11,7 +11,8 @@ import {
   SortingState,
   useReactTable }
 from "@tanstack/react-table";
-import { IbcTable } from "components/ibc-table";
+import { IbcTable } from "components/table/ibc-table";
+import { BooleanCell } from "components/table/boolean-cell";
 import { Modal } from "components/modal";
 import { PacketDetails } from "./packets-details";
 import { Packet, PacketStates } from "utils/types/packet";
@@ -24,9 +25,13 @@ const columns = [
     header: 'ID',
     enableHiding: true
   }),
-  columnHelper.accessor('state', {
+  columnHelper.accessor(row => stateToString(row.state), {
     header: 'State',
-    cell: props => <span>{ stateToString(props.getValue()) }</span>,
+    enableHiding: true
+  }),
+  columnHelper.accessor(row => (row.sourceChain.includes('sim') || row.destChain.includes('sim')), {
+    header: 'Sim Client',
+    cell: props => <BooleanCell value={props.getValue()} />,
     enableHiding: true
   }),
   columnHelper.accessor('sendTx', {
@@ -211,9 +216,9 @@ export default function Packets() {
   });
 
   return (
-    <div className="">
-
-      <Modal open={error} setOpen={setError}
+    <div className="h-0">
+      <Modal 
+        open={error} setOpen={setError}
         content={<>
           <h1>Error</h1>
           <p className="mt-1 mr-8">

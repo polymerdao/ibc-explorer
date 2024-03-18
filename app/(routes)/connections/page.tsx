@@ -11,7 +11,8 @@ import {
   SortingState,
   useReactTable }
 from "@tanstack/react-table";
-import { IbcTable } from "components/ibc-table";
+import { IbcTable } from "components/table/ibc-table";
+import { BooleanCell } from "components/table/boolean-cell";
 import { IdentifiedConnection, State } from "cosmjs-types/ibc/core/connection/v1/connection";
 import { Modal } from "components/modal";
 
@@ -31,6 +32,11 @@ const columns = [
   columnHelper.accessor('state', {
     header: 'State',
     cell: props => <span>{ stateToString(props.getValue()) }</span>,
+    enableHiding: true
+  }),
+  columnHelper.accessor(row => (row.clientId.includes('sim') || row.counterparty.clientId.includes('sim')), {
+    header: 'Sim Client',
+    cell: props => <BooleanCell value={props.getValue()} />,
     enableHiding: true
   }),
   columnHelper.accessor('counterparty.connectionId', {
@@ -101,7 +107,7 @@ export default function Packets() {
   });
 
   return (
-    <div className="">
+    <div className="h-0">
       <Modal
         open={error} setOpen={setError}
         content={<>

@@ -9,7 +9,8 @@ import {
   getPaginationRowModel,
   useReactTable }
 from "@tanstack/react-table";
-import { IbcTable } from "components/ibc-table";
+import { IbcTable } from "components/table/ibc-table";
+import { BooleanCell } from "components/table/boolean-cell";
 import { Modal } from "components/modal";
 import { Client } from "utils/types/client";
 
@@ -17,6 +18,11 @@ const columnHelper = createColumnHelper<Client>();
 const columns = [
   columnHelper.accessor('clientId', {
     header: 'Client ID',
+    enableHiding: true
+  }),
+  columnHelper.accessor(row => (row.clientId.includes('sim')), {
+    header: 'Sim Client',
+    cell: props => <BooleanCell value={props.getValue()} />,
     enableHiding: true
   }),
   columnHelper.accessor('clientState.revisionHeight', {
@@ -77,7 +83,7 @@ export default function Packets() {
   });
 
   return (
-    <div className="">
+    <div className="h-0">
       <Modal
         open={error} setOpen={setError}
         content={<>

@@ -11,7 +11,8 @@ import {
   useReactTable,
   VisibilityState
 } from '@tanstack/react-table';
-import { IbcTable } from 'components/ibc-table';
+import { IbcTable } from 'components/table/ibc-table';
+import { BooleanCell } from "components/table/boolean-cell";
 import { IdentifiedChannel, State } from 'cosmjs-types/ibc/core/channel/v1/channel';
 import { Modal } from 'components/modal';
 
@@ -19,6 +20,7 @@ const columnHelper = createColumnHelper<IdentifiedChannel>();
 const columns = [
   columnHelper.accessor('channelId', {
     header: 'Channel ID',
+    cell: props => <span className="whitespace-nowrap">{props.getValue()}</span>,
     enableHiding: true,
     enableSorting: true,
     sortingFn: 'alphanumeric'
@@ -26,6 +28,12 @@ const columns = [
   columnHelper.accessor('state', {
     header: 'State',
     cell: props => <span>{ stateToString(props.getValue()) }</span>,
+    enableHiding: true
+  }),
+  columnHelper.accessor(row => (row.portId.includes('sim') || row.counterparty.portId.includes('sim')), {
+    id: 'simClient',
+    header: 'Sim Client',
+    cell: props => <BooleanCell value={props.getValue()} />,
     enableHiding: true
   }),
   columnHelper.accessor('portId', {
@@ -100,7 +108,7 @@ export default function Packets() {
   });
 
   return (
-    <div className="">
+    <div className="h-0">
       <Modal
         open={error} setOpen={setError}
         content={<>
