@@ -11,16 +11,18 @@ const config: Config = {
     extend: {
       colors: {
         'bg-light': colors.slate[100],
+        'bg-light-accent': colors.white,
         'fg-light': colors.slate[800],
-        'content-bg-light': colors.white,
         'bg-dark': colors.slate[950],
+        'bg-dark-accent': colors.slate[900],
         'fg-dark': colors.slate[50],
-        'content-bg-dark': colors.slate[900],
         'primary': colors.emerald,
         'secondary': colors.sky,
       }
     },
   },
+  darkMode: 'selector',
   plugins: [],
 };
+
 export default config;
