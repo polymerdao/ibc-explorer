@@ -51,11 +51,15 @@
   }
 
   .btn {
-    @apply px-4 py-2 rounded-md bg-content-bg-light dark:bg-bg-dark dark:hover:bg-content-bg-dark dark:hover:text-white border border-slate-300 dark:border-slate-500 hover:border-transparent transition ease-in-out duration-200 font-medium;
+    @apply px-4 py-2 rounded-md bg-content-bg-light dark:bg-content-bg-dark dark:hover:bg-content-bg-dark dark:hover:text-white border border-slate-400 dark:border-slate-500 hover:border-transparent disabled:border-slate-300 dark:disabled:border-slate-600 disabled:hover:border-slate-300 disabled:hover:dark:border-slate-600 transition ease-in-out duration-200 font-medium disabled:text-slate-400 disabled:hover:text-slate-400 dark:disabled:text-slate-500 dark:disabled:hover:text-slate-500;
   }
 
   .btn-accent {
     @apply text-sky-700 bg-sky-100 dark:text-sky-100 dark:bg-sky-950 dark:hover:bg-sky-950;
+  }
+
+  .text-field {
+    @apply rounded-md bg-content-bg-light dark:bg-content-bg-dark border border-slate-300 dark:border-slate-600 px-3 hover:border-transparent transition ease-in-out duration-200;
   }
   
   *:focus {

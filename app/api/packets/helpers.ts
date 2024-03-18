@@ -6,6 +6,7 @@ import { CachingJsonRpcProvider } from '@/api/utils/provider';
 import Abi from '@/utils/dispatcher.json';
 import { GetTmClient } from '@/api/utils/cosmos';
 import { Packet, PacketStates } from '@/utils/types/packet';
+import { NextResponse } from 'next/server';
 
 export async function getPackets() {
   const limit = pLimit(getConcurrencyLimit()); // Adjust this number to the maximum concurrency you want
@@ -282,7 +283,7 @@ export async function getPacket(txHash: string) {
   // packet.sendTx = transaction.hash;
   // packet.createTime = transaction.blockNumber!;
   // return [packet];
-  let packets;
+  let response;
 
   try {
     const headers = {
@@ -308,14 +309,32 @@ export async function getPacket(txHash: string) {
       headers,
       body: JSON.stringify(requestBody)
     };
-    const response = await (await fetch(process.env.INDEXER_URL!, options)).json();
-    if (response?.data?.sendPackets.items.length > 0) {
-      packets = response.data.sendPackets.items;
+    const res = await (await fetch(process.env.INDEXER_URL!, options)).json();
+    if (res?.data?.sendPackets.items.length > 0) {
+      response = res.data.sendPackets.items[0];
+    } else {
+      return [];
     }
   }
   catch (err) {
     console.log('Error fetching packet: ', err);
   }
 
-  return packets || [];
+  const packet: Packet = {
+    sourcePortAddress: response.sourcePortAddress,
+    sourceChannelId: response.sourceChannelId,
+    destPortAddress: '',
+    destChannelId: '',
+    timeout: '',
+    fee: '',
+    id: '',
+    sequence: response.sequence,
+    state: PacketStates.SENT,
+    createTime: response.blockNumber,
+    sendTx: response.transactionHash,
+    sourceChain: '',
+    destChain: ''
+  };
+
+  return packet ? [packet] : [];
 }

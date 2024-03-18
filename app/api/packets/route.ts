@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { SimpleCache } from 'api/utils/cache';
 import { getPacket } from 'api/packets/helpers';
-import { get } from 'lodash';
 
 export const dynamic = 'force-dynamic'; // defaults to auto
 
