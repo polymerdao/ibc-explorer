@@ -1,9 +1,19 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+import { Rubik, Noto_Sans_Mono } from 'next/font/google'
 import Navbar from "./components/navbar";
 import "./globals.css";
 
-const inter = Inter({ subsets: ["latin"] });
+const primary = Rubik({
+  subsets: ['latin'],
+  variable: '--primary-font',
+  display: 'swap',
+})
+ 
+const mono = Noto_Sans_Mono({
+  subsets: ['latin'],
+  variable: '--mono-font',
+  display: 'swap',
+})
 
 export const metadata: Metadata = {
   title: "IBC Explorer",
@@ -16,8 +26,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className="dark">
-      <body className={inter.className}>
+    <html lang="en" className={'dark ' + `${primary.variable} ${mono.variable}`}>
+      <body>
         <Navbar />
         <main>
           {children}

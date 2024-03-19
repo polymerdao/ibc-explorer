@@ -35,7 +35,7 @@
   }
 
   body {
-    @apply h-screen flex flex-col items-center bg-bg-light text-fg-light dark:bg-bg-dark dark:text-fg-dark antialiased;
+    @apply h-screen flex flex-col items-center bg-bg-light text-fg-light dark:bg-bg-dark dark:text-fg-dark antialiased font-primary;
   }
 
   main {
@@ -56,13 +56,13 @@
   }
 
   h1 {
-    @apply text-2xl font-medium;
+    @apply text-3xl font-medium;
   }
   h2 {
-    @apply text-xl;
+    @apply text-2xl;
   }
   h3 {
-    @apply text-lg;
+    @apply text-xl;
   }
 
   .btn {

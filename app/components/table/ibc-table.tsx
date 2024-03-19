@@ -125,7 +125,7 @@ export function IbcTable<TableType extends Packet | Client | IdentifiedChannel |
                       header.id === 'destChain'
                       ? "pl-4"
                       : "pl-8"
-                      , "pb-2 h-20 dark:bg-bg-dark last:pr-6 whitespace-nowrap"
+                      , "pb-2 h-20 dark:bg-bg-dark last:pr-6 whitespace-nowrap font-medium"
                     )}
                     style={{width: header.getSize()}}>
                     {header.isPlaceholder ? null : (
@@ -145,7 +145,7 @@ export function IbcTable<TableType extends Packet | Client | IdentifiedChannel |
               </tr>
             ))}
           </thead>
-          <tbody className="min-h-32">
+          <tbody className="min-h-32 font-mono">
             {loading ? (
               <tr>
                 <td></td>
