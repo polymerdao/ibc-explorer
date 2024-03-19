@@ -263,28 +263,7 @@ export async function getPackets() {
 }
 
 export async function getPacket(txHash: string) {
-  // let transaction: ethers.TransactionResponse | undefined;
-
-  // for (const chain of Object.keys(CHAIN_CONFIGS)) {
-  //   const chainId = chain as CHAIN;
-  //   const provider = new CachingJsonRpcProvider(CHAIN_CONFIGS[chainId].rpc, CHAIN_CONFIGS[chainId].id);
-  //   const currTx = await provider.getTransaction(txHash);
-  //   if (currTx) {
-  //     transaction = currTx;
-  //     break;
-  //   }
-  // };
-
-  // if (!transaction) {
-  //   return [];
-  // }
-
-  // const packet: Packet = {} as Packet;
-  // packet.sendTx = transaction.hash;
-  // packet.createTime = transaction.blockNumber!;
-  // return [packet];
   let response;
-
   try {
     const headers = {
       'content-type': 'application/json',
@@ -299,6 +278,11 @@ export async function getPacket(txHash: string) {
                     sequence
                     blockNumber
                     transactionHash
+                    chainId
+                    gas
+                    maxFeePerGas
+                    maxPriorityFeePerGas
+                    from
                   }
                 }
               }`,
@@ -312,6 +296,7 @@ export async function getPacket(txHash: string) {
     const res = await (await fetch(process.env.INDEXER_URL!, options)).json();
     if (res?.data?.sendPackets.items.length > 0) {
       response = res.data.sendPackets.items[0];
+      console.log(response);
     } else {
       return [];
     }
@@ -336,5 +321,5 @@ export async function getPacket(txHash: string) {
     destChain: ''
   };
 
-  return packet ? [packet] : [];
+  return packet;
 }

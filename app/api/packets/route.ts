@@ -12,6 +12,6 @@ export async function GET(request: NextRequest) {
     return NextResponse.json(allPackets || []);
   }
 
-  const packets = await getPacket(txHash);
-  return NextResponse.json(packets || []);
+  const packet = await getPacket(txHash);
+  return NextResponse.json([packet]);
 }
