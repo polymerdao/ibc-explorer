@@ -18,7 +18,7 @@ export function RowDetails(selectedRow: Packet) {
 
   return (selectedRow &&
     <>
-      <h1>Packet Details</h1>
+      <h2>Packet Details</h2>
       <div className="flex flex-col gap-2 mt-4">
 
         <div className="flex flex-row justify-between">

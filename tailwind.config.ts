@@ -21,7 +21,8 @@ const config: Config = {
       },
       fontFamily: {
         primary: ['var(--primary-font)'],
-        mono: ['var(--mono-font)']
+        mono: ['var(--mono-font)'],
+        accent: ['var(--secondary-font)']
       }
     }
   },
