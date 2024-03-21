@@ -73,7 +73,10 @@ export function IbcComponent<T extends IdentifiedChannel | IdentifiedConnection 
     })
   }
 
-  useEffect(loadData, [])
+  useEffect(() => {
+    // Your effect code
+}, [props.ibcEntityName, props.queryParams]); // Add props.ibcEntityName and props.queryParams to the dependency array
+
 
   const hasSearchFilter = Boolean(filterValue);
 
