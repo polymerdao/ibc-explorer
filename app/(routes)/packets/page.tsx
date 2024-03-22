@@ -49,7 +49,7 @@ const columns = [
     header: 'Dest',
     cell: props => (
       <div className="flex flex-row justify-between">
-        <div className="ml-6"><ChainCell chain={props.getValue()} /></div>
+        <div className="ml-5"><ChainCell chain={props.getValue()} /></div>
       </div>
     ),
     enableHiding: true,

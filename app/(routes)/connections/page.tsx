@@ -12,7 +12,7 @@ import {
   useReactTable }
 from "@tanstack/react-table";
 import { IbcTable } from "components/table/ibc-table";
-import { BooleanCell } from "components/table/boolean-cell";
+import { SimIcon } from "components/icons";
 import { IdentifiedConnection, State } from "cosmjs-types/ibc/core/connection/v1/connection";
 import { Modal } from "components/modal";
 
@@ -20,7 +20,16 @@ const columnHelper = createColumnHelper<IdentifiedConnection>();
 const columns = [
   columnHelper.accessor('id', {
     header: 'Connection ID',
-    cell: props => <span className="whitespace-nowrap">{props.getValue()}</span>,
+    cell: props =>
+    <div className="flex flex-row">
+      <span className="whitespace-nowrap">
+        {props.getValue()}
+      </span>
+      {(props.row.original.counterparty?.clientId.toLowerCase().includes('sim') ||
+        props.row.original.clientId?.toLowerCase().includes('sim')) ?
+        <div className="ml-2"><SimIcon /></div>
+        : null}
+    </div>,
     enableHiding: true,
     enableSorting: true,
     sortingFn: 'alphanumeric'
@@ -34,13 +43,9 @@ const columns = [
     cell: props => <span>{ stateToString(props.getValue()) }</span>,
     enableHiding: true
   }),
-  columnHelper.accessor(row => (row.clientId.includes('sim') || row.counterparty.clientId.includes('sim')), {
-    header: 'Sim Client',
-    cell: props => <BooleanCell value={props.getValue()} />,
-    enableHiding: true
-  }),
   columnHelper.accessor('counterparty.connectionId', {
     header: 'Counterparty Connection',
+    cell: props => <span className="whitespace-nowrap">{props.getValue()}</span>,
     enableHiding: true
   }),
   columnHelper.accessor('counterparty.clientId', {

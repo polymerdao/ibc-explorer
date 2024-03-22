@@ -11,7 +11,7 @@ import { Packet } from "utils/types/packet";
 import { Client } from "utils/types/client";
 import { IdentifiedConnection } from "cosmjs-types/ibc/core/connection/v1/connection";
 import { IdentifiedChannel } from "cosmjs-types/ibc/core/channel/v1/channel";
-import { classNames } from "utils/functions";
+import { classNames, classLogic } from "utils/functions";
 import { Select } from "components/select";
 import { useState } from "react";
 import { Fragment } from 'react';
@@ -254,7 +254,23 @@ function ColumnFilter({ column, table }: { column: Column<any, any>, table: Tabl
         value={(columnFilterValue ?? '') as string}
         onChange={e => column.setFilterValue(e.target.value)}
         placeholder={column.columnDef.header as string}
-        className="table-inpt w-fit max-w-44 placeholder:text-fg-dark font-mono placeholder:font-primary"
+        className={classLogic(() => {
+          let classes = "table-inpt w-fit placeholder:text-fg-dark font-mono placeholder:font-primary";
+          console.log(column.id);
+          switch (column.id.toLowerCase()) {
+            case 'counterparty_connectionid':
+              break;
+            case 'state':
+              classes += " max-w-36";
+            case 'delayperiod':
+              classes += " max-w-32";
+            case 'counterparty_channelid':
+              classes += " max-w-48";
+            default:
+              classes += " max-w-44";
+          }
+          return classes;
+        })}
         aria-label={"Filter by " + column.columnDef.header as string}
       />
     );

@@ -23,10 +23,8 @@ export function stateToString (state: PacketStates): string {
     case PacketStates.WRITE_ACK:
     case PacketStates.POLY_WRITE_ACK:
       return 'Confirming';
-      break;
     case PacketStates.ACK:
       return 'Delivered';
-      break;
     default:
       return 'Relaying';
   }
