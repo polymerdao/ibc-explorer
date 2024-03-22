@@ -6,4 +6,7 @@ export interface Client {
 export interface clientState {
   revisionHeight: string;
   revisionNumber: string;
+  chainId: string;
+  chainMemo: string;
+  dispatcherAddr: string;
 }
