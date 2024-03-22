@@ -1,7 +1,14 @@
-import { GetTmClient } from '@/api/utils/cosmos';
+import { setupPolyIbcExtension } from './cosmos/index';
 import { QueryChannelsResponse } from 'cosmjs-types/ibc/core/channel/v1/query';
 import { QueryConnectionsResponse } from 'cosmjs-types/ibc/core/connection/v1/query';
 import { IdentifiedChannel } from 'cosmjs-types/ibc/core/channel/v1/channel';
+import process from 'process';
+import { QueryClient } from '@cosmjs/stargate';
+import { GetTmClient } from '@/api/utils/cosmos';
+import { QueryClientStatesRequest as QueryPolyIbcClientStatesRequest } from './cosmos/_generated/polyibc/core/query'
+import { Tendermint37Client } from '@cosmjs/tendermint-rpc';
+import * as optimism from './cosmos/_generated/polyibc/lightclients/opstackv2/opstackv2'
+
 
 async function getChannels() {
   const tmClient = await GetTmClient();
@@ -34,25 +41,18 @@ export async function getConnections() {
 }
 
 export async function getClients() {
-  const tmClient = await GetTmClient();
+  const client = await Tendermint37Client.connect(process.env.API_URL!);
+  const queryClient = QueryClient.withExtensions(client, setupPolyIbcExtension)
 
-  let clientIds = new Set<string>();
-  let clients = [];
-  const connections = await getConnections();
-  for (const connection of connections) {
-    if (clientIds.has(connection.clientId)) {
-      continue;
-    }
-    const clientState = await tmClient.ibc.client.state(connection.clientId);
+  const polyClients = await queryClient.polyibc.ClientStates(QueryPolyIbcClientStatesRequest.fromPartial({pagination: {
+      limit: "10"
+    }}))
 
-    clients.push({
-      clientId: connection.clientId,
-      clientState: {
-        revisionHeight: String(clientState.proofHeight.revisionHeight),
-        revisionNumber: String(clientState.proofHeight.revisionNumber)
-      }
-    });
-    clientIds.add(connection.clientId);
+  for (const state of polyClients.clientStates) {
+    console.log(state.clientId)
+    console.log(state.clientState)
+    console.log(optimism.ClientState.decode(state.clientState!.value))
   }
-  return clients;
+
+  return []
 }
