@@ -20,6 +20,14 @@ const columns = [
     header: 'Client ID',
     enableHiding: true
   }),
+  columnHelper.accessor('clientState.chainId', {
+    header: 'Chain ID',
+    enableHiding: true
+  }),
+  columnHelper.accessor('clientState.dispatcherAddr', {
+    header: 'Dispatcher',
+    enableHiding: true
+  }),
   columnHelper.accessor(row => (row.clientId.includes('sim')), {
     header: 'Sim Client',
     cell: props => <BooleanCell value={props.getValue()} />,
