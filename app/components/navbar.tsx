@@ -55,14 +55,14 @@ export default function Navbar() {
             ))}
           </div>
 
-          <button
+          {/* <button
             onClick={() => toggleTheme()}
             className="flex items-center justify-center h-10 mt-3 p-3 rounded-md bg-bg-light-accent hover:bg-bg-light dark:bg-bg-dark hover:dark:bg-bg-dark-accent transition ease-in-out">
             {dark
               ? <FiSun className="text-fg-dark w-5 h-5" />
               : <FiMoon className="text-fg-light w-5 h-5" />
             }
-          </button>
+          </button> */}
 
         </div>
 

@@ -256,12 +256,11 @@ function ColumnFilter({ column, table }: { column: Column<any, any>, table: Tabl
         placeholder={column.columnDef.header as string}
         className={classLogic(() => {
           let classes = "table-inpt w-fit placeholder:text-fg-dark font-mono placeholder:font-primary";
-          console.log(column.id);
           switch (column.id.toLowerCase()) {
             case 'counterparty_connectionid':
               break;
             case 'state':
-              classes += " max-w-36";
+              classes += " max-w-[9.5rem]";
             case 'delayperiod':
               classes += " max-w-32";
             case 'counterparty_channelid':

@@ -19,7 +19,7 @@ export function ChainCell({chain, iconSize}: {chain: string, iconSize?: number})
 
   return (
     <div className="relative">
-      <div className="opacity-75">
+      <div className="opacity-75" title={chain}>
         {icon}
       </div>
       {sim && 
