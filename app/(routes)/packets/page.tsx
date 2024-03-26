@@ -244,7 +244,7 @@ export default function Packets() {
           <input
             type="text"
             placeholder="Search by tx hash"
-            className="text-field w-full"
+            className="inpt w-full px-3 rounded-md font-mono placeholder:font-primary"
             value={searchHash}
             onChange={e => setSearchHash(e.target.value)}
             onKeyUp={e => { if (e.key === 'Enter') searchByHash() }}

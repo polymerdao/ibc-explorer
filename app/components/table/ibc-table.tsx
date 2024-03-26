@@ -32,7 +32,7 @@ export function IbcTable<TableType extends Packet | Client | IdentifiedChannel |
     <div className="relative mt-4">
 
       {/* Table View Options */}
-      <div className="flex flex-row justify-between items-end mb-3 mx-1 text-slate-700 dark:text-slate-300">
+      <div className="flex flex-row justify-between items-end mb-2 mx-1 text-slate-700 dark:text-slate-300">
         <span>
           {table.getFilteredRowModel().rows.length} total results
         </span>
@@ -129,7 +129,7 @@ export function IbcTable<TableType extends Packet | Client | IdentifiedChannel |
                       , "py-2 h-20 dark:bg-bg-dark last:pr-6 whitespace-nowrap font-medium first:pl-6"
                     )}
                     style={{width: header.getSize()}}>
-                    {header.isPlaceholder ? null : (
+                    {(header.isPlaceholder || loading) ? null : (
                       <div className="h-12 grid justify-items-start content-center">
                         {!header.column.getCanFilter() ? (
                           <div className="ml-2"> 
@@ -245,6 +245,8 @@ function ColumnFilter({ column, table }: { column: Column<any, any>, table: Tabl
           ...Object.entries(CHAIN_CONFIGS).map(([key, value]) => ({ value: key, label: value.display }))]
         }
         onChange={value => column.setFilterValue(value)}
+        containerClassName="w-24"
+        buttonClassName="inpt h-8 pl-[9px]"
       />
     );
   } else if (typeof firstValue === 'string') {
@@ -255,7 +257,7 @@ function ColumnFilter({ column, table }: { column: Column<any, any>, table: Tabl
         onChange={e => column.setFilterValue(e.target.value)}
         placeholder={column.columnDef.header as string}
         className={classLogic(() => {
-          let classes = "table-inpt w-fit placeholder:text-fg-dark font-mono placeholder:font-primary";
+          let classes = "inpt h-8 px-[9px] w-fit placeholder:text-fg-dark font-mono placeholder:font-primary";
           switch (column.id.toLowerCase()) {
             case 'counterparty_connectionid':
               break;

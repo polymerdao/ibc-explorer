@@ -33,12 +33,11 @@
   }
 
   body {
-    caret-shape: underscore;
     @apply h-screen flex flex-col items-center bg-bg-light text-fg-light dark:bg-bg-dark dark:text-fg-dark antialiased font-primary;
   }
 
   main {
-    @apply flex-1 w-full min-w-0 xl:min-w-[80rem] max-w-screen-xl xl:w-4/5 mx-auto px-4 sm:px-8 pt-6 md:pt-8 xl:pt-10 pb-6;
+    @apply flex-1 w-full min-w-0 xl:min-w-[80rem] max-w-screen-xl xl:w-4/5 mx-auto px-4 sm:px-8 pt-4 md:pt-6 xl:pt-8 pb-6;
   }
 
   ::-webkit-scrollbar {
@@ -65,19 +64,15 @@
   }
 
   .btn {
-    @apply px-4 py-2 rounded-md bg-bg-light-accent dark:bg-bg-dark-accent dark:hover:bg-bg-dark-accent dark:hover:text-white border border-slate-400 dark:border-slate-500 hover:border-transparent disabled:border-slate-300 dark:disabled:border-slate-600 disabled:hover:border-slate-300 disabled:hover:dark:border-slate-600 transition ease-in-out duration-200 font-medium disabled:text-slate-400 disabled:hover:text-slate-400 dark:disabled:text-slate-500 dark:disabled:hover:text-slate-500;
+    @apply px-4 py-2 rounded-md bg-bg-light-accent dark:bg-bg-dark dark:hover:text-white border-[0.5px] border-slate-400 dark:border-slate-500 dark:hover:border-fg-dark disabled:hover:border-slate-300 disabled:hover:dark:border-slate-500 transition ease-in-out duration-200 font-medium disabled:text-slate-400 disabled:hover:text-slate-400 dark:disabled:text-slate-400 dark:disabled:hover:text-slate-400;
   }
 
   .btn-accent {
-    @apply text-sky-700 bg-sky-100 dark:text-sky-100 dark:bg-sky-950 dark:hover:bg-sky-950;
+    @apply border-[1px] text-sky-700 bg-sky-100 dark:text-sky-100 dark:bg-sky-950 dark:hover:bg-sky-950;
   }
 
-  .text-field {
-    @apply rounded-md bg-bg-light-accent dark:bg-bg-dark-accent border border-slate-300 dark:border-slate-600 px-3 hover:border-transparent transition ease-in-out duration-200;
-  }
-
-  .table-inpt {
-    @apply h-8 px-[9px] border-[0.5px] border-slate-500 hover:border-fg-light focus:border-fg-light dark:hover:border-fg-dark dark:focus:border-fg-dark shadow-none rounded text-fg-light dark:text-fg-dark dark:bg-bg-dark-accent transition ease-in-out duration-200;
+  .inpt {
+    @apply border-[0.5px] border-slate-500 hover:border-fg-light focus:border-fg-light dark:hover:border-fg-dark dark:focus:border-fg-dark shadow-none rounded text-fg-light dark:text-fg-dark dark:bg-bg-dark-accent transition ease-in-out duration-200;
   }
   
   *:focus {

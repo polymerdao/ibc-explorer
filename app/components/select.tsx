@@ -11,9 +11,11 @@ interface Option {
 interface Props {
   options: Option[];
   onChange: (value: string | number) => void;
+  containerClassName?: string;
+  buttonClassName?: string;
 }
 
-export function Select({ options, onChange }: Props) {
+export function Select({ options, onChange, containerClassName, buttonClassName }: Props) {
   const [selectedOption, setSelectedOption] = useState(options[0]);
 
   const handleChange = (option: Option) => {
@@ -22,10 +24,10 @@ export function Select({ options, onChange }: Props) {
   }
 
   return (
-    <div className="relative w-24">
+    <div className={containerClassName + " relative"}>
       <Listbox value={selectedOption} onChange={(e) => {handleChange(e)}}>
         {({ open }) => (<>
-          <Listbox.Button className="w-full flex flex-row justify-between items-center h-8 pl-[9px] pr-1.5 cursor-default rounded bg-bg-dark-accent border-[0.5px] hover:border-fg-dark border-slate-500 text-fg-dark transition east-in-out duration-200">
+          <Listbox.Button className={buttonClassName + " w-full flex flex-row justify-between items-center pr-[0.4rem] cursor-default text-fg-light dark:text-fg-dark transition east-in-out duration-200"}>
             <span className="truncate">{selectedOption.label}</span>
             <FiChevronDown className={classNames(
               open
