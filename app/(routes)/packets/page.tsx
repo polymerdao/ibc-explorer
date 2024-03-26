@@ -208,7 +208,7 @@ export default function Packets() {
     },
     initialState: {
       pagination: {
-        pageSize: 20
+        pageSize: 10
       }
     },
     onColumnVisibilityChange: setColumnVisibility,
@@ -240,10 +240,10 @@ export default function Packets() {
 
       <h1 className="ml-1">Packets</h1>
       <div className="flex flex-row justify-between mt-4">
-        <div className="flex flex-row justify-left w-2/5 min-w-60">
+        <div className="flex flex-row justify-left w-2/5 min-w-[248px]">
           <input
             type="text"
-            placeholder="Search by tx hash"
+            placeholder="Search by Tx Hash"
             className="inpt w-full px-3 rounded-md font-mono placeholder:font-primary"
             value={searchHash}
             onChange={e => setSearchHash(e.target.value)}

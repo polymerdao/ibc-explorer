@@ -34,23 +34,22 @@ export function IbcTable<TableType extends Packet | Client | IdentifiedChannel |
       {/* Table View Options */}
       <div className="flex flex-row justify-between items-end mb-2 mx-1 text-slate-700 dark:text-slate-300">
         <span>
-          {table.getFilteredRowModel().rows.length} total results
+          {table.getFilteredRowModel().rows.length} Total Results
         </span>
 
         <div className="flex flex-row items-end space-x-3">
-          <select
-            value={table.getState().pagination.pageSize}
-            onChange={e => {
-              table.setPageSize(Number(e.target.value))
-            }}
-            aria-label="Rows per page"
-            className="mr-1 bg-transparent">
-            {[10, 20, 50, 100].map(pageSize => (
-              <option key={pageSize} value={pageSize}>
-                {pageSize} Rows / Page
-              </option>
-            ))}
-          </select>
+          <div className="hidden sm:contents">
+            <Select
+              onChange={value => {
+                table.setPageSize(Number(value))
+              }}
+              options={
+                [10, 20, 50, 100].map(pageSize => ({ value: pageSize, label: `${pageSize} Rows / Page` }))
+              }
+              buttonClassName="h-[1.47rem] w-[147px] text-slate-700 dark:text-slate-300"
+              dropdownClassName="bg-bg-light dark:bg-bg-dark">
+            </Select>
+          </div>
 
           <Popover>
             {({ open }) => (<>
@@ -66,13 +65,13 @@ export function IbcTable<TableType extends Packet | Client | IdentifiedChannel |
               <Transition
                 as={Fragment}
                 enter="ease-out duration-200"
-                enterFrom="transform scale-95 opacity-0 -translate-y-6 z-30"
-                enterTo="transform scale-100 opacity-100 z-30"
+                enterFrom="transform scale-95 opacity-0 -translate-y-6"
+                enterTo="transform scale-100 opacity-100"
                 leave="ease-in duration-200"
                 leaveFrom="transform scale-100 opacity-100"
                 leaveTo="transform scale-95 opacity-0">
                 <Popover.Panel className="absolute z-20 mt-2 right-0">
-                  <div className="bg-bg-light-accent dark:bg-bg-dark-accent pl-6 pr-9 py-5 border rounded-md border-slate-500">
+                  <div className="bg-bg-light dark:bg-bg-dark pl-6 pr-9 py-5 border-[0.5px] rounded-md border-slate-500">
                     {table.getAllLeafColumns().map(column => { return (
                       <div key={column.id} className="py-[0.17rem]">
                         <label>
@@ -246,7 +245,8 @@ function ColumnFilter({ column, table }: { column: Column<any, any>, table: Tabl
         }
         onChange={value => column.setFilterValue(value)}
         containerClassName="w-24"
-        buttonClassName="inpt h-8 pl-[9px]"
+        buttonClassName="inpt h-8 pl-[9px] cursor-default"
+        dropdownClassName="bg-bg-light dark:bg-bg-dark"
       />
     );
   } else if (typeof firstValue === 'string') {

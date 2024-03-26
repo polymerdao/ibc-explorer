@@ -13,9 +13,10 @@ interface Props {
   onChange: (value: string | number) => void;
   containerClassName?: string;
   buttonClassName?: string;
+  dropdownClassName?: string;
 }
 
-export function Select({ options, onChange, containerClassName, buttonClassName }: Props) {
+export function Select({ options, onChange, containerClassName, buttonClassName, dropdownClassName }: Props) {
   const [selectedOption, setSelectedOption] = useState(options[0]);
 
   const handleChange = (option: Option) => {
@@ -27,7 +28,7 @@ export function Select({ options, onChange, containerClassName, buttonClassName 
     <div className={containerClassName + " relative"}>
       <Listbox value={selectedOption} onChange={(e) => {handleChange(e)}}>
         {({ open }) => (<>
-          <Listbox.Button className={buttonClassName + " w-full flex flex-row justify-between items-center pr-[0.4rem] cursor-default text-fg-light dark:text-fg-dark transition east-in-out duration-200"}>
+          <Listbox.Button className={buttonClassName + " w-full flex flex-row justify-between items-center pr-[0.4rem] text-fg-light dark:text-fg-dark transition east-in-out duration-200"}>
             <span className="truncate">{selectedOption.label}</span>
             <FiChevronDown className={classNames(
               open
@@ -40,12 +41,12 @@ export function Select({ options, onChange, containerClassName, buttonClassName 
           <Transition
             as={Fragment}
             enter="ease-out duration-150"
-            enterFrom="transform scale-95 opacity-0 -translate-y-6 z-30"
-            enterTo="transform scale-100 opacity-100 z-30"
+            enterFrom="transform scale-95 opacity-0 -translate-y-6"
+            enterTo="transform scale-100 opacity-100"
             leave="ease-in duration-150"
             leaveFrom="transform scale-100 opacity-100"
             leaveTo="transform scale-95 opacity-0">
-            <Listbox.Options className="absolute left-0 mt-1.5 overflow-auto rounded-md bg-bg-dark py-2 border-[0.5px] border-slate-500">
+            <Listbox.Options className={dropdownClassName + " absolute z-20 left-0 mt-2 overflow-auto rounded-md py-2 border-[0.5px] border-slate-500"}>
               {options.map((option) => (
                 <Listbox.Option key={option.value} value={option}
                   className={({ active }) => classNames(
@@ -55,7 +56,7 @@ export function Select({ options, onChange, containerClassName, buttonClassName 
                     , "relative cursor-default select-none py-1.5 ml-2 mr-2.5 pl-2.5 pr-3 rounded"
                   )}>
                   <div className="flex flex-row">
-                    <span className="text-fg-light dark:text-fg-dark">
+                    <span className="text-fg-light dark:text-fg-dark whitespace-nowrap">
                       {option.label}
                     </span>
                   </div>

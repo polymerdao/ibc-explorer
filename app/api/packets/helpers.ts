@@ -269,20 +269,33 @@ export async function getPacket(txHash: string) {
       'content-type': 'application/json',
     };
     const requestBody = {
-      query: `query SendPacket($txHash:String!){
-                sendPackets(where:{transactionHash:$txHash}){
-                  items{
-                    sourcePortAddress
-                    sourceChannelId
-                    packet
-                    sequence
-                    blockNumber
-                    transactionHash
-                    chainId
-                    gas
-                    maxFeePerGas
-                    maxPriorityFeePerGas
-                    from
+      query: `query Packet($txHash:String!){
+                packets(where:{sendTx:$txHash}){
+                  items {
+                    sendPacket {
+                      sequence
+                      sourcePortAddress
+                      sourceChannelId
+                      blockTimestamp
+                      timeoutTimestamp
+                    }
+                    recvPacket {
+                      destPortAddress
+                      destChannelId
+                      blockTimestamp
+                    }
+                    writeAckPacket {
+                      blockTimestamp
+                    }
+                    ackPacket {
+                      blockTimestamp
+                    }
+                    id
+                    state
+                    sendTx
+                    recvTx
+                    writeAckTx
+                    ackTx
                   }
                 }
               }`,
@@ -293,9 +306,10 @@ export async function getPacket(txHash: string) {
       headers,
       body: JSON.stringify(requestBody)
     };
+
     const res = await (await fetch(process.env.INDEXER_URL!, options)).json();
-    if (res?.data?.sendPackets.items.length > 0) {
-      response = res.data.sendPackets.items[0];
+    if (res?.data?.packets?.items.length > 0) {
+      response = res.data.packets.items[0];
       console.log(response);
     } else {
       return [];
@@ -303,20 +317,21 @@ export async function getPacket(txHash: string) {
   }
   catch (err) {
     console.log('Error fetching packet: ', err);
+    return [];
   }
 
   const packet: Packet = {
-    sourcePortAddress: response.sourcePortAddress,
-    sourceChannelId: response.sourceChannelId,
+    sequence: response.sendPacket.sequence,
+    sourcePortAddress: response.sendPacket.sourcePortAddress,
+    sourceChannelId: response.sendPacket.sourceChannelId,
     destPortAddress: '',
     destChannelId: '',
-    timeout: '',
+    timeout: response.sendPacket.timeoutTimestamp,
     fee: '',
-    id: '',
-    sequence: response.sequence,
-    state: PacketStates.SENT,
-    createTime: response.blockNumber,
-    sendTx: response.transactionHash,
+    id: response.id,
+    state: response.state,
+    createTime: response.sendPacket.blockTimestamp,
+    sendTx: response.sendTx,
     sourceChain: '',
     destChain: ''
   };

@@ -102,7 +102,7 @@ export default function Packets() {
     columns,
     initialState: {
       pagination: {
-        pageSize: 20
+        pageSize: 10
       }
     },
     onColumnVisibilityChange: setColumnVisibility,
