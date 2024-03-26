@@ -12,29 +12,33 @@ import {
   VisibilityState
 } from '@tanstack/react-table';
 import { IbcTable } from 'components/table/ibc-table';
-import { BooleanCell } from "components/table/boolean-cell";
 import { IdentifiedChannel, State } from 'cosmjs-types/ibc/core/channel/v1/channel';
 import { Modal } from 'components/modal';
+import { SimIcon } from 'components/icons';
 
 const columnHelper = createColumnHelper<IdentifiedChannel>();
 const columns = [
   columnHelper.accessor('channelId', {
     header: 'Channel ID',
-    cell: props => <span className="whitespace-nowrap">{props.getValue()}</span>,
+    cell: props =>
+    <div className="flex flex-row">
+      <span className="whitespace-nowrap">
+        {props.getValue()}
+      </span>
+      {(props.row.original.counterparty?.portId?.toLowerCase().includes('sim') ||
+        props.row.original.portId?.toLowerCase().includes('sim')) ?
+        <div className="ml-2"><SimIcon /></div>
+        : null}
+    </div>,
     enableHiding: true,
     enableSorting: true,
     sortingFn: 'alphanumeric'
   }),
-  columnHelper.accessor('state', {
+  columnHelper.accessor(row => stateToString(row.state), {
     header: 'State',
-    cell: props => <span>{ stateToString(props.getValue()) }</span>,
-    enableHiding: true
-  }),
-  columnHelper.accessor(row => (row.portId.includes('sim') || row.counterparty.portId.includes('sim')), {
-    id: 'simClient',
-    header: 'Sim Client',
-    cell: props => <BooleanCell value={props.getValue()} />,
-    enableHiding: true
+    cell: props => <span>{props.getValue()}</span>,
+    enableHiding: true,
+    enableColumnFilter: true
   }),
   columnHelper.accessor('portId', {
     header: 'Port ID',
@@ -50,7 +54,8 @@ const columns = [
   }),
   columnHelper.accessor('connectionHops', {
     header: 'Connection Hops',
-    enableHiding: true
+    enableHiding: true,
+    enableColumnFilter: false
   })
 ];
 

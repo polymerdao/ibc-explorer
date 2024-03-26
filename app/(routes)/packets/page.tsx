@@ -12,12 +12,12 @@ import {
   useReactTable }
 from "@tanstack/react-table";
 import { IbcTable } from "components/table/ibc-table";
-import { BooleanCell } from "components/table/boolean-cell";
 import { Modal } from "components/modal";
+import { Packet } from "utils/types/packet";
 import { PacketDetails } from "./packets-details";
-import { Packet, PacketStates } from "utils/types/packet";
+import { StateCell, stateToString } from "./state-cell";
+import { ChainCell, Arrow } from "./chain-cell";
 import { hideMiddleChars } from "utils/functions";
-import { HiMiniArrowLongRight } from "react-icons/hi2";
 
 const columnHelper = createColumnHelper<Packet>();
 const columns = [
@@ -27,11 +27,7 @@ const columns = [
   }),
   columnHelper.accessor(row => stateToString(row.state), {
     header: 'State',
-    enableHiding: true
-  }),
-  columnHelper.accessor(row => (row.sourceChain.includes('sim') || row.destChain.includes('sim')), {
-    header: 'Sim Client',
-    cell: props => <BooleanCell value={props.getValue()} />,
+    cell: props => StateCell(props.getValue()),
     enableHiding: true
   }),
   columnHelper.accessor('sendTx', {
@@ -40,20 +36,24 @@ const columns = [
     enableHiding: true
   }),
   columnHelper.accessor('sourceChain', {
-    header: 'Source Chain',
+    header: 'Source',
     enableHiding: true,
     cell: props => (
       <div className="flex flex-row justify-between">
-        <span className="whitespace-nowrap mr-1">{props.getValue()}</span>
-        <HiMiniArrowLongRight className="mt-1 text-fg-light dark:text-fg-dark" />
+        <div className="ml-4"><ChainCell chain={props.getValue()} /></div>
+        <Arrow />
       </div>
-    ),
-    minSize: 170
+    )
   }),
   columnHelper.accessor('destChain', {
-    header: 'Dest Chain',
+    header: 'Dest',
+    cell: props => (
+      <div className="flex flex-row justify-between">
+        <div className="ml-5"><ChainCell chain={props.getValue()} /></div>
+      </div>
+    ),
     enableHiding: true,
-    minSize: 170
+    maxSize: 100
   }),
   columnHelper.accessor('sourcePortAddress', {
     header: 'Src Port Address',
@@ -103,19 +103,22 @@ const columns = [
   columnHelper.accessor('rcvTx', {
     header: 'Rcv Tx',
     cell: props => hideMiddleChars(props.getValue() ?? ''),
-    enableHiding: true
+    enableHiding: true,
+    enableColumnFilter: false
   }),
   columnHelper.accessor('ackTx', {
     header: 'Ack Tx',
     cell: props => hideMiddleChars(props.getValue() ?? ''),
-    enableHiding: true
+    enableHiding: true,
+    enableColumnFilter: false
   }),
   columnHelper.accessor('createTime', {
     header: 'Create Time',
     enableHiding: true,
     cell: props => new Date(props.getValue()*1000).toLocaleString(),
     enableSorting: true,
-    sortingFn: 'alphanumeric'
+    sortingFn: 'alphanumeric',
+    enableColumnFilter: false
   })
 ];
 
@@ -261,18 +264,4 @@ export default function Packets() {
       <IbcTable {...{table, loading, rowDetails: PacketDetails}} />
     </div>
   );
-}
-
-function stateToString(state: PacketStates) {
-  switch (state) {
-    case PacketStates.SENT:
-    case PacketStates.POLY_RECV:
-      return 'Relaying'
-    case PacketStates.RECV:
-    case PacketStates.WRITE_ACK:
-    case PacketStates.POLY_WRITE_ACK:
-      return 'Confirming'
-    case PacketStates.ACK:
-      return 'Delivered'
-  }
 }

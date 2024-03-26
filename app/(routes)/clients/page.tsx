@@ -10,20 +10,25 @@ import {
   useReactTable }
 from "@tanstack/react-table";
 import { IbcTable } from "components/table/ibc-table";
-import { BooleanCell } from "components/table/boolean-cell";
 import { Modal } from "components/modal";
+import { SimIcon } from "components/icons";
 import { Client } from "utils/types/client";
 
 const columnHelper = createColumnHelper<Client>();
 const columns = [
   columnHelper.accessor('clientId', {
     header: 'Client ID',
-    enableHiding: true
-  }),
-  columnHelper.accessor(row => (row.clientId.includes('sim')), {
-    header: 'Sim Client',
-    cell: props => <BooleanCell value={props.getValue()} />,
-    enableHiding: true
+    enableHiding: true,
+    cell: props =>
+    <div className="flex flex-row">
+      <span className="whitespace-nowrap">
+        {props.getValue()}
+      </span>
+      {(props.row.original.clientId?.toLowerCase().includes('sim'))
+        ? <div className="ml-2"><SimIcon /></div>
+        : null
+      }
+    </div>,
   }),
   columnHelper.accessor('clientState.revisionHeight', {
     header: 'Revision Height',

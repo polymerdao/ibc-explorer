@@ -5,17 +5,15 @@
 :root {
   --background-main: #F1F5F9;
   --background-accent: #FFFFFF;
-  --background-accent-light: #FFFFFF;
   --dark-background-main: #020617;
   --dark-background-accent: #0F172A;
-  --dark-background-accent-light: #041429;
 }
 
 @layer base {
   :not(.dark) body {
     background: linear-gradient(203deg in hsl shorter hue,
       var(--background-main) 15%,
-      var(--background-accent-light),
+      var(--background-accent),
       var(--background-main) 35%,
       var(--background-main) 50%,
       var(--background-accent),
@@ -26,7 +24,7 @@
   .dark body {
     background: linear-gradient(203deg in hsl shorter hue,
       var(--dark-background-main) 15%,
-      var(--dark-background-accent-light),
+      var(--dark-background-accent),
       var(--dark-background-main) 35%,
       var(--dark-background-main) 50%,
       var(--dark-background-accent),
@@ -35,7 +33,8 @@
   }
 
   body {
-    @apply h-screen flex flex-col items-center bg-bg-light text-fg-light dark:bg-bg-dark dark:text-fg-dark antialiased;
+    caret-shape: underscore;
+    @apply h-screen flex flex-col items-center bg-bg-light text-fg-light dark:bg-bg-dark dark:text-fg-dark antialiased font-primary;
   }
 
   main {
@@ -46,7 +45,7 @@
     @apply w-2 h-2 rounded-lg bg-bg-light-accent dark:bg-bg-dark;
   }
   ::-webkit-scrollbar-track {
-    @apply mt-[81.5px] rounded-lg bg-bg-light dark:bg-bg-dark;
+    @apply mt-[83px] rounded-lg bg-bg-light dark:bg-bg-dark;
   }
   ::-webkit-scrollbar-thumb {
     @apply rounded-lg bg-slate-300 dark:bg-slate-500;
@@ -56,13 +55,13 @@
   }
 
   h1 {
-    @apply text-2xl font-medium;
+    @apply text-3xl font-semibold font-accent;
   }
   h2 {
-    @apply text-xl;
+    @apply text-2xl font-medium;
   }
   h3 {
-    @apply text-lg;
+    @apply text-xl;
   }
 
   .btn {
@@ -75,6 +74,10 @@
 
   .text-field {
     @apply rounded-md bg-bg-light-accent dark:bg-bg-dark-accent border border-slate-300 dark:border-slate-600 px-3 hover:border-transparent transition ease-in-out duration-200;
+  }
+
+  .table-inpt {
+    @apply h-8 px-[9px] border-[0.5px] border-slate-500 hover:border-fg-light focus:border-fg-light dark:hover:border-fg-dark dark:focus:border-fg-dark shadow-none rounded text-fg-light dark:text-fg-dark dark:bg-bg-dark-accent transition ease-in-out duration-200;
   }
   
   *:focus {
