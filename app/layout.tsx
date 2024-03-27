@@ -1,9 +1,7 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+import { primary, mono, accent } from 'fonts'
 import Navbar from "./components/navbar";
 import "./globals.css";
-
-const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
   title: "IBC Explorer",
@@ -16,8 +14,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className="dark">
-      <body className={inter.className}>
+    <html lang="en" className={'dark ' + `${primary.variable} ${mono.variable} ${accent.variable}`}>
+      <body>
         <Navbar />
         <main>
           {children}

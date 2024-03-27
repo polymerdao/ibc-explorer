@@ -7,11 +7,12 @@ import { Transition, Popover } from "@headlessui/react";
 import { FiChevronDown, FiChevronLeft, FiChevronsLeft, FiChevronRight, FiChevronsRight } from "react-icons/fi";
 import { Modal } from "components/modal";
 import { CHAIN_CONFIGS } from "utils/chains/configs";
-import { Packet, PacketStates } from "utils/types/packet";
+import { Packet } from "utils/types/packet";
 import { Client } from "utils/types/client";
 import { IdentifiedConnection } from "cosmjs-types/ibc/core/connection/v1/connection";
 import { IdentifiedChannel } from "cosmjs-types/ibc/core/channel/v1/channel";
-import { classNames } from "utils/functions";
+import { classNames, classLogic } from "utils/functions";
+import { Select } from "components/select";
 import { useState } from "react";
 import { Fragment } from 'react';
 
@@ -99,7 +100,7 @@ export function IbcTable<TableType extends Packet | Client | IdentifiedChannel |
       </div>
 
       { /* Table */ }
-      <div className="w-full border border-slate-500 rounded-md bg-bg-light-accent dark:bg-bg-dark-accent overflow-y-auto table-height scroll-smooth min-h-72
+      <div className="w-full border border-slate-300 dark:border-slate-700 rounded-md bg-bg-light-accent dark:bg-bg-dark-accent overflow-y-auto table-height scroll-smooth min-h-72
         max-h-[calc(100vh-19rem)] xl:max-h-[calc(100vh-20rem)]">
         {loading && 
           <div className="absolute mt-40 z-10 w-full grid justify-items-center font-mewdium">
@@ -111,11 +112,11 @@ export function IbcTable<TableType extends Packet | Client | IdentifiedChannel |
             <div>No results</div>
           </div>
         }
-        <div className="absolute mt-20 left-[0.8px] w-[calc(100%-2px)] z-10 border-b border-slate-500"></div>
+        <div className="absolute mt-[79px] left-[0.8px] w-[calc(100%-2px)] z-10 border-t border-2 border-slate-300 dark:border-slate-700"></div>
         <table
           className="min-w-full"
           style={{width: table.getCenterTotalSize()}}>
-          <thead className="sticky top-0 bg-bg-light-accent dark:bg-dark-accent">
+          <thead className="sticky top-0 bg-bg-light-accent dark:bg-dark-accent z-10">
             {table.getHeaderGroups().map(headerGroup => (
               <tr key={headerGroup.id}>
               {headerGroup.headers.map(header => {
@@ -123,20 +124,23 @@ export function IbcTable<TableType extends Packet | Client | IdentifiedChannel |
                   <th key={header.id} colSpan={header.colSpan} 
                     className={classNames(
                       header.id === 'destChain'
-                      ? "pl-4"
-                      : "pl-8"
-                      , "pb-2 h-20 dark:bg-bg-dark last:pr-6 whitespace-nowrap"
+                      ? "pl-2"
+                      : "pl-5"
+                      , "py-2 h-20 dark:bg-bg-dark last:pr-6 whitespace-nowrap font-medium first:pl-6"
                     )}
                     style={{width: header.getSize()}}>
                     {header.isPlaceholder ? null : (
-                      <div className="h-12 grid justify-items-start align-items-start">
-                        {flexRender(
-                          header.column.columnDef.header,
-                          header.getContext()
-                        )}
-                        {header.column.getCanFilter() &&
+                      <div className="h-12 grid justify-items-start content-center">
+                        {!header.column.getCanFilter() ? (
+                          <div className="ml-2"> 
+                            {flexRender(
+                              header.column.columnDef.header,
+                              header.getContext()
+                            )}
+                          </div>
+                        ) : (
                           <ColumnFilter column={header.column} table={table} />
-                        }
+                        )}
                       </div>
                     )}
                   </th>
@@ -145,7 +149,7 @@ export function IbcTable<TableType extends Packet | Client | IdentifiedChannel |
               </tr>
             ))}
           </thead>
-          <tbody className="min-h-32">
+          <tbody className="relative z-0 min-h-32 font-mono">
             {loading ? (
               <tr>
                 <td></td>
@@ -158,7 +162,7 @@ export function IbcTable<TableType extends Packet | Client | IdentifiedChannel |
                     rowDetails
                     ? "hover:cursor-pointer"
                     : ""
-                    , "h-12 w-full hover:bg-sky-100 dark:hover:bg-sky-950 transition-colors ease-in-out duration-200 even:bg-bg-light dark:even:bg-bg-dark",
+                    , "h-14 w-full hover:bg-sky-100 dark:hover:bg-sky-950 transition-colors ease-in-out duration-200 even:bg-bg-light dark:even:bg-bg-dark",
                   )}
                   onClick={() => {if (rowDetails) {
                     setSelectedRow(row.original);
@@ -169,8 +173,8 @@ export function IbcTable<TableType extends Packet | Client | IdentifiedChannel |
                       key={cell.id}
                       className={classNames(
                         cell.column.id === 'destChain'
-                        ? "pl-4"
-                        : "pl-8"
+                        ? "pl-2"
+                        : "pl-7"
                         , "last:pr-6"
                       )}
                       style={{width: cell.column.getSize()}}>
@@ -235,18 +239,13 @@ function ColumnFilter({ column, table }: { column: Column<any, any>, table: Tabl
   
   if (column.id === 'sourceChain' || column.id === 'destChain') {
     return (
-      <select
-        value={(columnFilterValue ?? '') as string}
-        onChange={e => column.setFilterValue(e.target.value)}
-        className="w-28 border h-6 border-slate-500 shadow-none rounded dark:bg-bg-dark font-medium text-slate-700 dark:text-slate-300 dark:bg-bg-dark-accent"
-        aria-label={"Filter by " + column.columnDef.header as string}>
-        <option value="">All</option>
-        {
-          Object.entries(CHAIN_CONFIGS).map(([key, value]) => (
-            <option key={key} value={key}>{ value.display }</option>
-          ))
+      <Select 
+        options={
+          [{ value: '', label: column.columnDef.header as string }, 
+          ...Object.entries(CHAIN_CONFIGS).map(([key, value]) => ({ value: key, label: value.display }))]
         }
-      </select>
+        onChange={value => column.setFilterValue(value)}
+      />
     );
   } else if (typeof firstValue === 'string') {
     return (
@@ -254,8 +253,23 @@ function ColumnFilter({ column, table }: { column: Column<any, any>, table: Tabl
         type="text"
         value={(columnFilterValue ?? '') as string}
         onChange={e => column.setFilterValue(e.target.value)}
-        placeholder={`Search...`}
-        className="shadow-none h-6 pl-1 min-w-24 w-5/6 max-w-48 border border-slate-500 rounded dark:bg-bg-dark font-medium dark:bg-bg-dark-accent"
+        placeholder={column.columnDef.header as string}
+        className={classLogic(() => {
+          let classes = "table-inpt w-fit placeholder:text-fg-dark font-mono placeholder:font-primary";
+          switch (column.id.toLowerCase()) {
+            case 'counterparty_connectionid':
+              break;
+            case 'state':
+              classes += " max-w-[9.5rem]";
+            case 'delayperiod':
+              classes += " max-w-32";
+            case 'counterparty_channelid':
+              classes += " max-w-48";
+            default:
+              classes += " max-w-44";
+          }
+          return classes;
+        })}
         aria-label={"Filter by " + column.columnDef.header as string}
       />
     );
