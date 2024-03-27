@@ -96,8 +96,8 @@ export default function Navbar() {
           className={classNames(
             nav
               ? 'right-0'
-              : 'right-[-100%] hidden',
-                'fixed sm:hidden flex flex-col space-y-8 border-[0.8px] p-8 w-full h-screen top-16 border-gray-300 dark:border-gray-700 bg-bg-light-accent dark:bg-bg-dark ease-in-out duration-[400ms]'
+              : 'right-[-100%] hidden'
+              , 'fixed sm:hidden flex flex-col space-y-8 border-[0.8px] p-8 w-full h-screen top-16 border-gray-300 dark:border-gray-700 bg-bg-light-accent dark:bg-bg-dark ease-in-out duration-[400ms]'
           )}>
           {tabs.map((item) => (
             <Link
@@ -106,8 +106,8 @@ export default function Navbar() {
               className={classNames(
                 pathname === item.href
                   ? 'decoration-fg-light/70 dark:decoration-fg-dark/70'
-                  : 'text-gray-600 dark:text-gray-300 decoration-fg-light/0 dark:decoration-fg-dark/0',
-                    'inline-flex items-center px-1 pt-1 text-lg font-bold underline underline-offset-8 decoration-2 rounded-md transition ease-in-out'
+                  : 'text-gray-600 dark:text-gray-300 decoration-fg-light/0 dark:decoration-fg-dark/0'
+                  , 'inline-flex items-center px-1 pt-1 text-lg font-bold underline underline-offset-8 decoration-2 rounded-md transition ease-in-out'
               )}>
               {item.name}
             </Link>
