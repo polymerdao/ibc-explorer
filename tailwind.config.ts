@@ -18,8 +18,13 @@ const config: Config = {
         'fg-dark': colors.slate[50],
         'primary': colors.emerald,
         'secondary': colors.sky,
+      },
+      fontFamily: {
+        primary: ['var(--primary-font)'],
+        mono: ['var(--mono-font)'],
+        accent: ['var(--secondary-font)']
       }
-    },
+    }
   },
   darkMode: 'selector',
   plugins: [],
