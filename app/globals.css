@@ -7,6 +7,7 @@
   --background-accent: #FFFFFF;
   --dark-background-main: #020617;
   --dark-background-accent: #0F172A;
+  --dark-background-accent-2: #0B1224;
 }
 
 @layer base {
@@ -24,7 +25,7 @@
   .dark body {
     background: linear-gradient(203deg in hsl shorter hue,
       var(--dark-background-main) 15%,
-      var(--dark-background-accent),
+      var(--dark-background-accent-2),
       var(--dark-background-main) 35%,
       var(--dark-background-main) 50%,
       var(--dark-background-accent),

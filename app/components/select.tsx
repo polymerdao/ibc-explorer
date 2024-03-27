@@ -34,7 +34,7 @@ export function Select({ options, onChange, containerClassName, buttonClassName,
               open
               ? "scale-y-[-1]"
               : ""
-              , "transition ease-in-out duration-200"
+              , "transition ease-in-out duration-200 mt-[1px]"
             )}/>
           </Listbox.Button>
 

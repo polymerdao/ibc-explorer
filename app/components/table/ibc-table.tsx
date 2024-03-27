@@ -46,14 +46,15 @@ export function IbcTable<TableType extends Packet | Client | IdentifiedChannel |
               options={
                 [10, 20, 50, 100].map(pageSize => ({ value: pageSize, label: `${pageSize} Rows / Page` }))
               }
-              buttonClassName="h-[1.47rem] w-[147px] text-slate-700 dark:text-slate-300"
+              containerClassName="w-[145px]"
+              buttonClassName="h-[1.5rem] text-slate-700 dark:text-slate-300"
               dropdownClassName="bg-bg-light dark:bg-bg-dark">
             </Select>
           </div>
 
           <Popover>
             {({ open }) => (<>
-              <Popover.Button className="flex flex-row h-[1.47rem]">
+              <Popover.Button className="flex flex-row h-[1.5rem]">
                 Columns
                 <FiChevronDown className={classNames(
                   open
@@ -71,7 +72,7 @@ export function IbcTable<TableType extends Packet | Client | IdentifiedChannel |
                 leaveFrom="transform scale-100 opacity-100"
                 leaveTo="transform scale-95 opacity-0">
                 <Popover.Panel className="absolute z-20 mt-2 right-0">
-                  <div className="bg-bg-light dark:bg-bg-dark pl-6 pr-9 py-5 border-[0.5px] rounded-md border-slate-500">
+                  <div className="bg-bg-light dark:bg-bg-dark pl-6 pr-9 py-4 border-[0.5px] rounded-md border-slate-500">
                     {table.getAllLeafColumns().map(column => { return (
                       <div key={column.id} className="py-[0.17rem]">
                         <label>
@@ -210,7 +211,7 @@ export function IbcTable<TableType extends Packet | Client | IdentifiedChannel |
           <FiChevronLeft className="w-5 h-5"/>
         </button>
 
-        <span className="mx-4 font-medium">Page {table.getState().pagination.pageIndex + 1} of {table.getPageCount()}</span>
+        <span className="mx-4 mb-[2px] font-medium">Page {table.getState().pagination.pageIndex + 1} of {table.getPageCount()}</span>
 
         <button
           className="rounded p-2 disabled:opacity-60 enabled:hover:bg-bg-light-accent enabled:dark:hover:bg-bg-dark-accent transition-colors ease-in-out duration-200"
