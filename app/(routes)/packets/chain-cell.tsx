@@ -1,20 +1,16 @@
-import {
-  OptimismIcon,
-  BaseIcon
-} from "utils/chains/icons";
+import { CHAIN, CHAIN_CONFIGS } from "utils/chains/configs";
 import { SimIcon } from "components/icons"
 
-export function ChainCell({chain, iconSize}: {chain: string, iconSize?: number}) {
-  const size = iconSize || 32;
+export function ChainCell({chain}: {chain: string}) {
+  const size = 32;
   const sim: boolean = chain.toLowerCase().includes('sim');
+  const chainName = chain.split('-')[0];
+  let icon: JSX.Element = <span>{chain}</span>;
 
-  let icon;
-  if (chain.toLowerCase().includes('optimism')) {
-    icon = OptimismIcon(size);
-  } else if (chain.toLowerCase().includes('base')) {
-    icon = BaseIcon(size);
-  } else {
-    return <span>{chain}</span>
+  for (const key in CHAIN_CONFIGS) {
+    if (chainName.toLowerCase().includes(key.toLowerCase())) {
+      icon = CHAIN_CONFIGS[key as CHAIN].icon(size);
+    }
   }
 
   return (
