@@ -4,16 +4,25 @@ import { FiExternalLink } from "react-icons/fi";
 
 const optimismUrl = "https://optimism-sepolia.blockscout.com/tx/";
 const baseUrl = "https://base-sepolia.blockscout.com/tx/";
+const moltenUrl = "https://unidex-sepolia.explorer.caldera.xyz/tx/";
 
 export function RowDetails(selectedRow: Packet) {
   let sourceUrl = "";
   let destUrl = "";
+
   if (selectedRow?.sourceChain.startsWith("optimism")) {
     sourceUrl = optimismUrl;
-    destUrl = baseUrl;
-  } else {
+  } else if (selectedRow?.sourceChain.startsWith("base")) {
     sourceUrl = baseUrl;
+  } else if (selectedRow?.sourceChain.startsWith("molten")) {
+    sourceUrl = moltenUrl;
+  }
+  if (selectedRow?.destChain.startsWith("optimism")) {
     destUrl = optimismUrl;
+  } else if (selectedRow?.destChain.startsWith("base")) {
+    destUrl = baseUrl;
+  } else if (selectedRow?.destChain.startsWith("molten")) {
+    destUrl = moltenUrl;
   }
 
   return (selectedRow &&
