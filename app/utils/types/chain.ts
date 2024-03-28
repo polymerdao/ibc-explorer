@@ -5,5 +5,5 @@ export interface Chain {
   dispatchers: string[];
   clients: string[];
   blockTime: number;
-  icon: () => JSX.Element;
+  icon: (size?: number) => JSX.Element;
 }
