@@ -13,6 +13,7 @@ import { IdentifiedConnection } from "cosmjs-types/ibc/core/connection/v1/connec
 import { IdentifiedChannel } from "cosmjs-types/ibc/core/channel/v1/channel";
 import { classNames, classLogic } from "utils/functions";
 import { Select } from "components/select";
+import { OrbitLoader } from "components/loading/loader";
 import { useState } from "react";
 import { Fragment } from 'react';
 
@@ -103,8 +104,8 @@ export function IbcTable<TableType extends Packet | Client | IdentifiedChannel |
       <div className="w-full border border-slate-300 dark:border-slate-700 rounded-md bg-bg-light-accent dark:bg-bg-dark-accent overflow-y-auto table-height scroll-smooth min-h-72
         max-h-[calc(100vh-19rem)] xl:max-h-[calc(100vh-20rem)]">
         {loading && 
-          <div className="absolute mt-40 z-10 w-full grid justify-items-center font-mewdium">
-            <div>Loading...</div>
+          <div className="absolute mt-40 z-10 w-full grid justify-items-center">
+            <OrbitLoader />
           </div>
         }
         {(!loading && !table.getFilteredRowModel().rows.length) &&
