@@ -86,7 +86,7 @@ export default function Packets() {
     },
     initialState: {
       pagination: {
-        pageSize: 20
+        pageSize: 10
       }
     },
     onColumnVisibilityChange: setColumnVisibility,
@@ -105,9 +105,9 @@ export default function Packets() {
         </>}
       />
 
-      <div className="flex flex-row justify-between mr-28">
+      <div className="flex flex-row justify-between">
         <h1 className="ml-1">Clients</h1>
-        <button onClick={() => loadData()} className="btn btn-accent z-10 mr-4">
+        <button onClick={() => loadData()} className="btn btn-accent">
           Reload
         </button>
       </div>

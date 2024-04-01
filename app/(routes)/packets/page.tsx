@@ -14,7 +14,7 @@ from "@tanstack/react-table";
 import { IbcTable } from "components/table/ibc-table";
 import { Modal } from "components/modal";
 import { Packet } from "utils/types/packet";
-import { RowDetails } from "./row-details";
+import { PacketDetails } from "./packet-details";
 import { StateCell, stateToString } from "./state-cell";
 import { ChainCell, Arrow } from "./chain-cell";
 import { hideMiddleChars } from "utils/functions";
@@ -124,8 +124,13 @@ const columns = [
 
 export default function Packets() {
   const [packets, setPackets] = useState<Packet[]>([]);
+  const [searchHash, setSearchHash] = useState<string>('');
+  const [searchPacket, setSearchPacket] = useState(false);
+  const [foundPacket, setFoundPacket] = useState<Packet>({} as Packet);
   const [loading, setLoading] = useState(true);
+  const [searchLoading, setSearchLoading] = useState(false);
   const [error, setError] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({
     'sequence': false,
     'destPortAddress': false,
@@ -151,7 +156,7 @@ export default function Packets() {
     fetch("/api/packets")
       .then(res => {
         if (!res.ok) {
-          console.error(res.status);
+          setErrorMessage(res.statusText);
           setError(true);
           setLoading(false);
         }
@@ -160,9 +165,34 @@ export default function Packets() {
       .then(data => {
         setPackets(data);
         setLoading(false);
-      }).catch(err => {
+      }).catch(() => {
         setError(true);
         setLoading(false);
+      });
+  }
+
+  function searchByHash() {
+    setSearchLoading(true);
+    setSearchPacket(true);
+    fetch(`/api/packets?txHash=${searchHash}`)
+      .then(res => {
+        if (!res.ok) {
+          setErrorMessage(res.statusText);
+          setError(true);
+          setSearchLoading(false);
+        }
+        return res.json();
+      })
+      .then(data => {
+        if (data.length > 0) {
+          setFoundPacket(data[0]);
+        } else {
+          setFoundPacket({} as Packet);
+        }
+        setSearchLoading(false);
+      }).catch(() => {
+        setError(true);
+        setSearchLoading(false);
       });
   }
 
@@ -178,7 +208,7 @@ export default function Packets() {
     },
     initialState: {
       pagination: {
-        pageSize: 20
+        pageSize: 10
       }
     },
     onColumnVisibilityChange: setColumnVisibility,
@@ -194,18 +224,44 @@ export default function Packets() {
         open={error} setOpen={setError}
         content={<>
           <h1>Error</h1>
-          <p className="mt-2">There was an issue fetching packet data</p>
+          <p className="mt-1 mr-8">
+            There was an issue fetching packet data {errorMessage? `: ${errorMessage}` : ''}
+          </p>
         </>}
       />
 
-      <div className="flex flex-row justify-between mr-28">
-        <h1 className="ml-1">Packets</h1>
-        <button onClick={() => loadData()} className="btn btn-accent z-10 mr-4">
+      <Modal open={searchPacket} setOpen={setSearchPacket}
+        content={
+          searchLoading ?
+          <p className="mt-1 mr-8">Loading...</p> :
+          PacketDetails(foundPacket)
+        }
+      />
+
+      <div className="flex flex-row justify-between mt-4">
+      <h1 className="ml-1">Packets</h1>
+        {/* <div className="flex flex-row justify-left w-2/5 min-w-[248px]">
+          <input
+            type="text"
+            placeholder="Search by Tx Hash"
+            className="inpt w-full px-3 rounded-md font-mono placeholder:font-primary"
+            value={searchHash}
+            onChange={e => setSearchHash(e.target.value)}
+            onKeyUp={e => { if (e.key === 'Enter') searchByHash() }}
+          />
+          <button
+            className="btn ml-2"
+            disabled={searchLoading || searchHash.length === 0}
+            onClick={() => searchByHash()}>
+            Search
+          </button>
+        </div> */}
+        <button onClick={() => loadData()} className="btn btn-accent">
           Reload
         </button>
       </div>
 
-      <IbcTable {...{table, loading, rowDetails: RowDetails}} />
+      <IbcTable {...{table, loading, rowDetails: PacketDetails}} />
     </div>
   );
 }
