@@ -30,18 +30,32 @@ export function IbcTable<TableType extends Packet | Client | IdentifiedChannel |
   const [selectedRow, setSelectedRow] = useState<TableType | null>(null);
 
   return (
-    <div className="relative -top-[2.64rem]">
+    <div className="relative mt-4">
 
       {/* Table View Options */}
-      <div className="flex flex-row justify-between items-end mb-3">
-        <span className="ml-1 text-slate-700 dark:text-slate-300">
-          {table.getFilteredRowModel().rows.length} total results
+      <div className="flex flex-row justify-between items-end mb-2 mx-1 text-slate-700 dark:text-slate-300">
+        <span>
+          {table.getFilteredRowModel().rows.length} Total Results
         </span>
 
-        <div className="flex flex-col items-end">
-          <Popover className="mb-6">
+        <div className="flex flex-row items-end space-x-3">
+          <div className="hidden sm:contents">
+            <Select
+              onChange={value => {
+                table.setPageSize(Number(value))
+              }}
+              options={
+                [10, 20, 50, 100].map(pageSize => ({ value: pageSize, label: `${pageSize} Rows / Page` }))
+              }
+              containerClassName="w-[145px]"
+              buttonClassName="h-[1.5rem] text-slate-700 dark:text-slate-300"
+              dropdownClassName="bg-bg-light dark:bg-bg-dark">
+            </Select>
+          </div>
+
+          <Popover>
             {({ open }) => (<>
-              <Popover.Button className="btn flex flex-row pr-[0.8rem]">
+              <Popover.Button className="flex flex-row h-[1.5rem]">
                 Columns
                 <FiChevronDown className={classNames(
                   open
@@ -53,13 +67,13 @@ export function IbcTable<TableType extends Packet | Client | IdentifiedChannel |
               <Transition
                 as={Fragment}
                 enter="ease-out duration-200"
-                enterFrom="transform scale-95 opacity-0 -translate-y-6 z-30"
-                enterTo="transform scale-100 opacity-100 z-30"
+                enterFrom="transform scale-95 opacity-0 -translate-y-6"
+                enterTo="transform scale-100 opacity-100"
                 leave="ease-in duration-200"
                 leaveFrom="transform scale-100 opacity-100"
                 leaveTo="transform scale-95 opacity-0">
                 <Popover.Panel className="absolute z-20 mt-2 right-0">
-                  <div className="bg-bg-light-accent dark:bg-bg-dark-accent pl-6 pr-9 py-5 border rounded-md border-slate-500">
+                  <div className="bg-bg-light dark:bg-bg-dark pl-6 pr-9 py-4 border-[0.5px] rounded-md border-slate-500">
                     {table.getAllLeafColumns().map(column => { return (
                       <div key={column.id} className="py-[0.17rem]">
                         <label>
@@ -82,20 +96,6 @@ export function IbcTable<TableType extends Packet | Client | IdentifiedChannel |
               </Transition>
             </>)}
           </Popover>
-
-          <select
-            value={table.getState().pagination.pageSize}
-            onChange={e => {
-              table.setPageSize(Number(e.target.value))
-            }}
-            aria-label="Rows per page"
-            className="mr-1 bg-transparent text-slate-700 dark:text-slate-300">
-            {[10, 20, 50, 100].map(pageSize => (
-              <option key={pageSize} value={pageSize}>
-                {pageSize} Rows / Page
-              </option>
-            ))}
-          </select>
 
         </div>
       </div>
@@ -130,7 +130,7 @@ export function IbcTable<TableType extends Packet | Client | IdentifiedChannel |
                       , "py-2 h-20 dark:bg-bg-dark last:pr-6 whitespace-nowrap font-medium first:pl-6"
                     )}
                     style={{width: header.getSize()}}>
-                    {header.isPlaceholder ? null : (
+                    {(header.isPlaceholder || loading) ? null : (
                       <div className="h-12 grid justify-items-start content-center">
                         {!header.column.getCanFilter() ? (
                           <div className="ml-2"> 
@@ -212,7 +212,7 @@ export function IbcTable<TableType extends Packet | Client | IdentifiedChannel |
           <FiChevronLeft className="w-5 h-5"/>
         </button>
 
-        <span className="mx-4 font-medium">Page {table.getState().pagination.pageIndex + 1} of {table.getPageCount()}</span>
+        <span className="mx-4 mb-[2px] font-medium">Page {table.getState().pagination.pageIndex + 1} of {table.getPageCount()}</span>
 
         <button
           className="rounded p-2 disabled:opacity-60 enabled:hover:bg-bg-light-accent enabled:dark:hover:bg-bg-dark-accent transition-colors ease-in-out duration-200"
@@ -246,6 +246,9 @@ function ColumnFilter({ column, table }: { column: Column<any, any>, table: Tabl
           ...Object.entries(CHAIN_CONFIGS).map(([key, value]) => ({ value: key, label: value.display }))]
         }
         onChange={value => column.setFilterValue(value)}
+        containerClassName="w-24"
+        buttonClassName="inpt h-8 pl-[9px] cursor-default"
+        dropdownClassName="bg-bg-light dark:bg-bg-dark"
       />
     );
   } else if (typeof firstValue === 'string') {
@@ -256,7 +259,7 @@ function ColumnFilter({ column, table }: { column: Column<any, any>, table: Tabl
         onChange={e => column.setFilterValue(e.target.value)}
         placeholder={column.columnDef.header as string}
         className={classLogic(() => {
-          let classes = "table-inpt w-fit placeholder:text-fg-dark font-mono placeholder:font-primary";
+          let classes = "inpt h-8 px-[9px] w-fit placeholder:text-fg-dark font-mono placeholder:font-primary";
           switch (column.id.toLowerCase()) {
             case 'counterparty_connectionid':
               break;
