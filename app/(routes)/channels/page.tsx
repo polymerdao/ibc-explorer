@@ -11,7 +11,7 @@ import {
   useReactTable,
   VisibilityState
 } from '@tanstack/react-table';
-import { IbcTable } from 'components/table/ibc-table';
+import { IbcTable } from '@/components/ibc-table';
 import { IdentifiedChannel, State } from 'cosmjs-types/ibc/core/channel/v1/channel';
 import { Modal } from 'components/modal';
 import { SimIcon } from 'components/icons';

@@ -12,6 +12,11 @@ export async function GET(request: NextRequest) {
     return NextResponse.json(allPackets || []);
   }
 
-  const packet = await getPacket(txHash);
-  return NextResponse.json([packet]);
+  try {
+    const packet = await getPacket(txHash);
+    return NextResponse.json(packet);
+  }
+  catch (err) {
+    return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
+  }
 }

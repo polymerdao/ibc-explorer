@@ -11,7 +11,7 @@ import {
   SortingState,
   useReactTable }
 from "@tanstack/react-table";
-import { IbcTable } from "components/table/ibc-table";
+import { IbcTable } from "@/components/ibc-table";
 import { Modal } from "components/modal";
 import { Packet } from "utils/types/packet";
 import { PacketDetails } from "./packet-details";
@@ -126,7 +126,7 @@ export default function Packets() {
   const [packets, setPackets] = useState<Packet[]>([]);
   const [searchHash, setSearchHash] = useState<string>('');
   const [searchPacket, setSearchPacket] = useState(false);
-  const [foundPacket, setFoundPacket] = useState<Packet>({} as Packet);
+  const [foundPacket, setFoundPacket] = useState<Packet | null>(null);
   const [loading, setLoading] = useState(true);
   const [searchLoading, setSearchLoading] = useState(false);
   const [error, setError] = useState(false);
@@ -171,14 +171,16 @@ export default function Packets() {
       });
   }
 
+  const controller = new AbortController();
   function searchByHash() {
     setSearchLoading(true);
     setSearchPacket(true);
-    fetch(`/api/packets?txHash=${searchHash}`)
+    fetch(`/api/packets?txHash=${searchHash}`, { signal: controller.signal })
       .then(res => {
         if (!res.ok) {
           setErrorMessage(res.statusText);
           setError(true);
+          setSearchPacket(false);
           setSearchLoading(false);
         }
         return res.json();
@@ -187,11 +189,12 @@ export default function Packets() {
         if (data.length > 0) {
           setFoundPacket(data[0]);
         } else {
-          setFoundPacket({} as Packet);
+          setFoundPacket(null);
         }
         setSearchLoading(false);
       }).catch(() => {
         setError(true);
+        setSearchPacket(false);
         setSearchLoading(false);
       });
   }
@@ -221,26 +224,36 @@ export default function Packets() {
   return (
     <div className="h-0">
       <Modal 
-        open={error} setOpen={setError}
+        open={error}
+        onClose={() => {
+          setError(false);
+          setErrorMessage('');
+        }}
         content={<>
-          <h1>Error</h1>
+          <h2>Error</h2>
           <p className="mt-1 mr-8">
             There was an issue fetching packet data {errorMessage? `: ${errorMessage}` : ''}
           </p>
         </>}
       />
 
-      <Modal open={searchPacket} setOpen={setSearchPacket}
-        content={
-          searchLoading ?
-          <p className="mt-1 mr-8">Loading...</p> :
-          PacketDetails(foundPacket)
-        }
+      <Modal 
+        open={searchPacket} 
+        onClose={() => {
+          setSearchPacket(false);
+          setFoundPacket(null);
+          if (searchLoading) {
+            controller.abort();
+            setSearchLoading(false);
+          }
+        }}
+        content={PacketDetails(foundPacket)}
+        loading={searchLoading}
       />
 
-      <div className="flex flex-row justify-between mt-4">
       <h1 className="ml-1">Packets</h1>
-        {/* <div className="flex flex-row justify-left w-2/5 min-w-[248px]">
+      <div className="flex flex-row justify-between mt-4">
+        <div className="flex flex-row justify-left w-2/5 min-w-[248px]">
           <input
             type="text"
             placeholder="Search by Tx Hash"
@@ -255,7 +268,7 @@ export default function Packets() {
             onClick={() => searchByHash()}>
             Search
           </button>
-        </div> */}
+        </div>
         <button onClick={() => loadData()} className="btn btn-accent">
           Reload
         </button>
