@@ -11,7 +11,7 @@ import {
   SortingState,
   useReactTable }
 from "@tanstack/react-table";
-import { IbcTable } from "components/table/ibc-table";
+import { IbcTable } from "@/components/ibc-table";
 import { SimIcon } from "components/icons";
 import { IdentifiedConnection, State } from "cosmjs-types/ibc/core/connection/v1/connection";
 import { Modal } from "components/modal";

@@ -266,116 +266,100 @@ export async function getPacket(txHash: string) {
   const headers = {'content-type': 'application/json'};
   let packetResponse;
 
-  try {
-    const packetRequest = {
-      query: `query Packet($txHash:String!){
-                packets(where:{sendTx:$txHash}){
-                  items {
-                    sendPacket {
-                      sequence
-                      sourcePortAddress
-                      sourceChannelId
-                      dispatcherAddress
-                      blockTimestamp
-                      timeoutTimestamp
-                    }
-                    recvPacket {
-                      destPortAddress
-                      destChannelId
-                      blockTimestamp
-                    }
-                    writeAckPacket {
-                      dispatcherAddress
-                      blockTimestamp
-                    }
-                    ackPacket {
-                      blockTimestamp
-                    }
-                    id
-                    state
-                    sendTx
-                    recvTx
-                    writeAckTx
-                    ackTx
+  const packetRequest = {
+    query: `query Packet($txHash:String!){
+              packets(where:{sendTx:$txHash}){
+                items {
+                  sendPacket {
+                    sequence
+                    sourcePortAddress
+                    sourceChannelId
+                    dispatcherAddress
+                    blockTimestamp
+                    timeoutTimestamp
                   }
+                  recvPacket {
+                    destPortAddress
+                    destChannelId
+                    blockTimestamp
+                  }
+                  writeAckPacket {
+                    dispatcherAddress
+                    blockTimestamp
+                  }
+                  ackPacket {
+                    blockTimestamp
+                  }
+                  id
+                  state
+                  sendTx
+                  recvTx
+                  writeAckTx
+                  ackTx
                 }
-              }`,
-      variables: { txHash }
-    };
+              }
+            }`,
+    variables: { txHash }
+  };
 
-    const options = {
-      method: 'POST',
-      headers,
-      body: JSON.stringify(packetRequest)
-    };
+  const packetOptions = {
+    method: 'POST',
+    headers,
+    body: JSON.stringify(packetRequest)
+  };
 
-    const res = await (await fetch(process.env.INDEXER_URL!, options)).json();
-    if (res?.data?.packets?.items.length > 0) {
-      packetResponse = res.data.packets.items[0];
-      console.log(packetResponse);
-    } else {
-      return [];
-    }
-  }
-  catch (err) {
-    console.log('Error fetching packet: ', err);
+  const packetRes = await (await fetch(process.env.INDEXER_URL!, packetOptions)).json();
+  if (packetRes?.data?.packets?.items.length > 0) {
+    packetResponse = packetRes.data.packets.items[0];
+  } else {
     return [];
   }
 
   // Find channel associated with the packet to parse out src and dest chains
-  const sourceChannelId = packetResponse.sendPacket.sourceChannelId;
+  const sourceChannelId = packetResponse.sendPacket?.sourceChannelId;
   let channelResponse;
 
-  try {
-    const channelRequest = {
-      query: `query Channel($sourceChannelId:String!){
-                channels(where:{channelId:$sourceChannelId}){
-                  items {
-                    portId
-                    counterpartyPortId
-                  }
+  const channelRequest = {
+    query: `query Channel($sourceChannelId:String!){
+              channels(where:{channelId:$sourceChannelId}){
+                items {
+                  portId
+                  counterpartyPortId
                 }
-              }`,
-      variables: { sourceChannelId }
-    };
+              }
+            }`,
+    variables: { sourceChannelId }
+  };
 
-    const options = {
-      method: 'POST',
-      headers,
-      body: JSON.stringify(channelRequest)
-    };
+  const channelOptions = {
+    method: 'POST',
+    headers,
+    body: JSON.stringify(channelRequest)
+  };
 
-    const res = await (await fetch(process.env.INDEXER_URL!, options)).json();
-    if (res?.data?.channels?.items.length > 0) {
-      console.log(res.data.channels)
-      channelResponse = res.data.channels.items[0];
-    } else {
-      return [];
-    }
-  }
-  catch (err) {
-    console.log('Error fetching channel: ', err);
-    return [];
+  const channelRes = await (await fetch(process.env.INDEXER_URL!, channelOptions)).json();
+  if (channelRes?.data?.channels?.items.length > 0) {
+    channelResponse = channelRes.data.channels.items[0];
   }
 
   const packet: Packet = {
-    sequence: packetResponse.sendPacket.sequence,
-    sourcePortAddress: packetResponse.sendPacket.sourcePortAddress,
-    sourceChannelId: packetResponse.sendPacket.sourceChannelId,
-    destPortAddress: '',
-    destChannelId: '',
-    timeout: packetResponse.sendPacket.timeoutTimestamp,
+    sequence: packetResponse.sendPacket?.sequence,
+    sourcePortAddress: packetResponse.sendPacket?.sourcePortAddress,
+    sourceChannelId: packetResponse.sendPacket?.sourceChannelId,
+    destPortAddress: packetResponse.recvPacket?.destPortAddress,
+    destChannelId: packetResponse.recvPacket?.destChannelId,
+    timeout: packetResponse.sendPacket?.timeoutTimestamp,
     fee: '',
     id: packetResponse.id,
     state: packetResponse.state,
-    createTime: packetResponse.sendPacket.blockTimestamp,
+    createTime: packetResponse.sendPacket?.blockTimestamp,
     endTime: packetResponse.recvPacket?.blockTimestamp,
     sendTx: packetResponse.sendTx,
     rcvTx: packetResponse.recvTx,
     ackTx: packetResponse.ackTx,
-    sourceChain: channelResponse.portId?.split('.')[1],
-    destChain: channelResponse.counterpartyPortId?.split('.')[1]
+    sourceChain: channelResponse?.portId?.split('.')[1],
+    destChain: channelResponse?.counterpartyPortId?.split('.')[1]
   };
 
-  return packet;
+  return [packet];
 }

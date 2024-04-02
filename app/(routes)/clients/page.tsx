@@ -9,7 +9,7 @@ import {
   getPaginationRowModel,
   useReactTable }
 from "@tanstack/react-table";
-import { IbcTable } from "components/table/ibc-table";
+import { IbcTable } from "@/components/ibc-table";
 import { Modal } from "components/modal";
 import { SimIcon } from "components/icons";
 import { Client } from "utils/types/client";
