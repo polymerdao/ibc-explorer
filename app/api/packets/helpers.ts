@@ -85,7 +85,7 @@ export async function getPackets() {
       state: PacketStates.SENT,
       createTime: srcBlock!.timestamp,
       sendTx: sendEvent.transactionHash,
-      sourceChain: srcChain,
+      sourceChain: client,
       destChain: channel.channel.counterparty.portId.split('.')[1]
     };
     unprocessedPacketKeys.add(key);
