@@ -193,10 +193,7 @@ export function IbcTable<TableType extends Packet | Client | IdentifiedChannel |
       {rowDetails && 
         <Modal
           open={rowSelected}
-          onClose={() => {
-            setRowSelected(false);
-            setSelectedRow(null);
-          }}
+          onClose={() => setRowSelected(false)}
           content={rowDetails(selectedRow as TableType)}
         />
       }

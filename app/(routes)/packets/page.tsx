@@ -174,6 +174,7 @@ export default function Packets() {
   const controller = new AbortController();
   function searchByHash() {
     setSearchLoading(true);
+    setFoundPacket(null);
     setSearchPacket(true);
     fetch(`/api/packets?txHash=${searchHash}`, { signal: controller.signal })
       .then(res => {
@@ -241,7 +242,6 @@ export default function Packets() {
         open={searchPacket} 
         onClose={() => {
           setSearchPacket(false);
-          setFoundPacket(null);
           if (searchLoading) {
             controller.abort();
             setSearchLoading(false);
