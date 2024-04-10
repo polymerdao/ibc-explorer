@@ -1,4 +1,3 @@
-import { PacketStates } from "utils/types/packet";
 import { classNames } from "utils/functions";
 
 export function StateCell(state: string) {
@@ -12,20 +11,4 @@ export function StateCell(state: string) {
       <span className="text-fg-light dark:text-fg-dark mr-[1.5px] mb-[1.5px] font-primary">{state}</span>
     </div>
   );
-}
-
-export function stateToString (state: PacketStates): string {
-  switch (state) {
-    case PacketStates.SENT:
-    case PacketStates.POLY_RECV:
-      return 'Relaying';
-    case PacketStates.RECV:
-    case PacketStates.WRITE_ACK:
-    case PacketStates.POLY_WRITE_ACK:
-      return 'Confirming';
-    case PacketStates.ACK:
-      return 'Delivered';
-    default:
-      return 'Relaying';
-  }
 }

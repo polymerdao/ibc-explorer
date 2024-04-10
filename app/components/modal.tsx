@@ -33,13 +33,13 @@ export function Modal({open, onClose, content, loading}: ModalProps) {
             <Transition.Child
               as={Fragment}
               enter="ease-out duration-200"
-              enterFrom="opacity-0 -translate-y-6"
+              enterFrom="opacity-0 -translate-y-12"
               enterTo="opacity-100 translate-y-0"
               leave="ease-in duration-150"
               leaveFrom="opacity-100 translate-y-0"
               leaveTo="opacity-0 translate-y-12">
               <Dialog.Panel
-                className="w-fit max-w-full min-w-36 transform border border-slate-800 dark:border-slate-300 rounded-md bg-bg-light dark:bg-bg-dark p-6 transition-all">
+                className="w-fit max-w-full min-w-36 transform border-[1.5px] border-slate-800 dark:border-slate-300 rounded-md bg-bg-light dark:bg-bg-dark p-6 transition-all">
                 {!loading &&
                 <button className="absolute top-0 right-0 m-4"
                   onClick={() => onClose()}>

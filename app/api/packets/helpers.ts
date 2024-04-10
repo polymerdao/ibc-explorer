@@ -78,7 +78,6 @@ export async function getPackets() {
       sourceChannelId: srcChannelId,
       destPortAddress: channel.channel.counterparty.portId,
       destChannelId: channel.channel.counterparty.channelId,
-      fee,
       sequence: sequence.toString(),
       timeout: timeout.toString(),
       id: key,
@@ -268,7 +267,14 @@ export async function getPacket(txHash: string) {
 
   const packetRequest = {
     query: `query Packet($txHash:String!){
-              packets(where:{sendTx:$txHash}){
+              packets(where:{
+                OR:[
+                  {sendTx:$txHash},
+                  {recvTx:$txHash},
+                  {writeAckTx:$txHash},
+                  {ackTx:$txHash}
+                ]  
+              }){
                 items {
                   sendPacket {
                     sequence
@@ -342,6 +348,18 @@ export async function getPacket(txHash: string) {
     channelResponse = channelRes.data.channels.items[0];
   }
 
+  let state: PacketStates = PacketStates.SENT;
+  switch (packetResponse.state) {
+    case "ACK":
+      state = PacketStates.ACK;
+      break;
+    case "RECV":
+    case "WRITE_ACK":
+      state = PacketStates.RECV;
+      break;
+  }
+
+
   const packet: Packet = {
     sequence: packetResponse.sendPacket?.sequence,
     sourcePortAddress: packetResponse.sendPacket?.sourcePortAddress,
@@ -349,11 +367,11 @@ export async function getPacket(txHash: string) {
     destPortAddress: packetResponse.recvPacket?.destPortAddress,
     destChannelId: packetResponse.recvPacket?.destChannelId,
     timeout: packetResponse.sendPacket?.timeoutTimestamp,
-    fee: '',
     id: packetResponse.id,
-    state: packetResponse.state,
+    state: state,
     createTime: packetResponse.sendPacket?.blockTimestamp,
-    endTime: packetResponse.recvPacket?.blockTimestamp,
+    recvTime: packetResponse.recvPacket?.blockTimestamp,
+    endTime: packetResponse.ackPacket?.blockTimestamp,
     sendTx: packetResponse.sendTx,
     rcvTx: packetResponse.recvTx,
     ackTx: packetResponse.ackTx,

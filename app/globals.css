@@ -65,7 +65,7 @@
   }
 
   .btn {
-    @apply px-4 py-2 rounded-md bg-bg-light-accent dark:bg-bg-dark dark:hover:text-white border-[0.5px] border-slate-400 dark:border-slate-500 dark:hover:border-fg-dark disabled:hover:border-slate-300 disabled:hover:dark:border-slate-500 transition ease-in-out duration-200 font-medium disabled:text-slate-400 disabled:hover:text-slate-400 dark:disabled:text-slate-400 dark:disabled:hover:text-slate-400;
+    @apply px-4 py-2 rounded-md bg-bg-light-accent dark:bg-bg-dark dark:hover:text-white border-[1px] border-slate-400 dark:border-slate-500 dark:hover:border-fg-dark disabled:hover:border-slate-300 disabled:hover:dark:border-slate-500 transition ease-in-out duration-200 font-medium disabled:text-slate-400 disabled:hover:text-slate-400 dark:disabled:text-slate-400 dark:disabled:hover:text-slate-400;
   }
 
   .btn-accent {
