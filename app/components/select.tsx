@@ -25,10 +25,10 @@ export function Select({ options, onChange, containerClassName, buttonClassName,
   }
 
   return (
-    <div className={containerClassName + " relative"}>
+    <div className={`${containerClassName || ''} relative`}>
       <Listbox value={selectedOption} onChange={(e) => {handleChange(e)}}>
         {({ open }) => (<>
-          <Listbox.Button className={buttonClassName + " w-full flex flex-row justify-between items-center pr-[0.4rem] text-fg-light dark:text-fg-dark transition east-in-out duration-200"}>
+          <Listbox.Button className={`${buttonClassName || ''} w-full flex flex-row justify-between items-center pr-[0.4rem] text-fg-light dark:text-fg-dark transition east-in-out duration-200`}>
             <span className="truncate">{selectedOption.label}</span>
             <FiChevronDown className={classNames(
               open
@@ -46,7 +46,7 @@ export function Select({ options, onChange, containerClassName, buttonClassName,
             leave="ease-in duration-150"
             leaveFrom="transform scale-100 opacity-100"
             leaveTo="transform scale-95 opacity-0">
-            <Listbox.Options className={dropdownClassName + " absolute z-20 left-0 mt-2 overflow-auto rounded-md py-2 border-[0.5px] border-slate-500"}>
+            <Listbox.Options className={`${dropdownClassName || ''} absolute z-20 left-0 mt-2 overflow-auto rounded-md py-2 border-[0.5px] border-slate-500`}>
               {options.map((option) => (
                 <Listbox.Option key={option.value} value={option}
                   className={({ active }) => classNames(

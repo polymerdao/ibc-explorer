@@ -11,11 +11,12 @@ import {
   SortingState,
   useReactTable }
 from "@tanstack/react-table";
-import { IbcTable } from "@/components/ibc-table";
+import { IbcTable } from "components/ibc-table";
 import { Modal } from "components/modal";
 import { Packet } from "utils/types/packet";
 import { PacketDetails } from "./packet-details";
-import { StateCell, stateToString } from "./state-cell";
+import { StateCell } from "./state-cell";
+import { stateToString } from "utils/types/packet";
 import { ChainCell, Arrow } from "./chain-cell";
 import { hideMiddleChars } from "utils/functions";
 
@@ -89,11 +90,6 @@ const columns = [
     size: 175,
     minSize: 175
   }),
-  columnHelper.accessor('fee', {
-    header: 'Fee',
-    enableColumnFilter: false,
-    enableHiding: true
-  }),
   columnHelper.accessor('sequence', {
     header: 'Sequence',
     enableColumnFilter: false,
@@ -157,6 +153,7 @@ export default function Packets() {
       .then(res => {
         if (!res.ok) {
           setErrorMessage(res.statusText);
+          setErrorMessage(res.statusText);
           setError(true);
           setLoading(false);
         }
@@ -165,6 +162,7 @@ export default function Packets() {
       .then(data => {
         setPackets(data);
         setLoading(false);
+      }).catch(() => {
       }).catch(() => {
         setError(true);
         setLoading(false);
@@ -257,13 +255,13 @@ export default function Packets() {
           <input
             type="text"
             placeholder="Search by Tx Hash"
-            className="inpt w-full px-3 rounded-md font-mono placeholder:font-primary"
+            className="inpt border-[1px] w-full px-3 rounded-md font-mono placeholder:font-primary"
             value={searchHash}
             onChange={e => setSearchHash(e.target.value)}
             onKeyUp={e => { if (e.key === 'Enter') searchByHash() }}
           />
           <button
-            className="btn ml-2"
+            className="btn ml-3"
             disabled={searchLoading || searchHash.length === 0}
             onClick={() => searchByHash()}>
             Search

@@ -101,7 +101,7 @@ export function IbcTable<TableType extends Packet | Client | IdentifiedChannel |
       </div>
 
       { /* Table */ }
-      <div className="w-full border border-slate-300 dark:border-slate-700 rounded-md bg-bg-light-accent dark:bg-bg-dark-accent overflow-y-auto table-height scroll-smooth min-h-72
+      <div className="w-full border-2 border-slate-300 dark:border-slate-700 rounded-md bg-bg-light-accent dark:bg-bg-dark-accent overflow-y-auto table-height scroll-smooth min-h-72
         max-h-[calc(100vh-19rem)] xl:max-h-[calc(100vh-20rem)]">
         {loading && 
           <div className="absolute mt-40 z-10 w-full grid justify-items-center">
@@ -109,7 +109,7 @@ export function IbcTable<TableType extends Packet | Client | IdentifiedChannel |
           </div>
         }
         {(!loading && !table.getFilteredRowModel().rows.length) &&
-          <div className="absolute mt-40 z-10 w-full grid justify-items-center font-medium">
+          <div className="absolute mt-40 z-10 w-full grid justify-items-center font-medium font-mono text-lg">
             <div>No results</div>
           </div>
         }

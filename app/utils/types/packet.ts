@@ -5,10 +5,10 @@ export interface Packet {
   destPortAddress: string;
   destChannelId: string;
   timeout: string;
-  fee: string;
   id: string;
   state: PacketStates;
   createTime: number;
+  recvTime?: number;
   endTime?: number;
   sendTx: string;
   rcvTx?: string;
@@ -19,9 +19,19 @@ export interface Packet {
 
 export enum PacketStates {
   SENT = 1,
-  ACK,
-  POLY_WRITE_ACK,
-  WRITE_ACK,
+  POLY_RECV,
   RECV,
-  POLY_RECV
+  WRITE_ACK,
+  POLY_WRITE_ACK,
+  ACK
+}
+
+export function stateToString (state: PacketStates): string {
+  if (state < PacketStates.RECV) {
+    return 'Relaying';
+  } else if (state < PacketStates.ACK) {
+    return 'Confirming';
+  } else {
+    return 'Delivered';
+  }
 }
