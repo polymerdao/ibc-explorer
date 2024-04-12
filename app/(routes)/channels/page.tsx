@@ -114,11 +114,12 @@ export default function Packets() {
 
   return (
     <div className="h-0">
-      <Modal
-        open={error} setOpen={setError}
+      <Modal 
+        open={error}
+        onClose={() => setError(false)}
         content={<>
-          <h1>Error</h1>
-          <p className="mt-2">There was an issue fetching channel data</p>
+          <h2>Error</h2>
+          <p className="mt-1 mr-8">There was an issue fetching channel data</p>
         </>}
       />
 
