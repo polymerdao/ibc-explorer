@@ -6,11 +6,6 @@ export async function getLatestBlock(chainId: CHAIN) {
   return await provider.getBlock("latest");
 }
 
-export function hideMiddleChars(str: string) {
-  const shortened =  str.slice(0, 7) + '...' + str.slice(-5);
-  return <span title={str}>{shortened}</span>;
-}
-
 export function classNames(...classes: string[]) {
   return classes.filter(Boolean).join(' ');
 }

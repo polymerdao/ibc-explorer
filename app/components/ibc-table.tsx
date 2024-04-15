@@ -239,7 +239,7 @@ function ColumnFilter({ column, table }: { column: Column<any, any>, table: Tabl
 
   const columnFilterValue = column.getFilterValue();
   
-  if (column.id === 'sourceChain' || column.id === 'destChain') {
+  if (column.id === 'sourceChain' || column.id === 'destChain' || column.id === 'chain') {
     return (
       <Select 
         options={

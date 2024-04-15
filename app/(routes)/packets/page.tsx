@@ -17,8 +17,8 @@ import { Packet } from "utils/types/packet";
 import { PacketDetails } from "./packet-details";
 import { StateCell } from "./state-cell";
 import { stateToString } from "utils/types/packet";
-import { ChainCell, Arrow } from "./chain-cell";
-import { hideMiddleChars } from "utils/functions";
+import { ChainCell, Arrow } from "components/chain-cell";
+import { shortenHex } from "components/format-strings";
 
 const columnHelper = createColumnHelper<Packet>();
 const columns = [
@@ -33,7 +33,7 @@ const columns = [
   }),
   columnHelper.accessor('sendTx', {
     header: 'Send Tx',
-    cell: props => hideMiddleChars(props.getValue()),
+    cell: props => shortenHex(props.getValue()),
     enableHiding: true
   }),
   columnHelper.accessor('sourceChain', {
@@ -58,12 +58,12 @@ const columns = [
   }),
   columnHelper.accessor('sourcePortAddress', {
     header: 'Src Port Address',
-    cell: props => hideMiddleChars(props.getValue()),
+    cell: props => shortenHex(props.getValue()),
     enableHiding: true
   }),
   columnHelper.accessor('destPortAddress', {
     header: 'Dest Port Address',
-    cell: props => hideMiddleChars(props.getValue()),
+    cell: props => shortenHex(props.getValue()),
     enableHiding: true
   }),
   columnHelper.accessor('sourceChannelId', {
@@ -98,13 +98,13 @@ const columns = [
   }),
   columnHelper.accessor('rcvTx', {
     header: 'Rcv Tx',
-    cell: props => hideMiddleChars(props.getValue() ?? ''),
+    cell: props => shortenHex(props.getValue() ?? ''),
     enableHiding: true,
     enableColumnFilter: false
   }),
   columnHelper.accessor('ackTx', {
     header: 'Ack Tx',
-    cell: props => hideMiddleChars(props.getValue() ?? ''),
+    cell: props => shortenHex(props.getValue() ?? ''),
     enableHiding: true,
     enableColumnFilter: false
   }),
@@ -153,7 +153,6 @@ export default function Packets() {
       .then(res => {
         if (!res.ok) {
           setErrorMessage(res.statusText);
-          setErrorMessage(res.statusText);
           setError(true);
           setLoading(false);
         }
@@ -162,7 +161,6 @@ export default function Packets() {
       .then(data => {
         setPackets(data);
         setLoading(false);
-      }).catch(() => {
       }).catch(() => {
         setError(true);
         setLoading(false);

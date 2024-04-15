@@ -2,9 +2,7 @@ import Link from 'next/link';
 import { Packet, PacketStates, stateToString } from 'utils/types/packet';
 import { CHAIN_CONFIGS, CHAIN } from 'utils/chains/configs';
 import { classNames } from 'utils/functions';
-import { FiCopy } from 'react-icons/fi';
-import { Toaster, toast, resolveValue } from 'react-hot-toast';
-import { Transition } from '@headlessui/react';
+import { CopyButton } from 'components/copy-button';
 
 export function PacketDetails(packet: Packet | null) {
   let sourceUrl = '';
@@ -68,7 +66,7 @@ export function PacketDetails(packet: Packet | null) {
             : ""
             , "relative flex flex-row justify-center items-start w-full pl-[3.75rem] pr-[2.3rem]"
           )}>
-            <div className="absolute h-[7px] w-[7px] rounded-full bg-fg-dark left-[58px] -top-[2.3px]"></div>
+            <div className="absolute h-[7px] w-[7px] rounded-full bg-fg-dark left-[58px] -top-[2.8px]"></div>
             <div className="absolute right-[37.4px] bottom-[18.5px]">
               <div className="w-1 h-[2px] skew-y-[30deg] ml-[5px] bg-fg-dark"></div>
               <div className="w-[10px] h-[1px] border-[1px] border-fg-dark rounded rotate-[75deg] origin-right -mb-[2.7px]"></div>
@@ -163,56 +161,29 @@ function Divider () {
 }
 
 function linkAndCopy(url: string, path: string, hex?: string) {
-  if (hex) {
-    hex = hex.toLowerCase();
-    if (hex[0] != '0' || hex[1] != 'x') {
-      let split = hex.split('.');
-      if (split.length > 0) {
-        hex = split.pop();
-      }
-      hex = '0x' + hex;
-    }
-    return (
-      <div className="whitespace-nowrap flex flex-row transition ease-in-out duration-300">
-        <Link href={url + path + '/' + hex} target="_blank"
-          className="text-sky-600 dark:text-sky-400 font-mono text-[17px]/[24px] hover:underline underline-offset-2">
-          {hex}
-        </Link>
-        <button className="opacity-70 hover:opacity-100"
-          onClick={() => {
-            navigator.clipboard.writeText(hex!);
-            toast.success('Copied');
-          }}>
-          <FiCopy className="ml-2"/>
-        </button>
-        {toaster()}
-      </div>
-    );
-  } else {
+  if (!hex) {
     return <p className="font-mono animate-pulse">...</p>;
   }
-}
 
-function toaster() {
+  hex = hex.toLowerCase();
+  if (hex[0] != '0' || hex[1] != 'x') {
+    let split = hex.split('.');
+    if (split.length > 0) {
+      hex = split.pop();
+    }
+    hex = '0x' + hex;
+  }
+
   return (
-    <Toaster position="top-right">
-      {(t) => (
-        <Transition
-          appear
-          show={t.visible}
-          className="transform mt-6 mr-14 bg-transparent"
-          enter="transition-all duration-10"
-          enterFrom="opacity-0 scale-75"
-          enterTo="opacity-70 scale-100"
-          leave="transition-all duration-100"
-          leaveFrom="opacity-70 scale-100"
-          leaveTo="opacity-0 scale-75">
-          <p className="text-fg-dark">{resolveValue(t.message, t)}</p>
-        </Transition>
-      )}
-    </Toaster>
+    <div className="whitespace-nowrap flex flex-row transition ease-in-out duration-300">
+      <Link href={url + path + '/' + hex} target="_blank"
+        className="text-sky-600 dark:text-sky-400 font-mono text-[17px]/[24px] hover:underline underline-offset-2">
+        {hex}
+      </Link>
+      <CopyButton str={hex} />
+    </div>
   );
-};
+}
 
 function formatDuration(duration: number) {
   if (duration < 180) {
