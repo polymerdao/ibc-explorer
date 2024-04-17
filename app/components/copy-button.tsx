@@ -13,16 +13,21 @@ export function CopyButton({str}: {str: string}) {
 
   return (
     <div className="relative">
-      <button className="opacity-70 hover:opacity-100 transition ease-in-out duration-200"
+      <button className={classNames(
+        showCheck
+        ? 'invisible'
+        : ''
+        , 'opacity-70 w-5 h-5 pl-[1px] ml-1.5 mt-[1px] hover:opacity-100 transition ease-in-out duration-200'
+        )}
         onClick={() => handleClick()}>
-        <FiCopy className="ml-2 -mb-0.5"/>
+        <FiCopy />
       </button>
 
       <FiCheck className={classNames(
         showCheck
-        ? 'opacity-100'
-        : 'opacity-0'
-        , 'absolute bottom-[5px] left-[28px] w-[20px] h-[20px] text-emerald-500 transition ease-in-out duration-200'
+        ? ''
+        : 'invisible'
+        , 'absolute cursor-pointer bottom-[4px] left-[6px] w-[18px] h-[18px] text-emerald-500'
       )} />
     </div>
   );
