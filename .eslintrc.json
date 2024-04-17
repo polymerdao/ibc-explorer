@@ -1,3 +1,11 @@
 {
-  "extends": "next/core-web-vitals"
+  "extends": ["eslint:recommended", "next/core-web-vitals"],
+  "rules": {
+    "quotes": ["warn", "single", { "avoidEscape": true }],
+    "jsx-quotes": ["warn", "prefer-double"],
+    "eol-last": ["warn", "always"],
+    "no-unused-vars": "off",
+    "no-undef": "off",
+    "no-case-declarations": "off"
+  }
 }
