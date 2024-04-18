@@ -1,7 +1,7 @@
 name: docker-test
 
 on:
-  pull_requst_target:
+  pull_request:
     branches:
       - main
 
