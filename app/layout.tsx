@@ -1,11 +1,11 @@
-import type { Metadata } from "next";
+import type { Metadata } from 'next';
 import { primary, mono, accent } from 'fonts'
-import Navbar from "./components/navbar";
-import "./globals.css";
+import Navbar from './components/navbar';
+import './globals.css';
 
 export const metadata: Metadata = {
-  title: "IBC Explorer",
-  description: "Polymer Labs IBC Explorer",
+  title: 'IBC Explorer',
+  description: 'Polymer Labs IBC Explorer',
 };
 
 export default function RootLayout({

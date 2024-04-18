@@ -32,9 +32,9 @@ export function Select({ options, onChange, containerClassName, buttonClassName,
             <span className="truncate">{selectedOption.label}</span>
             <FiChevronDown className={classNames(
               open
-              ? "scale-y-[-1]"
-              : ""
-              , "transition ease-in-out duration-200 mt-[1px]"
+              ? 'scale-y-[-1]'
+              : ''
+              , 'transition ease-in-out duration-200 mt-[1px]'
             )}/>
           </Listbox.Button>
 
@@ -51,9 +51,9 @@ export function Select({ options, onChange, containerClassName, buttonClassName,
                 <Listbox.Option key={option.value} value={option}
                   className={({ active }) => classNames(
                     active
-                    ? "bg-bg-dark-accent"
-                    : ""
-                    , "relative cursor-default select-none py-1.5 ml-2 mr-2.5 pl-2.5 pr-3 rounded"
+                    ? 'bg-bg-dark-accent'
+                    : ''
+                    , 'relative cursor-default select-none py-1.5 ml-2 mr-2.5 pl-2.5 pr-3 rounded'
                   )}>
                   <div className="flex flex-row">
                     <span className="text-fg-light dark:text-fg-dark whitespace-nowrap">

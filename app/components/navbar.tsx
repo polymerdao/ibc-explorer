@@ -4,8 +4,8 @@ import { useState } from 'react';
 import { usePathname } from 'next/navigation';
 import { classNames } from 'utils/functions';
 import Link from 'next/link';
-import Image from "next/image";
-import { FiSun, FiMoon } from "react-icons/fi";
+import Image from 'next/image';
+import { FiSun, FiMoon } from 'react-icons/fi';
 
 const tabs = [
   { name: 'Packets', href: '/packets' },
@@ -34,7 +34,7 @@ export default function Navbar() {
 
         <div className="flex items-center shrink-0 mr-10 pt-1">
           <Link href="/">
-            <Image className="relative dark:invert opacity-95" src={"/logo512.png"} width={32} height={32} alt={"Logo"} />
+            <Image className="relative dark:invert opacity-95" src={'/logo512.png'} width={32} height={32} alt={'Logo'} />
           </Link>
         </div>
 
@@ -78,7 +78,7 @@ export default function Navbar() {
               nav
                 ? 'rotate-45 translate-y-[0.315rem]'
                 : 'rotate-0 translate-y-0',
-                  "w-full h-0.5 bg-fg-light dark:bg-fg-dark opacity-95 rounded-md mt-1 transition ease-in-out"
+                  'w-full h-0.5 bg-fg-light dark:bg-fg-dark opacity-95 rounded-md mt-1 transition ease-in-out'
             )}
           ></div>
           <div 
@@ -86,7 +86,7 @@ export default function Navbar() {
               nav
                 ? 'rotate-[-45deg] -translate-y-[0.315rem]'
                 : 'rotate-0 translate-y-0',
-                  "w-full h-0.5 bg-fg-light dark:bg-fg-dark opacity-95 rounded-md mb-1 transition ease-in-out"
+                  'w-full h-0.5 bg-fg-light dark:bg-fg-dark opacity-95 rounded-md mb-1 transition ease-in-out'
             )}
           ></div>
         </button>

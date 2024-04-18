@@ -1,9 +1,9 @@
 import { Block } from 'ethers';
 import * as stats from 'stats-lite';
 import _ from 'lodash';
-import { CHAIN, CHAIN_CONFIGS } from '@/utils/chains/configs';
-import { getLatestBlock } from '@/utils/functions';
-import { EvmData } from '@/api/metrics/route';
+import { CHAIN, CHAIN_CONFIGS } from 'utils/chains/configs';
+import { getLatestBlock } from 'utils/functions';
+import { EvmData } from 'api/metrics/route';
 
 export const calculateBlockNumber = (
   timestamp: number,

@@ -2,19 +2,19 @@ import {
   Table,
   flexRender,
   Column,
-} from "@tanstack/react-table";
-import { Transition, Popover } from "@headlessui/react";
-import { FiChevronDown, FiChevronLeft, FiChevronsLeft, FiChevronRight, FiChevronsRight } from "react-icons/fi";
-import { Modal } from "components/modal";
-import { CHAIN_CONFIGS } from "utils/chains/configs";
-import { Packet } from "utils/types/packet";
-import { Client } from "utils/types/client";
-import { IdentifiedConnection } from "cosmjs-types/ibc/core/connection/v1/connection";
-import { IdentifiedChannel } from "cosmjs-types/ibc/core/channel/v1/channel";
-import { classNames, classLogic } from "utils/functions";
-import { Select } from "components/select";
-import { OrbitLoader } from "components/loading/loader";
-import { useState } from "react";
+} from '@tanstack/react-table';
+import { Transition, Popover } from '@headlessui/react';
+import { FiChevronDown, FiChevronLeft, FiChevronsLeft, FiChevronRight, FiChevronsRight } from 'react-icons/fi';
+import { Modal } from 'components/modal';
+import { CHAIN_CONFIGS } from 'utils/chains/configs';
+import { Packet } from 'utils/types/packet';
+import { Client } from 'utils/types/client';
+import { IdentifiedConnection } from 'cosmjs-types/ibc/core/connection/v1/connection';
+import { IdentifiedChannel } from 'cosmjs-types/ibc/core/channel/v1/channel';
+import { classNames, classLogic } from 'utils/functions';
+import { Select } from 'components/select';
+import { OrbitLoader } from 'components/loading/loader';
+import { useState } from 'react';
 import { Fragment } from 'react';
 
 interface IbcTableProps<TableType> {
@@ -59,9 +59,9 @@ export function IbcTable<TableType extends Packet | Client | IdentifiedChannel |
                 Columns
                 <FiChevronDown className={classNames(
                   open
-                  ? "scale-y-[-1]"
-                  : ""
-                  , "mt-[0.28rem] ml-1.5 transition ease-in-out duration-200"
+                  ? 'scale-y-[-1]'
+                  : ''
+                  , 'mt-[0.28rem] ml-1.5 transition ease-in-out duration-200'
                 )}/>
               </Popover.Button>
               <Transition
@@ -125,9 +125,9 @@ export function IbcTable<TableType extends Packet | Client | IdentifiedChannel |
                   <th key={header.id} colSpan={header.colSpan} 
                     className={classNames(
                       header.id === 'destChain'
-                      ? "pl-2"
-                      : "pl-5"
-                      , "py-2 h-20 dark:bg-bg-dark last:pr-6 whitespace-nowrap font-medium first:pl-6"
+                      ? 'pl-2'
+                      : 'pl-5'
+                      , 'py-2 h-20 dark:bg-bg-dark last:pr-6 whitespace-nowrap font-medium first:pl-6'
                     )}
                     style={{width: header.getSize()}}>
                     {(header.isPlaceholder || loading) ? null : (
@@ -161,9 +161,9 @@ export function IbcTable<TableType extends Packet | Client | IdentifiedChannel |
                   key={row.id}
                   className={classNames(
                     rowDetails
-                    ? "hover:cursor-pointer"
-                    : ""
-                    , "h-14 w-full hover:bg-sky-100 dark:hover:bg-sky-950 transition-colors ease-in-out duration-200 even:bg-bg-light dark:even:bg-bg-dark",
+                    ? 'hover:cursor-pointer'
+                    : ''
+                    , 'h-14 w-full hover:bg-sky-100 dark:hover:bg-sky-950 transition-colors ease-in-out duration-200 even:bg-bg-light dark:even:bg-bg-dark',
                   )}
                   onClick={() => {if (rowDetails) {
                     setSelectedRow(row.original);
@@ -174,9 +174,9 @@ export function IbcTable<TableType extends Packet | Client | IdentifiedChannel |
                       key={cell.id}
                       className={classNames(
                         cell.column.id === 'destChain'
-                        ? "pl-2"
-                        : "pl-7"
-                        , "last:pr-6"
+                        ? 'pl-2'
+                        : 'pl-7'
+                        , 'last:pr-6'
                       )}
                       style={{width: cell.column.getSize()}}>
                       {flexRender(cell.column.columnDef.cell, cell.getContext())}
@@ -260,22 +260,25 @@ function ColumnFilter({ column, table }: { column: Column<any, any>, table: Tabl
         onChange={e => column.setFilterValue(e.target.value)}
         placeholder={column.columnDef.header as string}
         className={classLogic(() => {
-          let classes = "inpt h-8 px-[9px] w-fit placeholder:text-fg-dark font-mono placeholder:font-primary";
+          let classes = 'inpt h-8 px-[9px] w-fit placeholder:text-fg-dark font-mono placeholder:font-primary';
           switch (column.id.toLowerCase()) {
             case 'counterparty_connectionid':
               break;
             case 'state':
-              classes += " max-w-[9.5rem]";
+              classes += ' max-w-[9.5rem]';
+              break;
             case 'delayperiod':
-              classes += " max-w-32";
+              classes += ' max-w-32';
+              break;
             case 'counterparty_channelid':
-              classes += " max-w-48";
+              classes += ' max-w-48';
+              break;
             default:
-              classes += " max-w-44";
+              classes += ' max-w-44';
           }
           return classes;
         })}
-        aria-label={"Filter by " + column.columnDef.header as string}
+        aria-label={'Filter by ' + column.columnDef.header as string}
       />
     );
   } else {

@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { SimpleCache } from '@/api/utils/cache';
-import { isLocalEnv } from '@/api/utils/helpers';
-import { getChannelsConcurrently } from '@/api/utils/peptide';
-import { getPackets } from '@/api/packets/helpers';
+import { SimpleCache } from 'api/utils/cache';
+import { isLocalEnv } from 'api/utils/helpers';
+import { getChannelsConcurrently } from 'api/utils/peptide';
+import { getPackets } from 'api/packets/helpers';
 
 export const dynamic = 'force-dynamic'; // defaults to auto
 
@@ -24,8 +24,8 @@ export async function GET(request: NextRequest) {
       getChannelsConcurrently(),
     ]);
 
-    console.log("Saving packets to cache");
-    console.log("Saving channels to cache");
+    console.log('Saving packets to cache');
+    console.log('Saving channels to cache');
 
     // Set cache concurrently
     await Promise.all([

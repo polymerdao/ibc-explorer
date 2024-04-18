@@ -75,7 +75,7 @@ export default function Packets() {
 
   function loadData() {
     setLoading(true);
-    fetch("/api/ibc/channels")
+    fetch('/api/ibc/channels')
       .then(res => {
         if (!res.ok) {
           console.error(res.status);

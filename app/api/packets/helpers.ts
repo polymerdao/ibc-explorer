@@ -1,12 +1,11 @@
 import { pLimit } from 'plimit-lit';
-import { getConcurrencyLimit, getLookbackTime } from '@/api/utils/helpers';
 import { ethers } from 'ethers';
-import { CHAIN, CHAIN_CONFIGS } from '@/utils/chains/configs';
-import { CachingJsonRpcProvider } from '@/api/utils/provider';
-import Abi from '@/utils/dispatcher.json';
-import { GetTmClient } from '@/api/utils/cosmos';
-import { Packet, PacketStates } from '@/utils/types/packet';
-import { NextResponse } from 'next/server';
+import Abi from 'utils/dispatcher.json';
+import { CHAIN, CHAIN_CONFIGS } from 'utils/chains/configs';
+import { Packet, PacketStates } from 'utils/types/packet';
+import { CachingJsonRpcProvider } from 'api/utils/provider';
+import { GetTmClient } from 'api/utils/cosmos';
+import { getConcurrencyLimit, getLookbackTime } from 'api/utils/helpers';
 
 export async function getPackets() {
   const limit = pLimit(getConcurrencyLimit()); // Adjust this number to the maximum concurrency you want
@@ -350,11 +349,11 @@ export async function getPacket(txHash: string) {
 
   let state: PacketStates = PacketStates.SENT;
   switch (packetResponse.state) {
-    case "ACK":
+    case 'ACK':
       state = PacketStates.ACK;
       break;
-    case "RECV":
-    case "WRITE_ACK":
+    case 'RECV':
+    case 'WRITE_ACK':
       state = PacketStates.RECV;
       break;
   }

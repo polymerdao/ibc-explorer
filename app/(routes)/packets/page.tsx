@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from "react";
+import { useEffect, useState } from 'react';
 import {
   VisibilityState,
   createColumnHelper,
@@ -10,15 +10,15 @@ import {
   getSortedRowModel,
   SortingState,
   useReactTable }
-from "@tanstack/react-table";
-import { IbcTable } from "components/ibc-table";
-import { Modal } from "components/modal";
-import { Packet } from "utils/types/packet";
-import { PacketDetails } from "./packet-details";
-import { StateCell } from "./state-cell";
-import { stateToString } from "utils/types/packet";
-import { ChainCell, Arrow } from "components/chain-cell";
-import { shortenHex } from "components/format-strings";
+from '@tanstack/react-table';
+import { IbcTable } from 'components/ibc-table';
+import { Modal } from 'components/modal';
+import { Packet } from 'utils/types/packet';
+import { PacketDetails } from './packet-details';
+import { StateCell } from './state-cell';
+import { stateToString } from 'utils/types/packet';
+import { ChainCell, Arrow } from 'components/chain-cell';
+import { shortenHex } from 'components/format-strings';
 
 const columnHelper = createColumnHelper<Packet>();
 const columns = [
@@ -149,7 +149,7 @@ export default function Packets() {
 
   function loadData() {
     setLoading(true);
-    fetch("/api/packets")
+    fetch('/api/packets')
       .then(res => {
         if (!res.ok) {
           setErrorMessage(res.statusText);

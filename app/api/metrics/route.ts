@@ -1,10 +1,10 @@
 import { ethers } from 'ethers';
-import Abi from 'utils/dispatcher.json';
 import { NextRequest, NextResponse } from 'next/server';
-import { CHAIN, CHAIN_CONFIGS } from '@/utils/chains/configs';
-import { CachingJsonRpcProvider } from '@/api/utils/provider';
+import Abi from 'utils/dispatcher.json';
+import { CHAIN, CHAIN_CONFIGS } from 'utils/chains/configs';
+import { CachingJsonRpcProvider } from 'api/utils/provider';
+import { getConcurrencyLimit } from 'api/utils/helpers';
 import { pLimit } from 'plimit-lit';
-import { getConcurrencyLimit } from '@/api/utils/helpers';
 
 export const dynamic = 'force-dynamic'; // defaults to auto
 
@@ -27,7 +27,6 @@ export async function GET(request: NextRequest) {
   const evmData = await fetchEvmData(fromBlock, toBlock, chainId, dispatcher!);
   return Response.json(evmData);
 }
-
 
 const createLogPairs = (ackLogs: Array<ethers.EventLog>, sendPacketLogs: Array<ethers.EventLog>) => {
   const logPairs: {
@@ -58,7 +57,6 @@ const createLogPairs = (ackLogs: Array<ethers.EventLog>, sendPacketLogs: Array<e
 
   return logPairs;
 };
-
 
 export interface EvmData {
   txLatency: number;
