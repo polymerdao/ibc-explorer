@@ -1,4 +1,4 @@
-name: docker-ibc-explorer
+name: docker-publish
 
 on:
   push:
