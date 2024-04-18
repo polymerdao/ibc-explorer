@@ -1,4 +1,4 @@
-name: docker-test
+name: linter
 
 on:
   pull_request:
@@ -6,11 +6,14 @@ on:
       - main
 
 jobs:
-  build:
+  lint:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v2
 
-      - name: Build Docker Image
-        run: docker build -t ibc-explorer -f Dockerfile .
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: Run Lint
+        run: npm run lint
