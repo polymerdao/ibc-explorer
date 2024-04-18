@@ -9,33 +9,31 @@ import {
   getPaginationRowModel,
   useReactTable }
 from "@tanstack/react-table";
-import { IbcTable } from "@/components/ibc-table";
+import { IbcTable } from "components/ibc-table";
 import { Modal } from "components/modal";
-import { SimIcon } from "components/icons";
+import { ChainCell } from "components/chain-cell";
 import { Client } from "utils/types/client";
+import { shortenHex } from "components/format-strings";
 
 const columnHelper = createColumnHelper<Client>();
 const columns = [
   columnHelper.accessor('clientId', {
     header: 'Client ID',
-    enableHiding: true,
-    cell: props =>
-    <div className="flex flex-row">
-      <span className="whitespace-nowrap">
-        {props.getValue()}
-      </span>
-      {(props.row.original.clientId?.toLowerCase().includes('sim'))
-        ? <div className="ml-2"><SimIcon /></div>
-        : null
-      }
-    </div>,
+    enableHiding: true
   }),
   columnHelper.accessor('clientState.chainId', {
-    header: 'Chain ID',
+    header: 'Chain',
+    id: 'chain',
+    cell: props => (
+      <div className="">
+        <div className="ml-5"><ChainCell chain={props.getValue()} /></div>
+      </div>
+    ),
     enableHiding: true
   }),
   columnHelper.accessor('clientState.dispatcherAddr', {
     header: 'Dispatcher',
+    cell: props => shortenHex(props.getValue(), true),
     enableHiding: true
   }),
   columnHelper.accessor('clientState.revisionHeight', {
@@ -43,6 +41,7 @@ const columns = [
     enableHiding: true
   }),
   columnHelper.accessor('clientState.revisionNumber', {
+    id: 'revisionNumber',
     header: 'Revision Number',
     enableHiding: true
   })
@@ -52,7 +51,10 @@ export default function Packets() {
   const [connections, setConnections] = useState<Client[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
-  const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
+  const [errorMessage, setErrorMessage] = useState('');
+  const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({
+    revisionNumber: false
+  });
 
   useEffect(() => {
     loadData();
@@ -63,7 +65,7 @@ export default function Packets() {
     fetch("/api/ibc/clients")
       .then(res => {
         if (!res.ok) {
-          console.error(res.status);
+          setErrorMessage(res.statusText);
           setError(true);
           setLoading(false);
         }
@@ -99,10 +101,15 @@ export default function Packets() {
     <div className="h-0">
       <Modal 
         open={error}
-        onClose={() => setError(false)}
+        onClose={() => {
+          setError(false);
+          setErrorMessage('');
+        }}
         content={<>
           <h2>Error</h2>
-          <p className="mt-1 mr-8">There was an issue fetching channel data</p>
+          <p className="mt-1 mr-8">
+            There was an issue fetching packet data {errorMessage? `: ${errorMessage}` : ''}
+          </p>
         </>}
       />
 

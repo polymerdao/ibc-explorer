@@ -4,6 +4,8 @@ export const primary = Wix_Madefor_Display({
   subsets: ['latin'],
   variable: '--primary-font',
   display: 'swap',
+  fallback: ['system-ui', 'arial'],
+  adjustFontFallback: false,
 })
  
 export const mono = Source_Code_Pro({
