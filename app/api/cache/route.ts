@@ -19,22 +19,19 @@ export async function GET(request: NextRequest) {
   try {
 
     // Run requests concurrently
-    const [packets, channels] = await Promise.all([
+    const [packets] = await Promise.all([
       getPackets(),
-      getChannelsConcurrently(),
     ]);
 
     console.log("Saving packets to cache");
-    console.log("Saving channels to cache");
 
     // Set cache concurrently
     await Promise.all([
-      cache.set('allChannels', channels, -1),
       cache.set('allPackets', packets, -1),
     ]);
 
     console.log(`Fetched packets and channels in ${Date.now() - start}ms`);
-    return NextResponse.json({'packets': packets, 'channels': channels});
+    return NextResponse.json({'packets': packets});
   } catch (e) {
     console.error('Error fetching packets', e);
     return NextResponse.error();
