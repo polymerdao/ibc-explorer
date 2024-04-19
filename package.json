@@ -28,6 +28,7 @@
     "react-icons": "^5.0.1",
     "sharp": "^0.33.2",
     "stats-lite": "^2.2.0",
+    "winston": "^3.13.0",
     "zod": "^3.22.4"
   },
   "devDependencies": {

@@ -12,9 +12,6 @@ export async function GET(request: NextRequest,
 
   try {
     switch (reqType) {
-      case "channels":
-        const channels = await cache.get('allChannels');
-        return NextResponse.json(channels || []);
       case "connections":
         return NextResponse.json(await getConnections());
       case "clients":
