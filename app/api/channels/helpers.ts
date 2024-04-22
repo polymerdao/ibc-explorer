@@ -3,10 +3,10 @@ import { State } from 'cosmjs-types/ibc/core/channel/v1/channel';
 
 function stringToState(state: string) {
   switch (state) {
-    case "OPEN": return State.STATE_OPEN
-    case "INIT": return State.STATE_INIT
-    case "CLOSED": return State.STATE_CLOSED
-    case "TRY": return State.STATE_TRYOPEN
+    case 'OPEN': return State.STATE_OPEN
+    case 'INIT': return State.STATE_INIT
+    case 'CLOSED': return State.STATE_CLOSED
+    case 'TRY': return State.STATE_TRYOPEN
     default:
       return State.UNRECOGNIZED
   }
