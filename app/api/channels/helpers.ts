@@ -1,6 +1,7 @@
-import { IdentifiedChannel } from '@/api/utils/cosmos/_generated/ibc/core/channel/v1/channel';
+import { IdentifiedChannel } from 'api/utils/cosmos/_generated/ibc/core/channel/v1/channel';
 import { State } from 'cosmjs-types/ibc/core/channel/v1/channel';
-function stateToString(state: string) {
+
+function stringToState(state: string) {
   switch (state) {
     case "OPEN": return State.STATE_OPEN
     case "INIT": return State.STATE_INIT
@@ -28,7 +29,7 @@ async function getChannelByGQQuery(channelRequest: {
     const channel: IdentifiedChannel = {
       portId: item.portId,
       channelId: item.channelId,
-      state: stateToString(item.state),
+      state: stringToState(item.state),
       ordering: item.ordering,
       version: item.version,
       connectionHops: item.connectionHops,

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getChannel, getChannels } from '@/api/channels/helpers';
-import logger from '@/utils/logger';
+import { getChannel, getChannels } from 'api/channels/helpers';
+import logger from 'utils/logger';
 
 export const dynamic = 'force-dynamic'; // defaults to auto
 
