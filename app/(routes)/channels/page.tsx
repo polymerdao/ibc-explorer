@@ -11,7 +11,7 @@ import {
   useReactTable,
   VisibilityState
 } from '@tanstack/react-table';
-import { IbcTable } from '@/components/ibc-table';
+import { IbcTable } from 'components/ibc-table';
 import { IdentifiedChannel, State } from 'cosmjs-types/ibc/core/channel/v1/channel';
 import { Modal } from 'components/modal';
 import { SimIcon } from 'components/icons';
@@ -75,7 +75,7 @@ export default function Packets() {
 
   function loadData() {
     setLoading(true);
-    fetch("/api/channels")
+    fetch('/api/channels')
       .then(res => {
         if (!res.ok) {
           console.error(res.status);

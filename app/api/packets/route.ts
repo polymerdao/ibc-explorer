@@ -11,7 +11,7 @@ export async function GET(request: NextRequest) {
     try {
       return NextResponse.json(await getRecentPackets());
     } catch (err) {
-      logger.error(`Error getting recent packets: ` + err);
+      logger.error('Error getting recent packets: ' + err);
       return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
     }
   }

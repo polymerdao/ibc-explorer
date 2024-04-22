@@ -34,7 +34,7 @@ export function IbcTable<TableType extends Packet | Client | IdentifiedChannel |
       {/* Table View Options */}
       <div className="flex flex-row justify-between items-end mb-2 mx-1 text-slate-700 dark:text-slate-300">
         <span>
-          {table.getFilteredRowModel().rows.length} Total Results
+          Last {table.getFilteredRowModel().rows.length} Results
         </span>
 
         <div className="flex flex-row items-end space-x-3">

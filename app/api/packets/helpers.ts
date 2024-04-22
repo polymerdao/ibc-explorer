@@ -3,10 +3,10 @@ import logger from 'utils/logger';
 
 function stringToState(state: string) {
   switch (state) {
-    case "ACK":
+    case 'ACK':
       return PacketStates.ACK;
-    case "RECV":
-    case "WRITE_ACK":
+    case 'RECV':
+    case 'WRITE_ACK':
       return PacketStates.RECV;
     default:
       return PacketStates.SENT;

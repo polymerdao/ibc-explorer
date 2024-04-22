@@ -10,7 +10,7 @@ export async function GET(request: NextRequest,
 
   try {
     switch (reqType) {
-      case "connections":
+      case 'connections':
         return NextResponse.json(await getConnections());
       case 'clients':
         return NextResponse.json(await getClients());
