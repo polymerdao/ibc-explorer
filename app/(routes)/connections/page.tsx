@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from "react";
+import { useEffect, useState } from 'react';
 import {
   VisibilityState,
   createColumnHelper,
@@ -10,11 +10,11 @@ import {
   getSortedRowModel,
   SortingState,
   useReactTable }
-from "@tanstack/react-table";
-import { IbcTable } from "@/components/ibc-table";
-import { SimIcon } from "components/icons";
-import { IdentifiedConnection, State } from "cosmjs-types/ibc/core/connection/v1/connection";
-import { Modal } from "components/modal";
+from '@tanstack/react-table';
+import { IbcTable } from 'components/ibc-table';
+import { SimIcon } from 'components/icons';
+import { Modal } from 'components/modal';
+import { IdentifiedConnection, State } from 'cosmjs-types/ibc/core/connection/v1/connection';
 
 const columnHelper = createColumnHelper<IdentifiedConnection>();
 const columns = [
@@ -74,7 +74,7 @@ export default function Packets() {
 
   function loadData() {
     setLoading(true);
-    fetch("/api/ibc/connections")
+    fetch('/api/ibc/connections')
       .then(res => {
         if (!res.ok) {
           console.error(res.status);
@@ -137,10 +137,10 @@ export default function Packets() {
 function stateToString(state: State) {
   const stringState = state.toString();
   switch (stringState) {
-    case "STATE_OPEN": return 'Open'
-    case "STATE_INIT": return 'Initialized'
-    case "STATE_TRYOPEN":
-    case "STATE_UNINITIALIZED_UNSPECIFIED":
+    case 'STATE_OPEN': return 'Open'
+    case 'STATE_INIT': return 'Initialized'
+    case 'STATE_TRYOPEN':
+    case 'STATE_UNINITIALIZED_UNSPECIFIED':
       return 'Pending'
     default:
       return 'Pending'

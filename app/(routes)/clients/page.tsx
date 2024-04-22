@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from "react";
+import { useEffect, useState } from 'react';
 import {
   VisibilityState,
   createColumnHelper,
@@ -8,12 +8,12 @@ import {
   getFilteredRowModel,
   getPaginationRowModel,
   useReactTable }
-from "@tanstack/react-table";
-import { IbcTable } from "components/ibc-table";
-import { Modal } from "components/modal";
-import { ChainCell } from "components/chain-cell";
-import { Client } from "utils/types/client";
-import { shortenHex } from "components/format-strings";
+from '@tanstack/react-table';
+import { IbcTable } from 'components/ibc-table';
+import { Modal } from 'components/modal';
+import { ChainCell } from 'components/chain-cell';
+import { Client } from 'utils/types/client';
+import { shortenHex } from 'components/format-strings';
 
 const columnHelper = createColumnHelper<Client>();
 const columns = [
@@ -62,7 +62,7 @@ export default function Packets() {
 
   function loadData() {
     setLoading(true);
-    fetch("/api/ibc/clients")
+    fetch('/api/ibc/clients')
       .then(res => {
         if (!res.ok) {
           setErrorMessage(res.statusText);
