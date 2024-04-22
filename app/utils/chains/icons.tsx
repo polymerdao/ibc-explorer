@@ -27,8 +27,8 @@ export const MoltenIcon = (size?: number): JSX.Element => {
     <Image
       src={molten}
       style={{width: `${size}px`, height: `${size}px`}}
-      className='max-w-none'
-      alt='Molten Icon'
+      className="max-w-none"
+      alt="Molten Icon"
     />
   );
 };

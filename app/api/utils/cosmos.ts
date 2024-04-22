@@ -2,7 +2,7 @@ import { IbcExtension, QueryClient, setupIbcExtension } from '@cosmjs/stargate';
 import { Tendermint37Client } from '@cosmjs/tendermint-rpc';
 import { Height } from 'cosmjs-types/ibc/core/client/v1/client';
 import * as process from 'process';
-import { ICache, SimpleCache } from '@/api/utils/cache';
+import { ICache, SimpleCache } from 'api/utils/cache';
 
 class CachingIbcExtension {
   private cache: ICache;
@@ -33,7 +33,7 @@ class CachingIbcExtension {
         this.cachedCall(`channel-${portId}-${channelId}`, () => channel.channel(portId, channelId)),
       channels: (paginationKey?: Uint8Array) => channel.channels(paginationKey),
       allChannels: () =>
-        this.cachedCall(`allChannels`, () => channel.allChannels()),
+        this.cachedCall('allChannels', () => channel.allChannels()),
       connectionChannels: (connection: string, paginationKey?: Uint8Array) =>
         this.cachedCall(`connectionChannels-${connection}-${paginationKey}`, () => channel.connectionChannels(connection, paginationKey)),
       allConnectionChannels: (connection: string) =>
@@ -70,7 +70,7 @@ class CachingIbcExtension {
       states: (paginationKey?: Uint8Array) =>
         this.cachedCall(`client-states-${paginationKey}`, () => client.states(paginationKey)),
       allStates: () =>
-        this.cachedCall(`allStates`, () => client.allStates()),
+        this.cachedCall('allStates', () => client.allStates()),
       consensusState: (clientId: string, height?: number) =>
         this.cachedCall(`consensusState-${clientId}-${height}`, () => client.consensusState(clientId, height)),
       consensusStates: (clientId: string, paginationKey?: Uint8Array) =>
@@ -78,13 +78,13 @@ class CachingIbcExtension {
       allConsensusStates: (clientId: string) =>
         this.cachedCall(`allConsensusStates-${clientId}`, () => client.allConsensusStates(clientId)),
       params: () =>
-        this.cachedCall(`params`, () => client.params()),
+        this.cachedCall('params', () => client.params()),
       stateTm: (clientId: string) =>
         this.cachedCall(`stateTm-${clientId}`, () => client.stateTm(clientId)),
       statesTm: (paginationKey?: Uint8Array) =>
         this.cachedCall(`statesTm-${paginationKey}`, () => client.statesTm(paginationKey)),
       allStatesTm: () =>
-        this.cachedCall(`allStatesTm`, () => client.allStatesTm()),
+        this.cachedCall('allStatesTm', () => client.allStatesTm()),
       consensusStateTm: (clientId: string, height?: Height) =>
         this.cachedCall(`consensusStateTm-${clientId}-${height}`, () => client.consensusStateTm(clientId, height))
     };
@@ -115,7 +115,6 @@ class CachingIbcExtension {
     };
   }
 }
-
 
 export function getCacheTTL() {
   return process.env.CACHE_TTL ? parseInt(process.env.CACHE_TTL) : 60;

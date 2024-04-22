@@ -1,4 +1,4 @@
-import { CopyButton } from "./copy-button";
+import { CopyButton } from './copy-button';
 
 export function shortenHex(hex: string, copyable?: boolean) {
   if (!hex) return null;

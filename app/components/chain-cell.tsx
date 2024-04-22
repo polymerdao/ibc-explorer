@@ -1,5 +1,5 @@
-import { CHAIN, CHAIN_CONFIGS } from "utils/chains/configs";
-import { SimIcon } from "components/icons"
+import { CHAIN, CHAIN_CONFIGS } from 'utils/chains/configs';
+import { SimIcon } from 'components/icons'
 
 export function ChainCell({chain}: {chain: string}) {
   const size = 32;

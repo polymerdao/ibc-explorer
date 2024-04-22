@@ -62,9 +62,9 @@ export function PacketDetails(packet: Packet | null) {
           {/* Top Arrrow */}
           <div className={classNames(
             packet.state < PacketStates.RECV
-            ? "animate-pulse"
-            : ""
-            , "relative flex flex-row justify-center items-start w-full pl-[3.75rem] pr-[2.3rem]"
+            ? 'animate-pulse'
+            : ''
+            , 'relative flex flex-row justify-center items-start w-full pl-[3.75rem] pr-[2.3rem]'
           )}>
             <div className="absolute h-[7px] w-[7px] rounded-full bg-fg-dark left-[58px] -top-[2.8px]"></div>
             <div className="absolute right-[37.4px] bottom-[18.5px]">
@@ -81,9 +81,9 @@ export function PacketDetails(packet: Packet | null) {
           {/* Bottom Arrrow */}
           <div className={classNames(
             packet.state < PacketStates.ACK
-            ? packet.state < PacketStates.RECV ? "opacity-50" : "animate-pulse"
-            : ""
-            , "relative flex flex-row justify-center items-end w-full h-fit pl-[2.3rem] pr-[3.75rem]"
+            ? packet.state < PacketStates.RECV ? 'opacity-50' : 'animate-pulse'
+            : ''
+            , 'relative flex flex-row justify-center items-end w-full h-fit pl-[2.3rem] pr-[3.75rem]'
           )}>
             <div className="absolute h-[7px] w-[7px] rounded-full bg-fg-dark right-[58px] -bottom-[2.5px]"></div>
             <div className="absolute left-[37.8px] top-[18.8px]">

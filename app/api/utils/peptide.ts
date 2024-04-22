@@ -4,7 +4,7 @@ import { QueryConnectionsResponse } from 'cosmjs-types/ibc/core/connection/v1/qu
 import { IdentifiedChannel } from 'cosmjs-types/ibc/core/channel/v1/channel';
 import process from 'process';
 import { QueryClient } from '@cosmjs/stargate';
-import { GetTmClient } from '@/api/utils/cosmos';
+import { GetTmClient } from 'api/utils/cosmos';
 import {
   QueryClientStateRequest, QueryClientStateResponse,
 } from './cosmos/_generated/polyibc/core/query';
@@ -13,7 +13,6 @@ import * as opstackv2 from './cosmos/_generated/polyibc/lightclients/opstackv2/o
 import * as optimism from './cosmos/_generated/polyibc/lightclients/optimism/optimism';
 import * as sim from './cosmos/_generated/polyibc/lightclients/sim/sim';
 import { ethers } from 'ethers';
-
 
 async function getChannels() {
   const tmClient = await GetTmClient();
@@ -108,7 +107,6 @@ export async function getClients() {
     } catch (e) {
     // Suppress error: Query failed with (22): rpc error: code = NotFound desc = polymer: client not found: key not found
     }
-
 
     clients.push({
       clientId: connection.clientId,

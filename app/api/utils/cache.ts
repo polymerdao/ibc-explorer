@@ -1,5 +1,5 @@
 import Redis from 'ioredis';
-import { getCacheTTL } from '@/api/utils/cosmos';
+import { getCacheTTL } from 'api/utils/cosmos';
 
 export interface ICache {
   get<T>(key: string): Promise<T | null>;
