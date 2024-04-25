@@ -1,19 +1,9 @@
-import { Block } from 'ethers';
 import * as stats from 'stats-lite';
 import _ from 'lodash';
 import { CHAIN, CHAIN_CONFIGS } from 'utils/chains/configs';
-import { getLatestBlock } from 'utils/functions';
-import { EvmData } from 'api/metrics/route';
+import { PacketData } from 'api/metrics/helpers';
+import logger from 'utils/logger';
 
-export const calculateBlockNumber = (
-  timestamp: number,
-  latestBlock: Block,
-  blockTime: number
-) => {
-  return Math.ceil(
-    latestBlock.number - (latestBlock.timestamp - timestamp) / blockTime
-  );
-};
 export const calculateStats = (
   latencies: number[]
 ): {
@@ -30,48 +20,23 @@ export const calculateStats = (
   return { avg, min, median, max };
 };
 
-export async function calcMetrics(
-  dateRange: [Date, Date],
-  origin: string = ''
-) {
+export async function calcMetrics(baseUrl: string = '') {
   const results = await Promise.all(
     Object.keys(CHAIN_CONFIGS).map(async (chainKey) => {
       const chainConfig = CHAIN_CONFIGS[chainKey as CHAIN];
-      const blockTime = chainConfig.blockTime;
-      const latestBlock = await getLatestBlock(chainKey as CHAIN);
-
-      const blockStartNumber = calculateBlockNumber(
-        dateRange[0].getTime() / 1000,
-        latestBlock!,
-        blockTime
-      );
-      const blockEndNumber = calculateBlockNumber(
-        dateRange[1].getTime() / 1000,
-        latestBlock!,
-        blockTime
-      );
-
-      console.log(
-        `Block Number for ${chainKey} for Start Date: ${blockStartNumber}`
-      );
-      console.log(`Block Number for ${chainKey} End Date ${blockEndNumber}`);
 
       return await Promise.all(chainConfig.clients.map(async (client, i) => {
         let dispatcherAddress = chainConfig.dispatchers[i];
 
         let response;
+        const requestUrl = baseUrl + `/api/metrics?chain=${chainKey}&dispatcher=${dispatcherAddress}`;
         try {
-          response = await fetch(
-            `${origin}/api/metrics?from=${blockStartNumber}&to=${blockEndNumber}&chain=${chainKey}&dispatcher=${dispatcherAddress}`
-          );
+          response = await fetch(requestUrl);
         } catch (error) {
-          console.error(
-            `Failed to fetch metrics for chain ${chainKey} origin ${origin}:`,
-            error
-          );
+          logger.error(`Failed to fetch metrics for chain ${chainKey}: ` + error);
           return []; // Skip this chain's metrics calculation on error
         }
-        const evmData: EvmData[] = await response.json();
+        const evmData: PacketData[] = await response.json();
 
         const statsTemplate = {
           txLatency: `${_.capitalize(chainKey)} E2E Tx Latency in seconds`,

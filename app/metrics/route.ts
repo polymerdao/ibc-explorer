@@ -1,24 +1,18 @@
 import { register, Gauge } from 'prom-client';
 import { calcMetrics } from './utils';
 import { NextRequest } from 'next/server';
+import logger from 'utils/logger';
 
 export const dynamic = 'force-dynamic'; // defaults to auto
 
 let gauges: { [key: string]: Gauge } = {};
 
 export async function GET(request: NextRequest) {
-  const now = new Date();
-  const oneHourAgo = new Date();
-  oneHourAgo.setHours(now.getHours() - 1);
-
   let metrics;
   try {
-    metrics = await calcMetrics(
-      [oneHourAgo, now],
-      'http://' + request.nextUrl.host
-    );
+    metrics = await calcMetrics('http://' + request.nextUrl.host);
   } catch (error) {
-    console.error('Failed to calculate metrics:', error);
+    logger.error('Failed to calculate metrics: ', error);
     return new Response('Internal Server Error', { status: 500 });
   }
 
