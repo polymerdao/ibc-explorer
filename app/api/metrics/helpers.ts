@@ -9,8 +9,9 @@ export interface PacketData {
 }
 
 export async function getPackets(from?: number, to?: number): Promise<PacketData[]> {
-  from = from || Math.floor((Date.now() - 60 * 60 * 1000) / 1000);
-  to = to || Math.floor(Date.now() / 1000);
+  const now = Math.floor(Date.now() / 1000);
+  from = from || now - 60 * 60;
+  to = to || now;
 
   if (from >= to) {
     logger.error('Invalid time range for metrics');
