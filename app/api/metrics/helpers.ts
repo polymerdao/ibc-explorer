@@ -4,8 +4,8 @@ export interface PacketData {
   chainId: number;
   dispatcherAddress: string;
   txLatency: number;
-  sendTxCost: number;
-  ackTxCost: number;
+  sendPacketTransactionCost: number;
+  ackTransactionCost: number;
 }
 
 export async function getPackets(from?: number, to?: number): Promise<PacketData[]> {
@@ -61,10 +61,10 @@ export async function getPackets(from?: number, to?: number): Promise<PacketData
     const chainId = packet.sendPacket.chainId;
     const dispatcherAddress = packet.sendPacket.dispatcherAddress;
     const txLatency = packet.sendToAckTime;
-    const sendTxCost = packet.sendToRecvGas;
-    const ackTxCost = packet.sendToAckGas - packet.sendToRecvGas;
+    const sendPacketTransactionCost = packet.sendToRecvGas;
+    const ackTransactionCost = packet.sendToAckGas - packet.sendToRecvGas;
 
-    packets.push({ chainId, dispatcherAddress, txLatency, sendTxCost, ackTxCost });
+    packets.push({ chainId, dispatcherAddress, txLatency, sendPacketTransactionCost, ackTransactionCost });
   }
 
   return packets;

@@ -26,8 +26,10 @@ export async function GET(request: NextRequest) {
   }
 
   if (dispatcher) {
-    packets = packets.filter((packet) => packet.dispatcherAddress === dispatcher);
+    packets = packets.filter((packet) => {
+      return packet.dispatcherAddress.toLowerCase() === dispatcher.toLowerCase();
+    });
   }
 
-  return NextResponse.json(packets);
+  return NextResponse.json(packets || []);
 }
