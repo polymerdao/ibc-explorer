@@ -41,9 +41,7 @@ export async function calcMetrics(baseUrl: string = '') {
         const statsTemplate = {
           txLatency: `${_.capitalize(chainKey)} E2E Tx Latency in seconds`,
           ackTransactionCost: `${_.capitalize(chainKey)} Ack Gas Cost in gwei`,
-          sendPacketTransactionCost: `${_.capitalize(
-            chainKey
-          )} Send Packet Gas Cost in gwei`
+          sendPacketTransactionCost: `${_.capitalize(chainKey)} Send Packet Gas Cost in gwei`
         };
 
         return Object.keys(statsTemplate).map((key) => {
