@@ -25,67 +25,36 @@ async function processPacketRequest(packetRequest: {
   };
 
   const packetRes = await (await fetch(process.env.INDEXER_URL!, packetOptions)).json();
-  const responseItems = packetRes?.data?.packets?.items;
+  const responseItems = packetRes?.data?.packets;
   if (!responseItems) {
     return [];
   }
 
   const packets: Packet[] = [];
-
   for (const packet of responseItems) {
-    // Find channel associated with the packet to parse out src and dest chains
-    const sourceChannelId = packet.sendPacket?.sourceChannelId;
-
-    const channelRequest = {
-      query: `query Channel($sourceChannelId:String!){
-                channels(where:{channelId:$sourceChannelId}){
-                  items {
-                    portId
-                    counterpartyPortId
-                  }
-                }
-              }`,
-      variables: { sourceChannelId }
-    };
-
-    const channelOptions = {
-      method: 'POST',
-      headers,
-      body: JSON.stringify(channelRequest)
-    };
-
-    let channelResponse;
-    try {
-      const channelRes = await (await fetch(process.env.INDEXER_URL!, channelOptions)).json();
-      channelResponse = channelRes?.data?.channels?.items[0];
-      if (!channelResponse) {
-        logger.info(`Channel not found for packet ${packet.id}`);
-        continue;
-      }
-    } catch (err) {
-      logger.error(`Error processing packet ${packet.id}`);
-      continue;
-    }
-
     const state = stringToState(packet.state);
+
+    const createTime = packet.sendPacket?.blockTimestamp ? packet.sendPacket.blockTimestamp / 1000 : 0;
+    const recvTime = packet.recvPacket?.blockTimestamp ? packet.recvPacket.blockTimestamp / 1000 : undefined;
+    const endTime = packet.ackPacket?.blockTimestamp ? packet.ackPacket.blockTimestamp / 1000 : undefined;
 
     const newPacket: Packet = {
       sequence: packet.sendPacket?.sequence,
       sourcePortAddress: packet.sendPacket?.sourcePortAddress,
-      sourceChannelId: packet.sendPacket?.sourceChannelId,
+      sourceChannelId: packet.sendPacket?.sourceChannel?.channelId,
       destPortAddress: packet.recvPacket?.destPortAddress,
-      destChannelId: packet.recvPacket?.destChannelId,
+      destChannelId: packet.sendPacket?.sourceChannel?.counterpartyChannelId,
       timeout: packet.sendPacket?.timeoutTimestamp,
       id: packet.id,
       state: state,
-      createTime: packet.sendPacket?.blockTimestamp,
-      recvTime: packet.recvPacket?.blockTimestamp,
-      endTime: packet.ackPacket?.blockTimestamp,
-      sendTx: packet.sendTx,
-      rcvTx: packet.recvTx,
-      ackTx: packet.ackTx,
-      sourceChain: channelResponse?.portId?.split('.')[1],
-      destChain: channelResponse?.counterpartyPortId?.split('.')[1]
+      createTime,
+      recvTime,
+      endTime,
+      sendTx: packet.sendPacket?.transactionHash,
+      rcvTx: packet.recvPacket?.transactionHash,
+      ackTx: packet.ackPacket?.transactionHash,
+      sourceClient: packet.sendPacket?.sourceChannel?.portId.split('.')[1],
+      destClient: packet.sendPacket?.sourceChannel?.counterpartyPortId.split('.')[1],
     };
 
     packets.push(newPacket);
@@ -97,42 +66,43 @@ async function processPacketRequest(packetRequest: {
 export async function getPacket(txHash: string): Promise<Packet[]> {
   const packetRequest = {
     query: `query Packet($txHash:String!){
-              packets(where:{
-                OR:[
-                  {sendTx:$txHash},
-                  {recvTx:$txHash},
-                  {writeAckTx:$txHash},
-                  {ackTx:$txHash}
-                ]  
+              packets(where: {
+                OR: [
+                  {sendPacket: {transactionHash_eq: $txHash}},
+                  {recvPacket: {transactionHash_eq: $txHash}},
+                  {ackPacket: {transactionHash_eq: $txHash}}
+                ]
               }){
-                items {
-                  sendPacket {
-                    sequence
-                    sourcePortAddress
-                    sourceChannelId
-                    dispatcherAddress
-                    blockTimestamp
-                    timeoutTimestamp
+                id
+                sendPacket {
+                  blockTimestamp
+                  sourcePortAddress
+                  sequence
+                  dispatcherAddress
+                  timeoutTimestamp
+                  transactionHash
+                  sourceChannel {
+                    channelId
+                    counterpartyChannelId
+                    portId
+                    counterpartyPortId
                   }
-                  recvPacket {
-                    destPortAddress
-                    destChannelId
-                    blockTimestamp
-                  }
-                  writeAckPacket {
-                    dispatcherAddress
-                    blockTimestamp
-                  }
-                  ackPacket {
-                    blockTimestamp
-                  }
-                  id
-                  state
-                  sendTx
-                  recvTx
-                  writeAckTx
-                  ackTx
                 }
+                recvPacket {
+                  destPortAddress
+                  blockTimestamp
+                  transactionHash
+                }
+                writeAckPacket {
+                  dispatcherAddress
+                  blockTimestamp
+                  transactionHash
+                }
+                ackPacket {
+                  blockTimestamp
+                  transactionHash
+                }
+                state
               }
             }`,
     variables: { txHash }
@@ -141,38 +111,40 @@ export async function getPacket(txHash: string): Promise<Packet[]> {
   return await processPacketRequest(packetRequest);
 }
 
-export async function getRecentPackets(limit: number = 100): Promise<Packet[]> {
+export async function getRecentPackets(limit: number = 1000): Promise<Packet[]> {
   const packetRequest = {
     query: `query Packet($limit:Int!){
-              packets(limit:$limit, orderBy: "sendBlockTimestamp", orderDirection: "desc") {
-                items {
-                  sendPacket {
-                    sequence
-                    sourcePortAddress
-                    sourceChannelId
-                    dispatcherAddress
-                    blockTimestamp
-                    timeoutTimestamp
+              packets(limit: $limit, orderBy: sendPacket_blockTimestamp_DESC) {
+                id
+                sendPacket {
+                  blockTimestamp
+                  sourcePortAddress
+                  sequence
+                  dispatcherAddress
+                  timeoutTimestamp
+                  transactionHash
+                  sourceChannel {
+                    channelId
+                    counterpartyChannelId
+                    portId
+                    counterpartyPortId
                   }
-                  recvPacket {
-                    destPortAddress
-                    destChannelId
-                    blockTimestamp
-                  }
-                  writeAckPacket {
-                    dispatcherAddress
-                    blockTimestamp
-                  }
-                  ackPacket {
-                    blockTimestamp
-                  }
-                  id
-                  state
-                  sendTx
-                  recvTx
-                  writeAckTx
-                  ackTx
                 }
+                recvPacket {
+                  destPortAddress
+                  blockTimestamp
+                  transactionHash
+                }
+                writeAckPacket {
+                  dispatcherAddress
+                  blockTimestamp
+                  transactionHash
+                }
+                ackPacket {
+                  blockTimestamp
+                  transactionHash
+                }
+                state
               }
             }`,
     variables: { limit }

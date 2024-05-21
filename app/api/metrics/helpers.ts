@@ -9,9 +9,11 @@ export interface PacketData {
 }
 
 export async function getPackets(from?: number, to?: number): Promise<PacketData[]> {
-  const now = Math.floor(Date.now() / 1000);
+  const now = Date.now() / 1000;
   from = from || now - 60 * 60;
   to = to || now;
+  from = from * 1000;
+  to = to * 1000;
 
   if (from >= to) {
     logger.error('Invalid time range for metrics');
@@ -19,17 +21,15 @@ export async function getPackets(from?: number, to?: number): Promise<PacketData
   }
 
   const packetRequest = {
-    query: `query Packet($from:Int!, $to:Int!){
-              packets(where: {sendBlockTimestamp_gte: $from, sendBlockTimestamp_lte: $to}){
-                items {
-                  sendPacket {
-                    chainId
-                    dispatcherAddress
-                  }
-                  sendToRecvGas
-                  sendToAckGas
-                  sendToAckTime
+    query: `query Packet($from:BigInt!, $to:BigInt!){
+              packets(where: {sendPacket: {blockTimestamp_lte: $to, blockTimestamp_gte: $from}}) {
+                sendPacket {
+                  chainId
+                  dispatcherAddress
                 }
+                sendToAckGas
+                sendToRecvGas
+                sendToAckTime
               }
             }`,
     variables: { from, to }
@@ -47,9 +47,9 @@ export async function getPackets(from?: number, to?: number): Promise<PacketData
     logger.error('Failed to fetch packets for metrics: ', packetRes.errors[0].message);
     return [];
   }
-  const responseItems = packetRes?.data?.packets?.items;
+  const responseItems = packetRes?.data?.packets;
   if (!responseItems) {
-    logger.error('Error fetching packets for metrics');
+    logger.error('No packets found for metrics');
     return [];
   }
 

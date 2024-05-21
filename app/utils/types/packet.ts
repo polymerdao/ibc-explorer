@@ -13,8 +13,8 @@ export interface Packet {
   sendTx: string;
   rcvTx?: string;
   ackTx?: string;
-  sourceChain: string;
-  destChain: string;
+  sourceClient: string;
+  destClient: string;
 }
 
 export enum PacketStates {

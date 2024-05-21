@@ -55,3 +55,11 @@ export const CHAIN_CONFIGS: {
     icon: MoltenIcon,
   },
 };
+
+export function clientToDisplay(client: string) {
+  for (const key in CHAIN_CONFIGS) {
+    if (client.toLowerCase().includes(key.toLowerCase())) {
+      return CHAIN_CONFIGS[key as CHAIN].display;
+    }
+  }
+}
