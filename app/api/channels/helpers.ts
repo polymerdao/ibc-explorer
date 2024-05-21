@@ -12,7 +12,7 @@ function stringToState(state: string) {
   }
 }
 
-async function getChannelByGQQuery(channelRequest: {
+async function processChannelRequest(channelRequest: {
   variables: { searchId?: string, limit?: number };
   query: string
 }) {
@@ -25,7 +25,7 @@ async function getChannelByGQQuery(channelRequest: {
   const channelRes = await (await fetch(process.env.INDEXER_URL!, channelOptions)).json();
 
   const channels = [];
-  for (const item of channelRes.data.channels.items) {
+  for (const item of channelRes.data.channels) {
     const channel: IdentifiedChannel = {
       portId: item.portId,
       channelId: item.channelId,
@@ -46,28 +46,27 @@ async function getChannelByGQQuery(channelRequest: {
 export async function getChannels(limit: number = 100) {
   const channelsRequest = {
     query: `query Channels($limit:Int!){
-              channels(limit:$limit, orderBy: "blockTimestamp", orderDirection: "desc"){
-                items {
-                  state
-                  ordering
-                  version
-                  portId
-                  channelId
-                  counterpartyPortId
-                  counterpartyChannelId
-                  connectionHops
-                }
+              channels(limit: $limit, orderBy: blockTimestamp_DESC){
+                state
+                ordering
+                version
+                portId
+                channelId
+                counterpartyPortId
+                counterpartyChannelId
+                connectionHops
               }
             }`,
     variables: { limit: limit }
   };
-  return await getChannelByGQQuery(channelsRequest);
+
+  return await processChannelRequest(channelsRequest);
 }
 
 export async function getChannel(searchId: string) {
   const channelRequest = {
     query: `query Channel($searchId:String!){
-              channels(where:{
+              channels(where: {
                 OR: [
                   {channelId: $searchId},
                   {counterpartyChannelId: $searchId},
@@ -75,19 +74,18 @@ export async function getChannel(searchId: string) {
                   {counterpartyPortId: $searchId},
                 ]
               }){
-                items {
-                  state
-                  ordering
-                  version
-                  portId
-                  channelId
-                  counterpartyPortId
-                  counterpartyChannelId
-                  connectionHops
-                }
+                state
+                ordering
+                version
+                portId
+                channelId
+                counterpartyPortId
+                counterpartyChannelId
+                connectionHops
               }
             }`,
     variables: { searchId: searchId }
   };
-  return await getChannelByGQQuery(channelRequest);
+
+  return await processChannelRequest(channelRequest);
 }

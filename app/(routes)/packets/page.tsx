@@ -36,7 +36,7 @@ const columns = [
     cell: props => shortenHex(props.getValue()),
     enableHiding: true
   }),
-  columnHelper.accessor('sourceChain', {
+  columnHelper.accessor('sourceClient', {
     header: 'Source',
     enableHiding: true,
     cell: props => (
@@ -46,7 +46,7 @@ const columns = [
       </div>
     )
   }),
-  columnHelper.accessor('destChain', {
+  columnHelper.accessor('destClient', {
     header: 'Dest',
     cell: props => (
       <div className="flex flex-row justify-between">

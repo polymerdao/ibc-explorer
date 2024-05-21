@@ -14,7 +14,11 @@ export async function GET(request: NextRequest) {
 
   let packets: PacketData[] = [];
   try {
-    packets = await getPackets(Number(from), Number(to));
+    if (from && to) {
+      packets = await getPackets(Number(from), Number(to));
+    } else {
+      packets = await getPackets();
+    }
   } catch (error) {
     console.error('Failed to fetch packets for metrics: ', error);
     return NextResponse.error();

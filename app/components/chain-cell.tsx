@@ -2,6 +2,8 @@ import { CHAIN, CHAIN_CONFIGS } from 'utils/chains/configs';
 import { SimIcon } from 'components/icons'
 
 export function ChainCell({chain}: {chain: string}) {
+  if (!chain) return null;
+
   const size = 32;
   const sim: boolean = chain.toLowerCase().includes('sim');
   const chainName = chain.split('-')[0];

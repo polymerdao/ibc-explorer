@@ -123,7 +123,7 @@ export function IbcTable<TableType extends Packet | Client | IdentifiedChannel |
                 return (
                   <th key={header.id} colSpan={header.colSpan} 
                     className={classNames(
-                      header.id === 'destChain'
+                      header.id === 'destClient'
                       ? 'pl-2'
                       : 'pl-5'
                       , 'py-2 h-20 dark:bg-bg-dark last:pr-6 whitespace-nowrap font-medium first:pl-6'
@@ -172,7 +172,7 @@ export function IbcTable<TableType extends Packet | Client | IdentifiedChannel |
                     <td
                       key={cell.id}
                       className={classNames(
-                        cell.column.id === 'destChain'
+                        cell.column.id === 'destClient'
                         ? 'pl-2'
                         : 'pl-7'
                         , 'last:pr-6'
@@ -238,7 +238,7 @@ function ColumnFilter({ column, table }: { column: Column<any, any>, table: Tabl
 
   const columnFilterValue = column.getFilterValue();
   
-  if (column.id === 'sourceChain' || column.id === 'destChain' || column.id === 'chain') {
+  if (column.id === 'sourceClient' || column.id === 'destClient' || column.id === 'chain') {
     return (
       <Select 
         options={

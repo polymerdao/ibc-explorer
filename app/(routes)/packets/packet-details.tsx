@@ -1,8 +1,9 @@
 import Link from 'next/link';
 import { Packet, PacketStates, stateToString } from 'utils/types/packet';
-import { CHAIN_CONFIGS, CHAIN } from 'utils/chains/configs';
+import { CHAIN_CONFIGS, CHAIN, clientToDisplay } from 'utils/chains/configs';
 import { classNames } from 'utils/functions';
 import { CopyButton } from 'components/copy-button';
+import { SimIcon } from 'components/icons';
 
 export function PacketDetails(packet: Packet | null) {
   let sourceUrl = '';
@@ -11,10 +12,10 @@ export function PacketDetails(packet: Packet | null) {
   for (const chain of Object.keys(CHAIN_CONFIGS)) {
     const chainName = chain as CHAIN;
     const chainVals = CHAIN_CONFIGS[chainName];
-    if (packet?.sourceChain?.toLowerCase().startsWith(chain)) {
+    if (packet?.sourceClient?.toLowerCase().startsWith(chain)) {
       sourceUrl = chainVals.txUrl;
     }
-    if (packet?.destChain?.toLowerCase().startsWith(chain)) {
+    if (packet?.destClient?.toLowerCase().startsWith(chain)) {
       destUrl = chainVals.txUrl;
     }
   }
@@ -31,9 +32,9 @@ export function PacketDetails(packet: Packet | null) {
 
       {/* Status Bar */}
       <div className="w-full h-20 flex flex-row mt-6 mb-9">
-        <div className="w-60 h-full grid place-content-center border border-fg-dark border-fg-dark rounded-lg bg-sky-600/50 font-accent font-medium text-lg">
+        <div className="w-60 h-full grid justify-items-center content-center border border-fg-dark border-fg-dark rounded-lg bg-sky-600/50 font-accent font-medium text-lg">
           <p>Src Chain:</p>
-          <p>{packet.sourceChain}</p>
+          <p>{clientToDisplay(packet.sourceClient)}</p>
         </div>
 
         {/* Middle Section */}
@@ -98,9 +99,9 @@ export function PacketDetails(packet: Packet | null) {
           </div>
         </div>
 
-        <div className="w-60 h-full grid place-content-center border border-fg-dark border-fg-dark rounded-lg bg-sky-600/50 font-accent font-medium text-lg">
+        <div className="w-60 h-full grid justify-items-center content-center border border-fg-dark border-fg-dark rounded-lg bg-sky-600/50 font-accent font-medium text-lg">
           <p>Dest Chain:</p>
-          <p>{packet.destChain}</p>
+          <p>{clientToDisplay(packet.destClient)}</p>
         </div>
       </div>
 
