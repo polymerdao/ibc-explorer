@@ -3,7 +3,6 @@ import { Packet, PacketStates, stateToString } from 'utils/types/packet';
 import { CHAIN_CONFIGS, CHAIN, clientToDisplay } from 'utils/chains/configs';
 import { classNames } from 'utils/functions';
 import { CopyButton } from 'components/copy-button';
-import { SimIcon } from 'components/icons';
 
 export function PacketDetails(packet: Packet | null) {
   let sourceUrl = '';

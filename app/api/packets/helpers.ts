@@ -24,7 +24,19 @@ async function processPacketRequest(packetRequest: {
     body: JSON.stringify(packetRequest)
   };
 
-  const packetRes = await (await fetch(process.env.INDEXER_URL!, packetOptions)).json();
+  let packetRes;
+  try {
+    packetRes = await (await fetch(process.env.INDEXER_URL!, packetOptions)).json();
+  } catch (err) {
+    logger.error('Error processing packet request: ' + err);
+    return [];
+  }
+
+  if (packetRes.errors) {
+    logger.error('Error processing packet request: ' + packetRes.errors);
+    return [];
+  }
+
   const responseItems = packetRes?.data?.packets;
   if (!responseItems) {
     return [];
@@ -56,7 +68,6 @@ async function processPacketRequest(packetRequest: {
       sourceClient: packet.sendPacket?.sourceChannel?.portId.split('.')[1],
       destClient: packet.sendPacket?.sourceChannel?.counterpartyPortId.split('.')[1],
     };
-
     packets.push(newPacket);
   }
 
@@ -108,7 +119,12 @@ export async function getPacket(txHash: string): Promise<Packet[]> {
     variables: { txHash }
   };
 
-  return await processPacketRequest(packetRequest);
+  try {
+    return await processPacketRequest(packetRequest);
+  } catch (err) {
+    logger.error(`Error finding packet packet with txHash ${txHash}: ` + err);
+    return [];
+  }
 }
 
 export async function getRecentPackets(limit: number = 1000): Promise<Packet[]> {
@@ -150,5 +166,10 @@ export async function getRecentPackets(limit: number = 1000): Promise<Packet[]> 
     variables: { limit }
   };
 
-  return await processPacketRequest(packetRequest);
+  try {
+    return await processPacketRequest(packetRequest);
+  } catch (err) {
+    logger.error('Error getting recent packets: ' + err);
+    return [];
+  }
 }
