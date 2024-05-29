@@ -48,7 +48,7 @@ const columns = [
 ];
 
 export default function Packets() {
-  const [connections, setConnections] = useState<Client[]>([]);
+  const [clients, setClients] = useState<Client[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
@@ -72,7 +72,7 @@ export default function Packets() {
         return res.json();
       })
       .then(data => {
-        setConnections(data);
+        setClients(data);
         setLoading(false);
       }).catch(err => {
         setError(true);
@@ -81,7 +81,7 @@ export default function Packets() {
   }
 
   const table = useReactTable({
-    data: connections,
+    data: clients,
     columns,
     state: {
       columnVisibility

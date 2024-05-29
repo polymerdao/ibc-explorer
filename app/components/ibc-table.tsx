@@ -10,7 +10,7 @@ import { CHAIN_CONFIGS } from 'utils/chains/configs';
 import { Packet } from 'utils/types/packet';
 import { Client } from 'utils/types/client';
 import { IdentifiedConnection } from 'cosmjs-types/ibc/core/connection/v1/connection';
-import { IdentifiedChannel } from 'cosmjs-types/ibc/core/channel/v1/channel';
+import { IdentifiedChannel } from 'utils/types/channel';
 import { classNames, classLogic } from 'utils/functions';
 import { Select } from 'components/select';
 import { OrbitLoader } from 'components/loading/loader';
@@ -32,7 +32,7 @@ export function IbcTable<TableType extends Packet | Client | IdentifiedChannel |
     <div className="relative mt-4">
 
       {/* Table View Options */}
-      <div className="flex flex-row justify-between items-end mb-2 mx-1 text-slate-700 dark:text-slate-300">
+      <div className="flex flex-row justify-between items-end mb-2 ml-1.5 mr-1 text-slate-700 dark:text-slate-300">
         <span>
           Last {table.getFilteredRowModel().rows.length} Results
         </span>
@@ -246,7 +246,7 @@ function ColumnFilter({ column, table }: { column: Column<any, any>, table: Tabl
           ...Object.entries(CHAIN_CONFIGS).map(([key, value]) => ({ value: key, label: value.display }))]
         }
         onChange={value => column.setFilterValue(value)}
-        containerClassName="w-24"
+        containerClassName="w-28"
         buttonClassName="inpt h-8 pl-[9px] cursor-default"
         dropdownClassName="bg-bg-light dark:bg-bg-dark"
       />
@@ -264,13 +264,19 @@ function ColumnFilter({ column, table }: { column: Column<any, any>, table: Tabl
             case 'counterparty_connectionid':
               break;
             case 'state':
-              classes += ' max-w-[9.5rem]';
+              classes += ' max-w-[9rem]';
               break;
             case 'delayperiod':
               classes += ' max-w-32';
               break;
-            case 'counterparty_channelid':
+            case 'channelid':
+              classes += ' max-w-36';
+              break;
+            case 'portid':
               classes += ' max-w-48';
+              break;
+            case 'counterparty_channelid':
+              classes += ' max-w-32';
               break;
             default:
               classes += ' max-w-44';

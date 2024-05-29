@@ -1,21 +1,21 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getChannel, getChannels } from 'api/channels/helpers';
+import { getChannel, getUniversalChannels } from 'api/channels/helpers';
 import logger from 'utils/logger';
 
 export const dynamic = 'force-dynamic'; // defaults to auto
 
 export async function GET(request: NextRequest) {
-  const searchId = request.nextUrl.searchParams.get('searchId');
-  if (!searchId) {
-    return NextResponse.json(await getChannels())
+  const channelId = request.nextUrl.searchParams.get('channelId');
+
+  if (!channelId) {
+    return NextResponse.json(await getUniversalChannels())
   }
 
   try {
-    const channels = await getChannel(searchId);
-    return NextResponse.json(channels);
+    return NextResponse.json(await getChannel(channelId));
   }
   catch (err) {
-    logger.error(err);
+    logger.error(`Error searching for channel ${channelId}: ${err}`);
     return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
   }
 }
