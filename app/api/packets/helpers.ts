@@ -37,13 +37,19 @@ async function processPacketRequest(packetRequest: {
     return [];
   }
 
-  const responseItems = packetRes?.data?.packets;
-  if (!responseItems) {
-    return [];
+  if (packetRes?.data?.packets) {
+    return processPacketResponse(packetRes.data.packets);
+  }
+  else if (packetRes?.data?.sendPackets) {
+    return processSendPacketResponse(packetRes.data.sendPackets);
   }
 
+  return [];
+}
+
+function processPacketResponse(packetResponse: any[]): Packet[] {
   const packets: Packet[] = [];
-  for (const packet of responseItems) {
+  for (const packet of packetResponse) {
     const state = stringToState(packet.state);
 
     const createTime = packet.sendPacket?.blockTimestamp ? packet.sendPacket.blockTimestamp / 1000 : 0;
@@ -71,6 +77,38 @@ async function processPacketRequest(packetRequest: {
     packets.push(newPacket);
   }
 
+  return packets;
+}
+
+function processSendPacketResponse(packetResponse: any[]): Packet[] {
+  const packets: Packet[] = [];
+  for (const packet of packetResponse) {
+    const state = stringToState(packet.packetRelation.state);
+
+    const createTime = packet.blockTimestamp / 1000;
+    const recvTime = packet.packetRelation.recvPacket?.blockTimestamp ? packet.packetRelation.recvPacket.blockTimestamp / 1000 : undefined;
+    const endTime = packet.packetRelation.ackPacket?.blockTimestamp ? packet.packetRelation.ackPacket.blockTimestamp / 1000 : undefined;
+
+    const newPacket: Packet = {
+      sequence: packet.sequence,
+      sourcePortAddress: packet.sourcePortAddress,
+      sourceChannelId: packet.sourceChannel.channelId,
+      destPortAddress: packet.packetRelation.recvPacket?.destPortAddress,
+      destChannelId: packet.sourceChannel.counterpartyChannelId,
+      timeout: packet.timeoutTimestamp,
+      id: packet.packetRelation.id,
+      state: state,
+      createTime,
+      recvTime,
+      endTime,
+      sendTx: packet.transactionHash,
+      rcvTx: packet.packetRelation.recvPacket?.transactionHash,
+      ackTx: packet.packetRelation.ackPacket?.transactionHash,
+      sourceClient: packet.sourceChannel.portId.split('.')[1],
+      destClient: packet.sourceChannel.counterpartyPortId.split('.')[1],
+    };
+    packets.push(newPacket);
+  }
   return packets;
 }
 
@@ -130,37 +168,38 @@ export async function getPacket(txHash: string): Promise<Packet[]> {
 export async function getRecentPackets(limit: number = 1000): Promise<Packet[]> {
   const packetRequest = {
     query: `query Packet($limit:Int!){
-              packets(limit: $limit, orderBy: sendPacket_blockTimestamp_DESC) {
+              sendPackets(limit: $limit, orderBy: blockTimestamp_DESC) {
                 id
-                sendPacket {
-                  blockTimestamp
-                  sourcePortAddress
-                  sequence
-                  dispatcherAddress
-                  timeoutTimestamp
-                  transactionHash
-                  sourceChannel {
-                    channelId
-                    counterpartyChannelId
-                    portId
-                    counterpartyPortId
+                blockTimestamp
+                sourcePortAddress
+                sequence
+                dispatcherAddress
+                timeoutTimestamp
+                transactionHash
+                sourceChannel {
+                  channelId
+                  counterpartyChannelId
+                  portId
+                  counterpartyPortId
+                }
+                packetRelation {
+                  recvPacket {
+                    destPortAddress
+                    blockTimestamp
+                    transactionHash
                   }
+                  writeAckPacket {
+                    dispatcherAddress
+                    blockTimestamp
+                    transactionHash
+                  }
+                  ackPacket {
+                    blockTimestamp
+                    transactionHash
+                  }
+                  id
+                  state
                 }
-                recvPacket {
-                  destPortAddress
-                  blockTimestamp
-                  transactionHash
-                }
-                writeAckPacket {
-                  dispatcherAddress
-                  blockTimestamp
-                  transactionHash
-                }
-                ackPacket {
-                  blockTimestamp
-                  transactionHash
-                }
-                state
               }
             }`,
     variables: { limit }
