@@ -1,0 +1,12 @@
+version: 2
+updates:
+  # For JavaScript/Node.js
+  - package-ecosystem: 'npm'
+    directory: '/'
+    schedule:
+      interval: 'daily'
+    commit-message:
+      prefix: 'deps'
+    labels:
+      - 'dependencies'
+      - 'javascript'
