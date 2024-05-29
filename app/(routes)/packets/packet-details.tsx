@@ -175,7 +175,7 @@ function linkAndCopy(url: string, path: string, hex?: string) {
   }
 
   return (
-    <div className="whitespace-nowrap flex flex-row transition ease-in-out duration-300">
+    <div className="whitespace-nowrap flex flex-row">
       <Link href={url + path + '/' + hex} target="_blank"
         className="text-sky-600 dark:text-sky-400 font-mono text-[17px]/[24px] hover:underline underline-offset-2">
         {hex}

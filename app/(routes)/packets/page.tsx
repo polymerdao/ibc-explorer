@@ -15,8 +15,8 @@ import { IbcTable } from 'components/ibc-table';
 import { Modal } from 'components/modal';
 import { Packet } from 'utils/types/packet';
 import { PacketDetails } from './packet-details';
-import { StateCell } from './state-cell';
 import { stateToString } from 'utils/types/packet';
+import { StateCell } from 'components/state-cell';
 import { ChainCell, Arrow } from 'components/chain-cell';
 import { shortenHex } from 'components/format-strings';
 
@@ -121,7 +121,7 @@ const columns = [
 export default function Packets() {
   const [packets, setPackets] = useState<Packet[]>([]);
   const [searchHash, setSearchHash] = useState<string>('');
-  const [searchPacket, setSearchPacket] = useState(false);
+  const [packetSearch, setPacketSearch] = useState(false);
   const [foundPacket, setFoundPacket] = useState<Packet | null>(null);
   const [loading, setLoading] = useState(true);
   const [searchLoading, setSearchLoading] = useState(false);
@@ -171,13 +171,13 @@ export default function Packets() {
   function searchByHash() {
     setSearchLoading(true);
     setFoundPacket(null);
-    setSearchPacket(true);
+    setPacketSearch(true);
     fetch(`/api/packets?txHash=${searchHash}`, { signal: controller.signal })
       .then(res => {
         if (!res.ok) {
           setErrorMessage(res.statusText);
           setError(true);
-          setSearchPacket(false);
+          setPacketSearch(false);
           setSearchLoading(false);
         }
         return res.json();
@@ -191,7 +191,7 @@ export default function Packets() {
         setSearchLoading(false);
       }).catch(() => {
         setError(true);
-        setSearchPacket(false);
+        setPacketSearch(false);
         setSearchLoading(false);
       });
   }
@@ -235,9 +235,9 @@ export default function Packets() {
       />
 
       <Modal 
-        open={searchPacket} 
+        open={packetSearch} 
         onClose={() => {
-          setSearchPacket(false);
+          setPacketSearch(false);
           if (searchLoading) {
             controller.abort();
             setSearchLoading(false);

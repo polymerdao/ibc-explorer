@@ -12,58 +12,84 @@ import {
   VisibilityState
 } from '@tanstack/react-table';
 import { IbcTable } from 'components/ibc-table';
-import { IdentifiedChannel, State } from 'cosmjs-types/ibc/core/channel/v1/channel';
+import { IdentifiedChannel, stateToString } from 'utils/types/channel';
+import { ChannelDetails } from './channel-details';
 import { Modal } from 'components/modal';
-import { SimIcon } from 'components/icons';
+import { StateCell } from 'components/state-cell';
+import { ChainCell, Arrow } from 'components/chain-cell';
+import { formatPortId, formatConnectionHops } from 'components/format-strings';
 
 const columnHelper = createColumnHelper<IdentifiedChannel>();
 const columns = [
   columnHelper.accessor('channelId', {
     header: 'Channel ID',
-    cell: props =>
-    <div className="flex flex-row">
-      <span className="whitespace-nowrap">
-        {props.getValue()}
-      </span>
-      {(props.row.original.counterparty?.portId?.toLowerCase().includes('sim') ||
-        props.row.original.portId?.toLowerCase().includes('sim')) ?
-        <div className="ml-2"><SimIcon /></div>
-        : null}
-    </div>,
     enableHiding: true,
     enableSorting: true,
     sortingFn: 'alphanumeric'
   }),
   columnHelper.accessor(row => stateToString(row.state), {
     header: 'State',
-    cell: props => <span>{props.getValue()}</span>,
+    cell: props => StateCell(props.getValue()),
     enableHiding: true,
     enableColumnFilter: true
   }),
+  columnHelper.accessor(row => row.portId, {
+    header: 'Source',
+    id: 'sourceClient',
+    cell: props => (
+      <div className="flex flex-row justify-between">
+        <div className="ml-4"><ChainCell chain={props.getValue()} /></div>
+        <Arrow />
+      </div>
+    ),
+    enableColumnFilter: true,
+    enableHiding: true
+  }),
+  columnHelper.accessor(row => row.counterparty.portId, {
+    header: 'Dest',
+    id: 'destClient',
+    cell: props => (
+      <div className="flex flex-row justify-between">
+        <div className="ml-5"><ChainCell chain={props.getValue()} /></div>
+      </div>
+    ),
+    enableColumnFilter: true,
+    enableHiding: true
+  }),
   columnHelper.accessor('portId', {
     header: 'Port ID',
+    cell: props => formatPortId(props.getValue()),
     enableHiding: true
   }),
   columnHelper.accessor('counterparty.channelId', {
-    header: 'Counterparty Channel',
+    header: 'Counterparty',
     enableHiding: true
   }),
   columnHelper.accessor('counterparty.portId', {
     header: 'Counterparty Port',
+    cell: props => formatPortId(props.getValue()),
     enableHiding: true
   }),
-  columnHelper.accessor('connectionHops', {
+  columnHelper.accessor(row => formatConnectionHops(row.connectionHops), {
     header: 'Connection Hops',
-    enableHiding: true,
-    enableColumnFilter: false
+    id: 'connectionHops',
+    enableHiding: true
   })
 ];
 
 export default function Packets() {
-  const [connections, setConnections] = useState<IdentifiedChannel[]>([]);
+  const [channels, setChannels] = useState<IdentifiedChannel[]>([]);
+  const [searchId, setSearchId] = useState<string>('');
+  const [channelSearch, setChannelSearch] = useState(false);
+  const [foundChannel, setFoundChannel] = useState<IdentifiedChannel | null>(null);
   const [loading, setLoading] = useState(true);
+  const [searchLoading, setSearchLoading] = useState(false);
   const [error, setError] = useState(false);
-  const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
+  const [errorMessage, setErrorMessage] = useState('');
+  const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({
+    'connectionHops': false,
+    'counterparty_portId': false,
+  });
   const [sorting, setSorting] = useState<SortingState>([{
     id: 'channelId',
     desc: true
@@ -71,6 +97,13 @@ export default function Packets() {
 
   useEffect(() => {
     loadData();
+    // Check if url contains a channelId to load by default
+    const urlParams = new URLSearchParams(window.location.search);
+    const channelId = urlParams.get('channelId');
+    if (channelId) {
+      searchChannels(channelId);
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   function loadData() {
@@ -85,7 +118,7 @@ export default function Packets() {
         return res.json();
       })
       .then(data => {
-        setConnections(data);
+        setChannels(data);
         setLoading(false);
       }).catch(err => {
         setError(true);
@@ -93,8 +126,37 @@ export default function Packets() {
       });
   }
 
+  const controller = new AbortController();
+  function searchChannels(channelId: string) {
+    setSearchLoading(true);
+    setFoundChannel(null);
+    setChannelSearch(true);
+    fetch(`/api/channels?channelId=${channelId}`, { signal: controller.signal })
+      .then(res => {
+        if (!res.ok) {
+          setErrorMessage(res.statusText);
+          setError(true);
+          setChannelSearch(false);
+          setSearchLoading(false);
+        }
+        return res.json();
+      })
+      .then(data => {
+        if (data.length > 0) {
+          setFoundChannel(data[0]);
+        } else {
+          setFoundChannel(null);
+        }
+        setSearchLoading(false);
+      }).catch(() => {
+        setError(true);
+        setChannelSearch(false);
+        setSearchLoading(false);
+      });
+  }
+
   const table = useReactTable({
-    data: connections,
+    data: channels,
     state: {
       columnVisibility,
       sorting
@@ -116,35 +178,55 @@ export default function Packets() {
     <div className="h-0">
       <Modal 
         open={error}
-        onClose={() => setError(false)}
+        onClose={() => {
+          setError(false);
+          setErrorMessage('');
+        }}
         content={<>
           <h2>Error</h2>
-          <p className="mt-1 mr-8">There was an issue fetching channel data</p>
+          <p className="mt-1 mr-8">
+            There was an issue fetching channel data {errorMessage? `: ${errorMessage}` : ''}
+          </p>
         </>}
       />
 
-      <div className="flex flex-row justify-between">
-        <h1 className="ml-1">Channels</h1>
+      <Modal 
+        open={channelSearch} 
+        onClose={() => {
+          setChannelSearch(false);
+          if (searchLoading) {
+            controller.abort();
+            setSearchLoading(false);
+          }
+        }}
+        content={ChannelDetails(foundChannel)}
+        loading={searchLoading}
+      />
+
+      <h1 className="ml-1">Universal Channels</h1>
+      <div className="flex flex-row justify-between mt-4">
+        <div className="flex flex-row justify-left w-2/5 min-w-[248px]">
+          <input
+            type="text"
+            placeholder="Search Custom Channels by ID"
+            className="inpt border-[1px] w-full px-3 rounded-md font-mono placeholder:font-primary"
+            value={searchId}
+            onChange={e => setSearchId(e.target.value)}
+            onKeyUp={e => { if (e.key === 'Enter') searchChannels(searchId) }}
+          />
+          <button
+            className="btn ml-3"
+            disabled={searchLoading || searchId.length === 0}
+            onClick={() => searchChannels(searchId)}>
+            Search
+          </button>
+        </div>
         <button onClick={() => loadData()} className="btn btn-accent">
           Reload
         </button>
       </div>
 
-      <IbcTable {...{table, loading}} />
+      <IbcTable {...{table, loading, rowDetails: ChannelDetails}} />
     </div>
   );
-}
-
-function stateToString(state: State) {
-  switch (state) {
-    case State.STATE_OPEN: return 'Open'
-    case State.STATE_INIT: return 'Initialized'
-    case State.STATE_CLOSED: return 'Closed'
-    case State.STATE_TRYOPEN:
-    case State.UNRECOGNIZED:
-    case State.STATE_UNINITIALIZED_UNSPECIFIED:
-      return 'Pending'
-    default:
-      return 'Pending'
-  }
 }

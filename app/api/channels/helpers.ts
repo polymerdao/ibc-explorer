@@ -1,5 +1,5 @@
-import { IdentifiedChannel } from 'api/utils/cosmos/_generated/ibc/core/channel/v1/channel';
-import { State } from 'cosmjs-types/ibc/core/channel/v1/channel';
+import { IdentifiedChannel, State } from 'utils/types/channel';
+import logger from 'utils/logger';
 
 function stringToState(state: string) {
   switch (state) {
@@ -10,6 +10,36 @@ function stringToState(state: string) {
     default:
       return State.UNRECOGNIZED
   }
+}
+
+export async function getUniversalChannels(): Promise<IdentifiedChannel[]> {
+  const universalChannels: IdentifiedChannel[] = [];
+  // Fetch polymer-registry to get Universal Channel IDs
+  const registry = await getPolymerRegistry();
+
+  for (const chain in registry) {
+    const clients = registry[chain].clients;
+    for (const client in clients) {
+      const clientProps = clients[client];
+      if (!clientProps.universalChannelId) {
+        logger.info(`No universal channel found for ${chain} ${client}`);
+        continue;
+      }
+      try {
+        const universalChannel = await getChannel(clientProps.universalChannelId);
+        if (universalChannel.length === 0) {
+          logger.info(`Could not find universal channel ${chain} ${client} ${clientProps.universalChannelId}`);
+          continue;
+        }
+        universalChannels.push(universalChannel[0]);
+      }
+      catch (err) {
+        logger.error(`Error fetching universal channel for ${chain} ${client}: ` + err);
+      }
+    }
+  }
+
+  return universalChannels;
 }
 
 async function processChannelRequest(channelRequest: {
@@ -68,10 +98,7 @@ export async function getChannel(searchId: string) {
     query: `query Channel($searchId:String!){
               channels(where: {
                 OR: [
-                  {channelId: $searchId},
-                  {counterpartyChannelId: $searchId},
-                  {portId: $searchId},
-                  {counterpartyPortId: $searchId},
+                  {channelId_eq: $searchId}
                 ]
               }){
                 state
@@ -88,4 +115,19 @@ export async function getChannel(searchId: string) {
   };
 
   return await processChannelRequest(channelRequest);
+}
+
+async function getPolymerRegistry() {
+  try {
+    const res = await fetch(process.env.REGISTRY_URL!);
+    if (!res.ok) {
+      logger.error('Error fetching polymer-registry: ' + res.statusText);
+      return {};
+    }
+    const data = await res.json();
+    return data;
+  } catch (error) {
+    logger.error('Error fetching polymer-registry: ' + error);
+    return {};
+  }
 }

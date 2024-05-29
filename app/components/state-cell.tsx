@@ -3,7 +3,7 @@ import { classNames } from 'utils/functions';
 export function StateCell(state: string) {
   return (
     <div className={classNames(
-      state === 'Delivered'
+      state === 'Delivered' || state === 'Open'
       ? 'bg-emerald-500/60'
       : 'bg-sky-500/50'
       , 'flex flex-row w-32 justify-center rounded-xl py-[2.2px]'
