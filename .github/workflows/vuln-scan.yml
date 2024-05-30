@@ -1,0 +1,25 @@
+name: build
+on:
+  workflow_dispatch:
+  pull_request:
+jobs:
+  explorer:
+    name: Build and Scan Explorer
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Build an image
+        run: |
+          docker build -t explorer  .
+
+      - name: Peptide vulnerability scan
+        uses: aquasecurity/trivy-action@0.21.0
+        with:
+          image-ref: 'explorer'
+          format: 'table'
+          exit-code: '1'
+          ignore-unfixed: true
+          vuln-type: 'os,library'
+          severity: 'CRITICAL,HIGH'
