@@ -113,15 +113,9 @@ function processSendPacketResponse(packetResponse: any[]): Packet[] {
 }
 
 export async function getPacket(txHash: string): Promise<Packet[]> {
-  const packetRequest = {
+  const sendPacketSearch = {
     query: `query Packet($txHash:String!){
-              packets(where: {
-                OR: [
-                  {sendPacket: {transactionHash_eq: $txHash}},
-                  {recvPacket: {transactionHash_eq: $txHash}},
-                  {ackPacket: {transactionHash_eq: $txHash}}
-                ]
-              }){
+              packets(where: {sendPacket: {transactionHash_eq: $txHash}}){
                 id
                 sendPacket {
                   blockTimestamp
@@ -157,12 +151,140 @@ export async function getPacket(txHash: string): Promise<Packet[]> {
     variables: { txHash }
   };
 
+  const recvPacketSearch = {
+    query: `query Packet($txHash:String!){
+              packets(where: {recvPacket: {transactionHash_eq: $txHash}}){
+                id
+                sendPacket {
+                  blockTimestamp
+                  sourcePortAddress
+                  sequence
+                  dispatcherAddress
+                  timeoutTimestamp
+                  transactionHash
+                  sourceChannel {
+                    channelId
+                    counterpartyChannelId
+                    portId
+                    counterpartyPortId
+                  }
+                }
+                recvPacket {
+                  destPortAddress
+                  blockTimestamp
+                  transactionHash
+                }
+                writeAckPacket {
+                  dispatcherAddress
+                  blockTimestamp
+                  transactionHash
+                }
+                ackPacket {
+                  blockTimestamp
+                  transactionHash
+                }
+                state
+              }
+            }`,
+    variables: { txHash }
+  };
+
+  const writeAckPacketSearch = {
+    query: `query Packet($txHash:String!){
+              packets(where: {writeAckPacket: {transactionHash_eq: $txHash}}){
+                id
+                sendPacket {
+                  blockTimestamp
+                  sourcePortAddress
+                  sequence
+                  dispatcherAddress
+                  timeoutTimestamp
+                  transactionHash
+                  sourceChannel {
+                    channelId
+                    counterpartyChannelId
+                    portId
+                    counterpartyPortId
+                  }
+                }
+                recvPacket {
+                  destPortAddress
+                  blockTimestamp
+                  transactionHash
+                }
+                writeAckPacket {
+                  dispatcherAddress
+                  blockTimestamp
+                  transactionHash
+                }
+                ackPacket {
+                  blockTimestamp
+                  transactionHash
+                }
+                state
+              }
+            }`,
+    variables: { txHash }
+  };
+
+  const ackPacketSearch = {
+    query: `query Packet($txHash:String!){
+              packets(where: {ackPacket: {transactionHash_eq: $txHash}}){
+                id
+                sendPacket {
+                  blockTimestamp
+                  sourcePortAddress
+                  sequence
+                  dispatcherAddress
+                  timeoutTimestamp
+                  transactionHash
+                  sourceChannel {
+                    channelId
+                    counterpartyChannelId
+                    portId
+                    counterpartyPortId
+                  }
+                }
+                recvPacket {
+                  destPortAddress
+                  blockTimestamp
+                  transactionHash
+                }
+                writeAckPacket {
+                  dispatcherAddress
+                  blockTimestamp
+                  transactionHash
+                }
+                ackPacket {
+                  blockTimestamp
+                  transactionHash
+                }
+                state
+              }
+            }`,
+    variables: { txHash }
+  };
+
+  const sendPacketRequest = () => processPacketRequest(sendPacketSearch);
+  const recvPacketRequest = () => processPacketRequest(recvPacketSearch);
+  const writeAckPacketRequest = () => processPacketRequest(writeAckPacketSearch);
+  const ackPacketRequest = () => processPacketRequest(ackPacketSearch);
+
+  const requests = [sendPacketRequest, recvPacketRequest, writeAckPacketRequest, ackPacketRequest];
+
   try {
-    return await processPacketRequest(packetRequest);
+    const results = await Promise.all(requests.map(request => request()));
+    for (const result of results) {
+      if (result.length > 0) {
+        return result;
+      }
+    }
   } catch (err) {
     logger.error(`Error finding packet packet with txHash ${txHash}: ` + err);
     return [];
   }
+
+  return [];
 }
 
 export async function getRecentPackets(limit: number = 1000): Promise<Packet[]> {
