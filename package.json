@@ -14,7 +14,7 @@
     "@headlessui/react": "^1.7.18",
     "@tanstack/react-table": "^8.17.3",
     "@types/flat-cache": "^2.0.2",
-    "ethers": "^6.10.0",
+    "ethers": "^6.12.1",
     "flat-cache": "^4.0.0",
     "ioredis": "^5.3.2",
     "lodash": "^4.17.21",
