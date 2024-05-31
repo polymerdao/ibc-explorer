@@ -1,5 +1,6 @@
 import { Packet, PacketStates } from 'utils/types/packet';
 import logger from 'utils/logger';
+import { packet } from '../utils/cosmos/polyibc';
 
 function stringToState(state: string) {
   switch (state) {
@@ -112,163 +113,13 @@ function processSendPacketResponse(packetResponse: any[]): Packet[] {
   return packets;
 }
 
+type searchEvent = 'sendPacket' | 'recvPacket' | 'writeAckPacket' | 'ackPacket';
+
 export async function getPacket(txHash: string): Promise<Packet[]> {
-  const sendPacketSearch = {
-    query: `query Packet($txHash:String!){
-              packets(where: {sendPacket: {transactionHash_eq: $txHash}}){
-                id
-                sendPacket {
-                  blockTimestamp
-                  sourcePortAddress
-                  sequence
-                  dispatcherAddress
-                  timeoutTimestamp
-                  transactionHash
-                  sourceChannel {
-                    channelId
-                    counterpartyChannelId
-                    portId
-                    counterpartyPortId
-                  }
-                }
-                recvPacket {
-                  destPortAddress
-                  blockTimestamp
-                  transactionHash
-                }
-                writeAckPacket {
-                  dispatcherAddress
-                  blockTimestamp
-                  transactionHash
-                }
-                ackPacket {
-                  blockTimestamp
-                  transactionHash
-                }
-                state
-              }
-            }`,
-    variables: { txHash }
-  };
-
-  const recvPacketSearch = {
-    query: `query Packet($txHash:String!){
-              packets(where: {recvPacket: {transactionHash_eq: $txHash}}){
-                id
-                sendPacket {
-                  blockTimestamp
-                  sourcePortAddress
-                  sequence
-                  dispatcherAddress
-                  timeoutTimestamp
-                  transactionHash
-                  sourceChannel {
-                    channelId
-                    counterpartyChannelId
-                    portId
-                    counterpartyPortId
-                  }
-                }
-                recvPacket {
-                  destPortAddress
-                  blockTimestamp
-                  transactionHash
-                }
-                writeAckPacket {
-                  dispatcherAddress
-                  blockTimestamp
-                  transactionHash
-                }
-                ackPacket {
-                  blockTimestamp
-                  transactionHash
-                }
-                state
-              }
-            }`,
-    variables: { txHash }
-  };
-
-  const writeAckPacketSearch = {
-    query: `query Packet($txHash:String!){
-              packets(where: {writeAckPacket: {transactionHash_eq: $txHash}}){
-                id
-                sendPacket {
-                  blockTimestamp
-                  sourcePortAddress
-                  sequence
-                  dispatcherAddress
-                  timeoutTimestamp
-                  transactionHash
-                  sourceChannel {
-                    channelId
-                    counterpartyChannelId
-                    portId
-                    counterpartyPortId
-                  }
-                }
-                recvPacket {
-                  destPortAddress
-                  blockTimestamp
-                  transactionHash
-                }
-                writeAckPacket {
-                  dispatcherAddress
-                  blockTimestamp
-                  transactionHash
-                }
-                ackPacket {
-                  blockTimestamp
-                  transactionHash
-                }
-                state
-              }
-            }`,
-    variables: { txHash }
-  };
-
-  const ackPacketSearch = {
-    query: `query Packet($txHash:String!){
-              packets(where: {ackPacket: {transactionHash_eq: $txHash}}){
-                id
-                sendPacket {
-                  blockTimestamp
-                  sourcePortAddress
-                  sequence
-                  dispatcherAddress
-                  timeoutTimestamp
-                  transactionHash
-                  sourceChannel {
-                    channelId
-                    counterpartyChannelId
-                    portId
-                    counterpartyPortId
-                  }
-                }
-                recvPacket {
-                  destPortAddress
-                  blockTimestamp
-                  transactionHash
-                }
-                writeAckPacket {
-                  dispatcherAddress
-                  blockTimestamp
-                  transactionHash
-                }
-                ackPacket {
-                  blockTimestamp
-                  transactionHash
-                }
-                state
-              }
-            }`,
-    variables: { txHash }
-  };
-
-  const sendPacketRequest = () => processPacketRequest(sendPacketSearch);
-  const recvPacketRequest = () => processPacketRequest(recvPacketSearch);
-  const writeAckPacketRequest = () => processPacketRequest(writeAckPacketSearch);
-  const ackPacketRequest = () => processPacketRequest(ackPacketSearch);
+  const sendPacketRequest = () => processPacketRequest(generateSearchQuery('sendPacket', txHash));
+  const recvPacketRequest = () => processPacketRequest(generateSearchQuery('recvPacket', txHash));
+  const writeAckPacketRequest = () => processPacketRequest(generateSearchQuery('writeAckPacket', txHash));
+  const ackPacketRequest = () => processPacketRequest(generateSearchQuery('ackPacket', txHash));
 
   const requests = [sendPacketRequest, recvPacketRequest, writeAckPacketRequest, ackPacketRequest];
 
@@ -285,6 +136,46 @@ export async function getPacket(txHash: string): Promise<Packet[]> {
   }
 
   return [];
+}
+
+const generateSearchQuery = (searchEvent: searchEvent, txHash: string): { query: string, variables: { txHash: string } } => {
+  return {
+    query: `query Packet($txHash:String!){
+      packets(where: {${searchEvent}: {transactionHash_eq: $txHash}}){
+        id
+        sendPacket {
+          blockTimestamp
+          sourcePortAddress
+          sequence
+          dispatcherAddress
+          timeoutTimestamp
+          transactionHash
+          sourceChannel {
+            channelId
+            counterpartyChannelId
+            portId
+            counterpartyPortId
+          }
+        }
+        recvPacket {
+          destPortAddress
+          blockTimestamp
+          transactionHash
+        }
+        writeAckPacket {
+          dispatcherAddress
+          blockTimestamp
+          transactionHash
+        }
+        ackPacket {
+          blockTimestamp
+          transactionHash
+        }
+        state
+      }
+    }`,
+    variables: { txHash }
+  };
 }
 
 export async function getRecentPackets(limit: number = 1000): Promise<Packet[]> {
