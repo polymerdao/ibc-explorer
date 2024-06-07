@@ -10,7 +10,7 @@
   },
   "dependencies": {
     "@cosmjs/stargate": "^0.32.2",
-    "@cosmjs/tendermint-rpc": "^0.32.2",
+    "@cosmjs/tendermint-rpc": "^0.32.3",
     "@headlessui/react": "^1.7.18",
     "@tanstack/react-table": "^8.17.3",
     "@types/flat-cache": "^2.0.2",
