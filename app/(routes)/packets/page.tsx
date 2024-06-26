@@ -172,7 +172,7 @@ export default function Packets() {
     setSearchLoading(true);
     setFoundPacket(null);
     setPacketSearch(true);
-    fetch(`/api/packets?txHash=${searchHash}`, { signal: controller.signal })
+    fetch(`/api/packets?searchValue=${searchHash}`, { signal: controller.signal })
       .then(res => {
         if (!res.ok) {
           setErrorMessage(res.statusText);

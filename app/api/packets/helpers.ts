@@ -1,8 +1,11 @@
 import { Packet, PacketStates } from 'utils/types/packet';
-import logger from 'utils/logger';
 import { packet } from '../utils/cosmos/polyibc';
+import logger from 'utils/logger';
 
 function stringToState(state: string) {
+  if (!state) {
+    return PacketStates.SENT;
+  }
   switch (state) {
     case 'ACK':
       return PacketStates.ACK;
@@ -14,10 +17,7 @@ function stringToState(state: string) {
   }
 }
 
-async function processPacketRequest(packetRequest: {
-  query: string
-  variables: { txHash?: string, limit?: number }
-}): Promise<Packet[]>{
+export async function processRequest(packetRequest: { query: string }): Promise<Packet[]>{
   const headers = {'content-type': 'application/json'};
   const packetOptions = {
     method: 'POST',
@@ -74,6 +74,7 @@ function processPacketResponse(packetResponse: any[]): Packet[] {
       ackTx: packet.ackPacket?.transactionHash,
       sourceClient: packet.sendPacket?.sourceChannel?.portId.split('.')[1],
       destClient: packet.sendPacket?.sourceChannel?.counterpartyPortId.split('.')[1],
+      senderAddress: packet.sendPacket?.uchEventSender || packet.sendPacket?.packetDataSender || ''
     };
     packets.push(newPacket);
   }
@@ -83,65 +84,41 @@ function processPacketResponse(packetResponse: any[]): Packet[] {
 
 function processSendPacketResponse(packetResponse: any[]): Packet[] {
   const packets: Packet[] = [];
-  for (const packet of packetResponse) {
-    const state = stringToState(packet.packetRelation.state);
+  for (const sendPacket of packetResponse) {
+    const state = stringToState(sendPacket.packetRelation?.state);
 
-    const createTime = packet.blockTimestamp / 1000;
-    const recvTime = packet.packetRelation.recvPacket?.blockTimestamp ? packet.packetRelation.recvPacket.blockTimestamp / 1000 : undefined;
-    const endTime = packet.packetRelation.ackPacket?.blockTimestamp ? packet.packetRelation.ackPacket.blockTimestamp / 1000 : undefined;
+    const createTime = sendPacket.blockTimestamp / 1000;
+    const recvTime = sendPacket.packetRelation?.recvPacket?.blockTimestamp ? sendPacket.packetRelation?.recvPacket.blockTimestamp / 1000 : undefined;
+    const endTime = sendPacket.packetRelation?.ackPacket?.blockTimestamp ? sendPacket.packetRelation?.ackPacket.blockTimestamp / 1000 : undefined;
 
     const newPacket: Packet = {
-      sequence: packet.sequence,
-      sourcePortAddress: packet.sourcePortAddress,
-      sourceChannelId: packet.sourceChannel.channelId,
-      destPortAddress: packet.packetRelation.recvPacket?.destPortAddress,
-      destChannelId: packet.sourceChannel.counterpartyChannelId,
-      timeout: packet.timeoutTimestamp,
-      id: packet.packetRelation.id,
+      sequence: sendPacket.sequence,
+      sourcePortAddress: sendPacket.sourcePortAddress,
+      sourceChannelId: sendPacket.sourceChannel.channelId,
+      destPortAddress: sendPacket.packetRelation?.recvPacket?.destPortAddress || '',
+      destChannelId: sendPacket.sourceChannel.counterpartyChannelId,
+      timeout: sendPacket.timeoutTimestamp,
+      id: sendPacket.packetRelation?.id || '',
       state: state,
       createTime,
       recvTime,
       endTime,
-      sendTx: packet.transactionHash,
-      rcvTx: packet.packetRelation.recvPacket?.transactionHash,
-      ackTx: packet.packetRelation.ackPacket?.transactionHash,
-      sourceClient: packet.sourceChannel.portId.split('.')[1],
-      destClient: packet.sourceChannel.counterpartyPortId.split('.')[1],
+      sendTx: sendPacket.transactionHash,
+      rcvTx: sendPacket.packetRelation?.recvPacket?.transactionHash,
+      ackTx: sendPacket.packetRelation?.ackPacket?.transactionHash,
+      sourceClient: sendPacket.sourceChannel.portId.split('.')[1],
+      destClient: sendPacket.sourceChannel.counterpartyPortId.split('.')[1],
+      senderAddress: sendPacket.uchEventSender || sendPacket.packetDataSender || ''
     };
     packets.push(newPacket);
   }
   return packets;
 }
 
-type searchEvent = 'sendPacket' | 'recvPacket' | 'writeAckPacket' | 'ackPacket';
-
-export async function getPacket(txHash: string): Promise<Packet[]> {
-  const sendPacketRequest = () => processPacketRequest(generateSearchQuery('sendPacket', txHash));
-  const recvPacketRequest = () => processPacketRequest(generateSearchQuery('recvPacket', txHash));
-  const writeAckPacketRequest = () => processPacketRequest(generateSearchQuery('writeAckPacket', txHash));
-  const ackPacketRequest = () => processPacketRequest(generateSearchQuery('ackPacket', txHash));
-
-  const requests = [sendPacketRequest, recvPacketRequest, writeAckPacketRequest, ackPacketRequest];
-
-  try {
-    const results = await Promise.all(requests.map(request => request()));
-    for (const result of results) {
-      if (result.length > 0) {
-        return result;
-      }
-    }
-  } catch (err) {
-    logger.error(`Error finding packet packet with txHash ${txHash}: ` + err);
-    return [];
-  }
-
-  return [];
-}
-
-const generateSearchQuery = (searchEvent: searchEvent, txHash: string): { query: string, variables: { txHash: string } } => {
+export function generatePacketQuery(params?: string): { query: string } {
   return {
-    query: `query Packet($txHash:String!){
-      packets(where: {${searchEvent}: {transactionHash_eq: $txHash}}){
+    query: `query Packet {
+      packets ${params ? params : ''}{
         id
         sendPacket {
           blockTimestamp
@@ -150,6 +127,8 @@ const generateSearchQuery = (searchEvent: searchEvent, txHash: string): { query:
           dispatcherAddress
           timeoutTimestamp
           transactionHash
+          packetDataSender
+          uchEventSender
           sourceChannel {
             channelId
             counterpartyChannelId
@@ -173,55 +152,65 @@ const generateSearchQuery = (searchEvent: searchEvent, txHash: string): { query:
         }
         state
       }
-    }`,
-    variables: { txHash }
+    }`
   };
 }
 
-export async function getRecentPackets(limit: number = 1000): Promise<Packet[]> {
-  const packetRequest = {
-    query: `query Packet($limit:Int!){
-              sendPackets(limit: $limit, orderBy: blockTimestamp_DESC) {
-                id
-                blockTimestamp
-                sourcePortAddress
-                sequence
-                dispatcherAddress
-                timeoutTimestamp
-                transactionHash
-                sourceChannel {
-                  channelId
-                  counterpartyChannelId
-                  portId
-                  counterpartyPortId
-                }
-                packetRelation {
-                  recvPacket {
-                    destPortAddress
-                    blockTimestamp
-                    transactionHash
-                  }
-                  writeAckPacket {
-                    dispatcherAddress
-                    blockTimestamp
-                    transactionHash
-                  }
-                  ackPacket {
-                    blockTimestamp
-                    transactionHash
-                  }
-                  id
-                  state
-                }
-              }
-            }`,
-    variables: { limit }
+export function generateSendPacketQuery(params?: string): { query: string } {
+  return {
+    query: `query Packet {
+      sendPackets ${params ? params : ''} {
+        id
+        blockTimestamp
+        sourcePortAddress
+        sequence
+        dispatcherAddress
+        timeoutTimestamp
+        transactionHash
+        packetDataSender
+        uchEventSender
+        sourceChannel {
+          channelId
+          counterpartyChannelId
+          portId
+          counterpartyPortId
+        }
+        packetRelation {
+          recvPacket {
+            destPortAddress
+            blockTimestamp
+            transactionHash
+          }
+          writeAckPacket {
+            dispatcherAddress
+            blockTimestamp
+            transactionHash
+          }
+          ackPacket {
+            blockTimestamp
+            transactionHash
+          }
+          id
+          state
+        }
+      }
+    }`
   };
+}
 
-  try {
-    return await processPacketRequest(packetRequest);
-  } catch (err) {
-    logger.error('Error getting recent packets: ' + err);
-    return [];
-  }
+interface QueryFilters {
+  orderBy?: string,
+  where?: string,
+  limit?: number,
+  offset?: number,
+}
+
+export function generateQueryParams(params: QueryFilters): string {
+  let reqParams = '';
+  params.limit = params.limit || 1000;
+  reqParams += `limit: ${params.limit}, `;
+  if (params.offset) reqParams += `offset: ${params.offset}, `;
+  if (params.orderBy) reqParams += `orderBy: ${params.orderBy}, `;
+  if (params.where) reqParams += `where: {${params.where}}`;
+  return '(' + reqParams + ')';
 }

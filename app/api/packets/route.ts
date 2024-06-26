@@ -1,25 +1,69 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getPacket, getRecentPackets } from 'api/packets/helpers';
-import logger from 'utils/logger';
+import {
+  PacketRes,
+  getAllPackets,
+  searchTxHashes,
+  searchSenderAddresses,
+  searchPacketId
+} from './request-handlers';
 
 export const dynamic = 'force-dynamic'; // defaults to auto
 
 export async function GET(request: NextRequest) {
-  const txHash = request.nextUrl.searchParams.get('txHash');
+  let searchValue = request.nextUrl.searchParams.get('searchValue');
+  let from = request.nextUrl.searchParams.get('from');
+  let to = request.nextUrl.searchParams.get('to');
+  const limit = Number(request.nextUrl.searchParams.get('limit'));
+  const offset = Number(request.nextUrl.searchParams.get('offset'));
 
-  if (!txHash) {
-    try {
-      return NextResponse.json(await getRecentPackets());
-    } catch (err) {
-      logger.error('Error getting recent packets: ' + err);
+  // Format as strings for graphql query
+  searchValue ? searchValue = '"' + searchValue + '"' : searchValue = '';
+  from ? from = '"' + from + '"' : from = '';
+  to ? to = '"' + to + '"' : to = '';
+ 
+  // No txHash provided, return all packets
+  if (!searchValue) {
+    const packetRes: PacketRes = await getAllPackets(from, to, limit, offset);
+    if (packetRes.error) {
       return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
+    }
+    return NextResponse.json(packetRes.packets);
+  }
+
+  // Currently nothing this short is searchable
+  if (searchValue.length < 40) {
+    return NextResponse.json([]);
+  }
+
+  // Address searches
+  if (searchValue.slice(1, 3) === '0x') {
+    // Search Tx Hashes
+    let packetRes: PacketRes = await searchTxHashes(searchValue);
+    if (packetRes.error) {
+      return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
+    }
+    else if (packetRes.packets?.length) {
+      return NextResponse.json(packetRes.packets);
+    }
+
+    // Search Sender Addresses
+    packetRes = await searchSenderAddresses(searchValue, from, to, limit, offset);
+    if (packetRes.error) {
+      return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
+    }
+    else if (packetRes.packets?.length) {
+      return NextResponse.json(packetRes.packets);
     }
   }
 
-  try {
-    return NextResponse.json(await getPacket(txHash));
-  } catch (err) {
-    logger.error(`Error finding packet ${txHash}: ` + err);
+  // Search Packet Id
+  let packetRes = await searchPacketId(searchValue);
+  if (packetRes.error) {
     return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
   }
+  else if (packetRes.packets?.length) {
+    return NextResponse.json(packetRes.packets);
+  }
+
+  return NextResponse.json([]);
 }
