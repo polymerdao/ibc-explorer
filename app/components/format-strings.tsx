@@ -1,8 +1,8 @@
 import { connect } from 'http2';
 import { CopyButton } from './copy-button';
 
-export function shortenHex(hex: string, copyable?: boolean) {
-  if (!hex) return null;
+export function shortenHex(hex?: string, copyable?: boolean) {
+  if (!hex) return '';
   const shortened =  hex.slice(0, 7) + '...' + hex.slice(-5);
 
   return (

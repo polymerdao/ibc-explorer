@@ -15,6 +15,7 @@ export interface Packet {
   ackTx?: string;
   sourceClient: string;
   destClient: string;
+  senderAddress?: string;
 }
 
 export enum PacketStates {
