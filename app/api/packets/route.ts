@@ -10,11 +10,12 @@ import {
 export const dynamic = 'force-dynamic'; // defaults to auto
 
 export async function GET(request: NextRequest) {
-  let searchValue = request.nextUrl.searchParams.get('searchValue');
-  let from = request.nextUrl.searchParams.get('from');
-  let to = request.nextUrl.searchParams.get('to');
-  const limit = Number(request.nextUrl.searchParams.get('limit'));
-  const offset = Number(request.nextUrl.searchParams.get('offset'));
+  const { searchParams } = request.nextUrl;
+  let searchValue = searchParams.get('searchValue');
+  let from = searchParams.get('from');
+  let to = searchParams.get('to');
+  const limit = Number(searchParams.get('limit'));
+  const offset = Number(searchParams.get('offset'));
 
   // Format as strings for graphql query
   if (from) {
@@ -51,7 +52,7 @@ export async function GET(request: NextRequest) {
     if (packetRes.error) {
       return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
     }
-    else if (packetRes.packets?.length) {
+    if (packetRes.packets?.length) {
       return NextResponse.json(packetRes.packets);
     }
 
@@ -60,7 +61,7 @@ export async function GET(request: NextRequest) {
     if (packetRes.error) {
       return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
     }
-    else if (packetRes.packets?.length) {
+    if (packetRes.packets?.length) {
       return NextResponse.json(packetRes.packets);
     }
   }
@@ -70,7 +71,7 @@ export async function GET(request: NextRequest) {
   if (packetRes.error) {
     return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
   }
-  else if (packetRes.packets?.length) {
+  if (packetRes.packets?.length) {
     return NextResponse.json(packetRes.packets);
   }
 
