@@ -3,9 +3,6 @@ import { packet } from '../utils/cosmos/polyibc';
 import logger from 'utils/logger';
 
 function stringToState(state: string) {
-  if (!state) {
-    return PacketStates.SENT;
-  }
   switch (state) {
     case 'ACK':
       return PacketStates.ACK;

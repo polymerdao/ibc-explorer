@@ -17,9 +17,16 @@ export async function GET(request: NextRequest) {
   const offset = Number(request.nextUrl.searchParams.get('offset'));
 
   // Format as strings for graphql query
-  searchValue ? searchValue = '"' + searchValue + '"' : searchValue = '';
-  from ? from = '"' + from + '"' : from = '';
-  to ? to = '"' + to + '"' : to = '';
+  if (from) {
+    from = '"' + from + '"';
+  } else {
+    from = '';
+  }
+  if (to) {
+    to = '"' + to + '"';
+  } else {
+    to = '';
+  }
  
   // No txHash provided, return all packets
   if (!searchValue) {
@@ -29,6 +36,8 @@ export async function GET(request: NextRequest) {
     }
     return NextResponse.json(packetRes.packets);
   }
+
+  searchValue = '"' + searchValue + '"';
 
   // Currently nothing this short is searchable
   if (searchValue.length < 40) {
