@@ -10,6 +10,7 @@ import logger from 'utils/logger';
 export interface PacketRes {
   packets?: Packet[];
   error?: boolean;
+  type?: string;
 }
 
 export async function getAllPackets(
@@ -29,7 +30,7 @@ export async function getAllPackets(
     offset
   });
 
-  let packetRes: PacketRes = {};
+  let packetRes: PacketRes = { type: 'all' };
   try {
     const packets = await processRequest(generateSendPacketQuery(queryParams));
     if (packets.length) {
@@ -55,7 +56,7 @@ export async function searchTxHashes(txHash: string): Promise<PacketRes> {
 
   const requests = [sendPacketRequest, recvPacketRequest, writeAckPacketRequest, ackPacketRequest];
 
-  let packetRes: PacketRes = {};
+  let packetRes: PacketRes = { type: 'tx-hash' };
   try {
     const results = await Promise.all(requests.map(request => request()));
     for (const result of results) {
@@ -90,7 +91,7 @@ export async function searchSenderAddresses(
     offset: offset
   });
 
-  let packetRes: PacketRes = {};
+  let packetRes: PacketRes = { type: 'sender' };
   try {
     const packets = await processRequest(generateSendPacketQuery(queryParams));
     if (packets.length) {
@@ -109,7 +110,7 @@ export async function searchPacketId(searchValue: string): Promise<PacketRes> {
     where: `id_eq: ${searchValue}`
   })
 
-  let packetRes: PacketRes = {};
+  let packetRes: PacketRes = { type: 'id' };
   try {
     const packets = await processRequest(generatePacketQuery(queryParams));
     if (packets.length) {

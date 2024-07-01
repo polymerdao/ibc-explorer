@@ -120,9 +120,10 @@ const columns = [
 
 export default function Packets() {
   const [packets, setPackets] = useState<Packet[]>([]);
-  const [searchHash, setSearchHash] = useState<string>('');
+  const [searchValue, setSearchValue] = useState<string>('');
   const [packetSearch, setPacketSearch] = useState(false);
   const [foundPacket, setFoundPacket] = useState<Packet | null>(null);
+  const [resType, setResType] = useState<string>('all');
   const [loading, setLoading] = useState(true);
   const [searchLoading, setSearchLoading] = useState(false);
   const [error, setError] = useState(false);
@@ -159,7 +160,8 @@ export default function Packets() {
         return res.json();
       })
       .then(data => {
-        setPackets(data);
+        setPackets(data.packets);
+        setResType(data.type);
         setLoading(false);
       }).catch(() => {
         setError(true);
@@ -168,11 +170,11 @@ export default function Packets() {
   }
 
   const controller = new AbortController();
-  function searchByHash() {
+  function searchPackets() {
     setSearchLoading(true);
     setFoundPacket(null);
     setPacketSearch(true);
-    fetch(`/api/packets?searchValue=${searchHash}`, { signal: controller.signal })
+    fetch(`/api/packets?searchValue=${searchValue}`, { signal: controller.signal })
       .then(res => {
         if (!res.ok) {
           setErrorMessage(res.statusText);
@@ -183,9 +185,14 @@ export default function Packets() {
         return res.json();
       })
       .then(data => {
-        if (data.length > 0) {
-          setFoundPacket(data[0]);
-        } else {
+        setResType(data.type);
+        if (data.packets.length === 1) {
+          setFoundPacket(data.packets[0]);
+        } else if (data.packets.length > 1) {
+          setPacketSearch(false);
+          setPackets(data.packets);
+        }
+        else {
           setFoundPacket(null);
         }
         setSearchLoading(false);
@@ -247,25 +254,30 @@ export default function Packets() {
         loading={searchLoading}
       />
 
-      <h1 className="ml-1">Packets</h1>
+      <h1 className="ml-1">Recent Packets</h1>
       <div className="flex flex-row justify-between mt-4">
         <div className="flex flex-row justify-left w-2/5 min-w-[248px]">
           <input
             type="text"
-            placeholder="Search by Tx Hash"
+            placeholder="Tx Hash, Sender Address or Packet ID"
             className="inpt border-[1px] w-full px-3 rounded-md font-mono placeholder:font-primary"
-            value={searchHash}
-            onChange={e => setSearchHash(e.target.value)}
-            onKeyUp={e => { if (e.key === 'Enter') searchByHash() }}
+            value={searchValue}
+            onChange={e => setSearchValue(e.target.value)}
+            onKeyUp={e => { if (e.key === 'Enter') searchPackets() }}
           />
           <button
             className="btn ml-3"
-            disabled={searchLoading || searchHash.length === 0}
-            onClick={() => searchByHash()}>
+            disabled={searchLoading || searchValue.length === 0}
+            onClick={() => searchPackets()}>
             Search
           </button>
         </div>
-        <button onClick={() => loadData()} className="btn btn-accent">
+        <button 
+          onClick={() => {
+            if (resType === 'sender') { searchPackets() }
+            else { loadData() }
+          }}
+          className="btn btn-accent">
           Reload
         </button>
       </div>

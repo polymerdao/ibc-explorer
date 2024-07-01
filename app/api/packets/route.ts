@@ -35,7 +35,7 @@ export async function GET(request: NextRequest) {
     if (packetRes.error) {
       return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
     }
-    return NextResponse.json(packetRes.packets);
+    return NextResponse.json(packetRes);
   }
 
   searchValue = '"' + searchValue + '"';
@@ -53,7 +53,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
     }
     if (packetRes.packets?.length) {
-      return NextResponse.json(packetRes.packets);
+      return NextResponse.json(packetRes);
     }
 
     // Search Sender Addresses
@@ -62,7 +62,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
     }
     if (packetRes.packets?.length) {
-      return NextResponse.json(packetRes.packets);
+      return NextResponse.json(packetRes);
     }
   }
 
@@ -72,7 +72,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
   }
   if (packetRes.packets?.length) {
-    return NextResponse.json(packetRes.packets);
+    return NextResponse.json(packetRes);
   }
 
   return NextResponse.json([]);
