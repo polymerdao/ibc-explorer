@@ -46,7 +46,7 @@ export function Select({ options, onChange, containerClassName, buttonClassName,
             leave="ease-in duration-150"
             leaveFrom="transform scale-100 opacity-100"
             leaveTo="transform scale-95 opacity-0">
-            <Listbox.Options className={`${dropdownClassName || ''} absolute z-20 left-0 mt-2 overflow-auto rounded-md py-2 border-[0.5px] border-slate-500`}>
+            <Listbox.Options className={`${dropdownClassName || ''} absolute z-20 left-0 mt-2 overflow-auto rounded-md py-2.5 px-2 border-[0.5px] border-slate-500`}>
               {options.map((option) => (
                 <Listbox.Option key={option.value} value={option}
                   className={({ active }) => classNames(
