@@ -1,12 +1,10 @@
 import { 
   Table,
-  flexRender,
-  Column,
+  flexRender
 } from '@tanstack/react-table';
 import { Transition, Popover } from '@headlessui/react';
 import { FiChevronDown, FiChevronLeft, FiChevronsLeft, FiChevronRight, FiChevronsRight } from 'react-icons/fi';
 import { Modal } from 'components/modal';
-import { CHAIN_CONFIGS } from 'utils/chains/configs';
 import { Packet } from 'utils/types/packet';
 import { Client } from 'utils/types/client';
 import { IdentifiedConnection } from 'cosmjs-types/ibc/core/connection/v1/connection';
@@ -112,7 +110,7 @@ export function IbcTable<TableType extends Packet | Client | IdentifiedChannel |
             <div>No results</div>
           </div>
         }
-        <div className="absolute mt-[79px] left-[0.8px] w-[calc(100%-2px)] z-10 border-t border-2 border-slate-300 dark:border-slate-700"></div>
+        <div className="absolute mt-[55px] left-[0.8px] w-[calc(100%-2px)] z-10 border-t border-2 border-slate-300 dark:border-slate-700"></div>
         <table
           className="min-w-full"
           style={{width: table.getCenterTotalSize()}}>
@@ -126,21 +124,22 @@ export function IbcTable<TableType extends Packet | Client | IdentifiedChannel |
                       header.id === 'destClient'
                       ? 'pl-2'
                       : 'pl-5'
-                      , 'py-2 h-20 dark:bg-bg-dark last:pr-6 whitespace-nowrap font-medium first:pl-6'
+                      , 'py-2 dark:bg-bg-dark last:pr-6 whitespace-nowrap font-medium first:pl-6'
                     )}
                     style={{width: header.getSize()}}>
-                    {(header.isPlaceholder || loading) ? null : (
-                      <div className="h-12 grid justify-items-start content-center">
-                        {!header.column.getCanFilter() ? (
-                          <div className="ml-2"> 
-                            {flexRender(
-                              header.column.columnDef.header,
-                              header.getContext()
-                            )}
-                          </div>
-                        ) : (
-                          <ColumnFilter column={header.column} table={table} />
-                        )}
+                    {(header.isPlaceholder) ? null : (
+                      <div className="h-10 grid justify-items-start content-center">
+                        <div className={classNames(
+                          loading
+                          ? 'opacity-0'
+                          : 'opacity-100'
+                          , 'ml-2 transition-opacity ease-in-out duration-100'
+                        )}> 
+                          {flexRender(
+                            header.column.columnDef.header,
+                            header.getContext()
+                          )}
+                        </div>
                       </div>
                     )}
                   </th>
@@ -229,64 +228,4 @@ export function IbcTable<TableType extends Packet | Client | IdentifiedChannel |
       </div>
     </div>
   )
-}
-
-function ColumnFilter({ column, table }: { column: Column<any, any>, table: Table<any> }) {
-  const firstValue = table
-    .getPreFilteredRowModel()
-    .flatRows[0]?.getValue(column.id);
-
-  const columnFilterValue = column.getFilterValue();
-  
-  if (column.id === 'sourceClient' || column.id === 'destClient' || column.id === 'chain') {
-    return (
-      <Select 
-        options={
-          [{ value: '', label: column.columnDef.header as string }, 
-          ...Object.entries(CHAIN_CONFIGS).map(([key, value]) => ({ value: key, label: value.display }))]
-        }
-        onChange={value => column.setFilterValue(value)}
-        containerClassName="w-28"
-        buttonClassName="inpt h-8 pl-[9px] cursor-default"
-        dropdownClassName="bg-bg-light dark:bg-bg-dark"
-      />
-    );
-  } else if (typeof firstValue === 'string') {
-    return (
-      <input
-        type="text"
-        value={(columnFilterValue ?? '') as string}
-        onChange={e => column.setFilterValue(e.target.value)}
-        placeholder={column.columnDef.header as string}
-        className={classLogic(() => {
-          let classes = 'inpt h-8 px-[9px] w-fit placeholder:text-fg-dark font-mono placeholder:font-primary';
-          switch (column.id.toLowerCase()) {
-            case 'counterparty_connectionid':
-              break;
-            case 'state':
-              classes += ' max-w-[9rem]';
-              break;
-            case 'delayperiod':
-              classes += ' max-w-32';
-              break;
-            case 'channelid':
-              classes += ' max-w-36';
-              break;
-            case 'portid':
-              classes += ' max-w-48';
-              break;
-            case 'counterparty_channelid':
-              classes += ' max-w-32';
-              break;
-            default:
-              classes += ' max-w-44';
-          }
-          return classes;
-        })}
-        aria-label={'Filter by ' + column.columnDef.header as string}
-      />
-    );
-  } else {
-    return null;
-  }
 }

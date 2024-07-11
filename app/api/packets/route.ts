@@ -11,34 +11,34 @@ export const dynamic = 'force-dynamic'; // defaults to auto
 
 export async function GET(request: NextRequest) {
   const { searchParams } = request.nextUrl;
-  let searchValue = searchParams.get('searchValue');
-  let from = searchParams.get('from');
-  let to = searchParams.get('to');
+  let searchValue = searchParams.get('searchValue') || '';
   const limit = Number(searchParams.get('limit'));
   const offset = Number(searchParams.get('offset'));
+  let start = searchParams.get('start') || '';
+  let end = searchParams.get('end') || '';
+  let states = searchParams.get('states') || '';
+  let src = searchParams.get('src') || '';
+  let dest = searchParams.get('dest') || '';
 
   // Format as strings for graphql query
-  if (from) {
-    from = '"' + from + '"';
-  } else {
-    from = '';
-  }
-  if (to) {
-    to = '"' + to + '"';
-  } else {
-    to = '';
+  if (searchValue) { searchValue = '"' + searchValue + '"'; }
+  if (start) { start = '"' + start + '"'; }
+  if (end) { end = '"' + end + '"'; }
+  if (src) { src = '"' + src + '"'; }
+  if (dest) { dest = '"' + dest + '"'; }
+  if (states) {
+    states = states.toUpperCase();
+    states = '[' + states + ']';
   }
  
   // No txHash provided, return all packets
   if (!searchValue) {
-    const packetRes: PacketRes = await getAllPackets(from, to, limit, offset);
+    const packetRes: PacketRes = await getAllPackets(start, end, limit, offset, states, src, dest);
     if (packetRes.error) {
       return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
     }
     return NextResponse.json(packetRes);
   }
-
-  searchValue = '"' + searchValue + '"';
 
   // Currently nothing this short is searchable
   if (searchValue.length < 40) {
@@ -57,7 +57,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Search Sender Addresses
-    packetRes = await searchSenderAddresses(searchValue, from, to, limit, offset);
+    packetRes = await searchSenderAddresses(searchValue, start, end, limit, offset, states, src, dest);
     if (packetRes.error) {
       return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
     }

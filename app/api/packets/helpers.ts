@@ -195,14 +195,14 @@ export function generateSendPacketQuery(params?: string): { query: string } {
   };
 }
 
-interface QueryFilters {
-  orderBy?: string,
+export interface QueryParams {
   where?: string,
+  orderBy?: string,
   limit?: number,
   offset?: number,
 }
 
-export function generateQueryParams(params: QueryFilters): string {
+export function generateQueryParams(params: QueryParams): string {
   let reqParams = '';
   params.limit = params.limit || 1000;
   reqParams += `limit: ${params.limit}, `;
@@ -210,4 +210,32 @@ export function generateQueryParams(params: QueryFilters): string {
   if (params.orderBy) reqParams += `orderBy: ${params.orderBy}, `;
   if (params.where) reqParams += `where: {${params.where}}`;
   return '(' + reqParams + ')';
+}
+
+export interface FiltersProps {
+  start?: string,
+  end?: string,
+  states?: string,
+  src?: string,
+  dest?: string
+}
+
+export function generateSendPacketFilters(filters: FiltersProps): string {
+  let startFilter = filters.start ? `blockTimestamp_gte: ${filters.start}` : '';
+  const endFilter = filters.end ? `blockTimestamp_lte: ${filters.end}` : '';
+  if (startFilter && endFilter) { startFilter += ', '; }
+  let stateFilter = filters.states ? `packetRelation: {state_in: ${filters.states}}` : '';
+  if (stateFilter && (startFilter || endFilter)) { stateFilter = ', ' + stateFilter; }
+  let srcFilter = filters.src ? `portId_contains: ${filters.src}` : '';
+  const destFilter = filters.dest ? `counterpartyPortId_contains: ${filters.dest}` : '';
+  if (srcFilter && destFilter) { srcFilter += ', '; }
+  let channelFilter = '';
+  if (srcFilter || destFilter) {
+    channelFilter = `sourceChannel: {AND: {${srcFilter}${destFilter}}}`;
+  }
+  if (channelFilter && (startFilter || endFilter || stateFilter)) {
+    channelFilter = ', ' + channelFilter
+  }
+
+  return startFilter + endFilter + stateFilter + channelFilter;
 }
