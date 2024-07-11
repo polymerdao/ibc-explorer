@@ -45,7 +45,7 @@
     @apply w-2 h-2 rounded-lg bg-bg-light-accent dark:bg-bg-dark;
   }
   ::-webkit-scrollbar-track {
-    @apply mt-[83px] rounded-lg bg-bg-light dark:bg-bg-dark;
+    @apply mt-[60px] rounded-lg bg-bg-light dark:bg-bg-dark;
   }
   ::-webkit-scrollbar-thumb {
     @apply rounded-lg bg-slate-300 dark:bg-slate-500;
@@ -65,7 +65,7 @@
   }
 
   .btn {
-    @apply px-4 py-2 rounded-md bg-bg-light-accent dark:bg-bg-dark dark:hover:text-white border-[1px] border-slate-400 dark:border-slate-500 dark:hover:border-fg-dark disabled:hover:border-slate-300 disabled:hover:dark:border-slate-500 transition ease-in-out duration-200 font-medium disabled:text-slate-400 disabled:hover:text-slate-400 dark:disabled:text-slate-400 dark:disabled:hover:text-slate-400;
+    @apply h-[42px] px-4 py-2 rounded-md bg-bg-light-accent dark:bg-bg-dark dark:hover:text-white border-[1px] border-slate-400 dark:border-slate-500 dark:hover:border-fg-dark disabled:hover:border-slate-300 disabled:hover:dark:border-slate-500 transition ease-in-out duration-200 font-medium disabled:text-slate-400 disabled:hover:text-slate-400 dark:disabled:text-slate-400 dark:disabled:hover:text-slate-400;
   }
 
   .btn-accent {
@@ -73,7 +73,7 @@
   }
 
   .inpt {
-    @apply border-[0.5px] border-slate-500 hover:border-fg-light focus:border-fg-light dark:hover:border-fg-dark dark:focus:border-fg-dark shadow-none rounded text-fg-light dark:text-fg-dark dark:bg-bg-dark-accent transition ease-in-out duration-200;
+    @apply h-[42px] border-[1px] border-slate-500 hover:border-fg-light focus:border-fg-light dark:hover:border-fg-dark dark:focus:border-fg-dark shadow-none rounded text-fg-light dark:text-fg-dark dark:bg-bg-dark-accent transition ease-in-out duration-200;
   }
   
   *:focus {

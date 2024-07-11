@@ -11,7 +11,7 @@ import {
   SortingState,
   useReactTable }
 from '@tanstack/react-table';
-import { IbcTable } from 'components/ibc-table';
+import { PacketsTable } from 'components/packets-table';
 import { Modal } from 'components/modal';
 import { Packet } from 'utils/types/packet';
 import { PacketDetails } from './packet-details';
@@ -22,7 +22,7 @@ import { StateCell } from 'components/state-cell';
 import { ChainCell, Arrow } from 'components/chain-cell';
 import { shortenHex } from 'components/format-strings';
 import { classNames } from 'utils/functions';
-import { FiChevronDown } from 'react-icons/fi';
+import { FiChevronDown, FiChevronLeft, FiChevronsLeft, FiChevronRight } from 'react-icons/fi';
 import { Transition, Popover } from '@headlessui/react';
 
 const columnHelper = createColumnHelper<Packet>();
@@ -46,7 +46,7 @@ const columns = [
     enableHiding: true,
     cell: props => (
       <div className="flex flex-row justify-between">
-        <div className="ml-4"><ChainCell chain={props.getValue()} /></div>
+        <div className="ml-2.5"><ChainCell chain={props.getValue()} /></div>
         <Arrow />
       </div>
     )
@@ -55,7 +55,7 @@ const columns = [
     header: 'Dest',
     cell: props => (
       <div className="flex flex-row justify-between">
-        <div className="ml-5"><ChainCell chain={props.getValue()} /></div>
+        <div className="ml-3"><ChainCell chain={props.getValue()} /></div>
       </div>
     ),
     enableHiding: true,
@@ -129,6 +129,8 @@ interface state {
   selected: boolean;
 }
 
+const PAGE_SIZE = 20;
+
 export default function Packets() {
   const [packets, setPackets] = useState<Packet[]>([]);
   const [searchValue, setSearchValue] = useState<string>('');
@@ -140,11 +142,10 @@ export default function Packets() {
     { value: 'RECV,WRITE_ACK', label: 'Confirming', selected: false },
     { value: 'ACK', label: 'Delivered', selected: false }
   ]);
-  const [packetSearch, setPacketSearch] = useState(false);
+  const [pageNumber, setPageNumber] = useState(1);
   const [foundPacket, setFoundPacket] = useState<Packet | null>(null);
   const [resType, setResType] = useState<string>('all');
   const [loading, setLoading] = useState(true);
-  const [searchLoading, setSearchLoading] = useState(false);
   const [error, setError] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({
@@ -164,12 +165,28 @@ export default function Packets() {
   }]);
 
   useEffect(() => {
-    loadData();
+    searchPackets();
   }, []);
 
-  function loadData() {
+  useEffect(() => {
+    searchPackets();
+  }, [pageNumber]);
+
+  const controller = new AbortController();
+  function searchPackets() {
     setLoading(true);
-    fetch('/api/packets')
+    setFoundPacket(null);
+    let states = '';
+    for (const state of stateFilter) {
+      if (state.selected) {
+        states += state.value + ',';
+      }
+    }
+    const offset = (pageNumber - 1) * PAGE_SIZE;
+    fetch(
+      `/api/packets?searchValue=${searchValue}&src=${srcFilter}&dest=${destFilter}&states=${states}&limit=${PAGE_SIZE}&offset=${offset}`,
+      { signal: controller.signal }
+    )
       .then(res => {
         if (!res.ok) {
           setErrorMessage(res.statusText);
@@ -179,55 +196,20 @@ export default function Packets() {
         return res.json();
       })
       .then(data => {
-        setPackets(data.packets);
-        setResType(data.type);
-        setLoading(false);
-      }).catch(() => {
-        setError(true);
-        setLoading(false);
-      });
-  }
-
-  const controller = new AbortController();
-  function searchPackets() {
-    setSearchLoading(true);
-    setFoundPacket(null);
-    setPacketSearch(true);
-    let states = '';
-    for (const state of stateFilter) {
-      if (state.selected) {
-        states += state.value + ',';
-      }
-    }
-    fetch(
-      `/api/packets?searchValue=${searchValue}&src=${srcFilter}&dest=${destFilter}&states=${states}`,
-      { signal: controller.signal }
-    )
-      .then(res => {
-        if (!res.ok) {
-          setErrorMessage(res.statusText);
-          setError(true);
-          setPacketSearch(false);
-          setSearchLoading(false);
-        }
-        return res.json();
-      })
-      .then(data => {
         setResType(data.type);
         if (data.packets.length === 1) {
           setFoundPacket(data.packets[0]);
         } else if (data.packets.length > 1) {
-          setPacketSearch(false);
           setPackets(data.packets);
         }
         else {
           setFoundPacket(null);
+          setPackets([]);
         }
-        setSearchLoading(false);
+        setLoading(false);
       }).catch(() => {
         setError(true);
-        setPacketSearch(false);
-        setSearchLoading(false);
+        setLoading(false);
       });
   }
 
@@ -243,7 +225,7 @@ export default function Packets() {
     },
     initialState: {
       pagination: {
-        pageSize: 10
+        pageSize: PAGE_SIZE
       }
     },
     onColumnVisibilityChange: setColumnVisibility,
@@ -270,62 +252,61 @@ export default function Packets() {
       />
 
       <Modal 
-        open={packetSearch} 
+        open={foundPacket !== null} 
         onClose={() => {
-          setPacketSearch(false);
-          if (searchLoading) {
-            controller.abort();
-            setSearchLoading(false);
-          }
+          setFoundPacket(null);
+          setSearchValue('');
         }}
         content={PacketDetails(foundPacket)}
-        loading={searchLoading}
       />
 
       <h1 className="ml-1">Recent Packets</h1>
       <div className="flex flex-row justify-between mt-4">
-        <div className="flex flex-row justify-left w-2/5 min-w-[248px]">
+        <div className="flex flex-row justify-left w-[45%] min-w-[248px]">
           <input
             type="text"
             placeholder="Tx Hash, Sender Address or Packet ID"
-            className="inpt border-[1px] w-full px-3 rounded-md font-mono placeholder:font-primary"
+            className="inpt w-full px-3 rounded-md font-mono placeholder:font-primary"
             value={searchValue}
             onChange={e => setSearchValue(e.target.value)}
             onKeyUp={e => { if (e.key === 'Enter') searchPackets() }}
           />
           <button
             className="btn ml-3"
-            disabled={searchLoading || searchValue.length === 0}
+            disabled={
+              loading || (
+                searchValue.length === 0 &&
+                srcFilter === '' &&
+                destFilter === '' &&
+                stateFilter.filter(state => state.selected).length === 0
+            )}
             onClick={() => searchPackets()}>
             Search
           </button>
           <button
-            className="ml-3.5 pt-0.5 pb-1.5 px-2 grid justify-items-center items-center"
+            className="ml-3.5 pt-2 pb-2.5 px-2 grid justify-items-center items-center"
             onClick={() => setShowFilters(!showFilters)}>
             <div className={classNames(
               showFilters
-              ? 'translate-y-5'
+              ? 'translate-y-4'
               : '',
-              'relative h-0.5 w-7 mt-1 bg-primary-500 transition-transform duration-200 ease-in-out'
+              'relative h-0.5 w-6 bg-slate-400 transition-transform duration-200 ease-in-out'
             )}>
             </div>
             <div
-              className='h-0.5 w-4 bg-primary-500'>
+              className='h-0.5 w-[15.5px] bg-slate-400'>
             </div>
             <div className={classNames(
               showFilters
-              ? '-translate-y-5'
+              ? '-translate-y-4'
               : '',
-              'relative h-0.5 w-1.5 bg-primary-500 transition-transform duration-200 ease-in-out'
+              'relative h-0.5 w-[7px] bg-slate-400 transition-transform duration-200 ease-in-out'
             )}>
             </div>
           </button>
         </div>
         <button 
-          onClick={() => {
-            if (resType === 'sender') { searchPackets() }
-            else { loadData() }
-          }}
+          onClick={() => searchPackets()}
           className="btn btn-accent">
           Reload
         </button>
@@ -334,20 +315,20 @@ export default function Packets() {
       <div 
         className={classNames(
           showFilters
-          ? 'h-8'
-          : 'h-0'
-          , 'w-full mt-4 transition-all ease-in-out duration-200'
+          ? 'h-14 duration-100'
+          : 'h-0 duration-100 delay-100'
+          , 'w-full transition-all ease-in-out'
         )}>
         <div
           className={classNames(
             showFilters
-            ? 'opacity-100'
-            : 'opacity-0'
-            , 'relative flex flex-row space-x-2 items-center w-full mx-auto transition-all ease-in-out delay-100 duration-100'
+            ? 'opacity-100 duration-100 delay-100'
+            : 'opacity-0 duration-100'
+            , 'relative flex flex-row space-x-4 items-center w-full mx-auto pt-4 transition-all ease-in-out'
           )}>
           <Popover>
             {({ open }) => (<>
-              <Popover.Button className="inpt w-28 flex flex-row justify-between items-center h-8 pl-[9px] pr-[0.4rem] text-fg-light dark:text-fg-dark transition east-in-out duration-200 cursor-default">
+              <Popover.Button className="inpt w-32 flex flex-row justify-between items-center pl-3 pr-[0.4rem] text-fg-light dark:text-fg-dark transition east-in-out duration-200 cursor-default">
                 State
                 <FiChevronDown className={classNames(
                   open
@@ -365,12 +346,12 @@ export default function Packets() {
                 leaveFrom="transform scale-100 opacity-100"
                 leaveTo="transform scale-95 opacity-0">
                 <Popover.Panel className="absolute z-20 mt-2 left-0">
-                  <div className="bg-bg-light dark:bg-bg-dark pl-6 pr-9 py-4 border-[0.5px] rounded-md border-slate-500">
+                  <div className="bg-bg-light dark:bg-bg-dark pl-5 pr-9 pt-3.5 pb-4 border-[0.5px] rounded-md border-slate-500">
                     {stateFilter.map(state => { return (
-                      <div key={state.value} className="py-[0.17rem]">
+                      <div key={state.value} className="py-[0.25rem]">
                         <label>
                           <input
-                            className="appearance-none border border-slate-500 bg-transparent rounded-lg w-3 h-3 mr-3 transition-colors ease-in-out duration-150
+                            className="appearance-none border border-slate-500 bg-transparent rounded-lg w-3 h-3 mr-2.5 transition-colors ease-in-out duration-150
                               checked:bg-emerald-500 checked:border-transparent"
                             {...{
                               type: 'checkbox',
@@ -395,8 +376,8 @@ export default function Packets() {
               ...Object.entries(CHAIN_CONFIGS).map(([key, value]) => ({ value: key, label: value.display }))]
             }
             onChange={value => setSrcFilter(value as string)}
-            containerClassName="w-28"
-            buttonClassName="inpt h-8 pl-[9px] cursor-default"
+            containerClassName="w-32"
+            buttonClassName="inpt pl-3 cursor-default"
             dropdownClassName="bg-bg-light dark:bg-bg-dark"
           />
           <Select 
@@ -405,14 +386,39 @@ export default function Packets() {
               ...Object.entries(CHAIN_CONFIGS).map(([key, value]) => ({ value: key, label: value.display }))]
             }
             onChange={value => setDestFilter(value as string)}
-            containerClassName="w-28"
-            buttonClassName="inpt h-8 pl-[9px] cursor-default"
+            containerClassName="w-32"
+            buttonClassName="inpt pl-3 cursor-default"
             dropdownClassName="bg-bg-light dark:bg-bg-dark"
           />
         </div>
       </div>
 
-      <IbcTable {...{table, loading, rowDetails: PacketDetails}} />
+      <PacketsTable {...{table, loading, rowDetails: PacketDetails}} />
+
+      { /* Pagination */ }
+      <div className="flex flex-row justify-center items-center mt-4">
+        <button
+          className="rounded p-2 disabled:opacity-60 enabled:hover:bg-bg-light-accent enabled:dark:hover:bg-bg-dark-accent transition-colors ease-in-out duration-200"
+          onClick={() => setPageNumber(1)}
+          disabled={pageNumber < 2}>
+          <FiChevronsLeft className="w-6 h-6"/>
+        </button>
+        <button
+          className="rounded p-2 disabled:opacity-60 enabled:hover:bg-bg-light-accent enabled:dark:hover:bg-bg-dark-accent transition-colors ease-in-out duration-200"
+          onClick={() => setPageNumber(pageNumber - 1)}
+          disabled={pageNumber < 2}>
+          <FiChevronLeft className="w-5 h-5"/>
+        </button>
+
+        <span className="mx-4 mb-[2px] font-medium">{pageNumber}</span>
+
+        <button
+          className="rounded p-2 disabled:opacity-60 enabled:hover:bg-bg-light-accent enabled:dark:hover:bg-bg-dark-accent transition-colors ease-in-out duration-200"
+          onClick={() => setPageNumber(pageNumber + 1)}
+          disabled={table.getRowCount() < PAGE_SIZE}>
+          <FiChevronRight className="w-5 h-5"/>
+        </button>
+      </div>
     </div>
   );
 }
