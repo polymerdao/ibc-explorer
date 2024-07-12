@@ -34,11 +34,11 @@
   }
 
   body {
-    @apply h-screen flex flex-col items-center bg-bg-light text-fg-light dark:bg-bg-dark dark:text-fg-dark antialiased font-primary;
+    @apply min-h-screen flex flex-col items-center bg-bg-light text-fg-light dark:bg-bg-dark dark:text-fg-dark antialiased font-primary;
   }
 
   main {
-    @apply flex-1 w-full min-w-0 xl:min-w-[80rem] max-w-screen-xl xl:w-4/5 mx-auto px-4 sm:px-8 pt-4 md:pt-6 xl:pt-8 pb-6;
+    @apply h-full w-full min-w-0 xl:min-w-[80rem] max-w-screen-xl xl:w-4/5 mx-auto px-4 sm:px-8 pt-4 md:pt-6 xl:pt-8 pb-6;
   }
 
   ::-webkit-scrollbar {
@@ -55,13 +55,13 @@
   }
 
   h1 {
-    @apply text-3xl font-semibold font-accent;
+    @apply text-2xl font-semibold font-accent;
   }
   h2 {
-    @apply text-2xl font-medium;
+    @apply text-xl font-medium;
   }
   h3 {
-    @apply text-xl;
+    @apply text-lg;
   }
 
   .btn {

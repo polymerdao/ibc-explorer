@@ -75,5 +75,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json(packetRes);
   }
 
-  return NextResponse.json([]);
+  packetRes.type = 'none';
+  packetRes.packets = [];
+  return NextResponse.json(packetRes);
 }

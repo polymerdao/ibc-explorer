@@ -3,25 +3,27 @@ import {
   flexRender
 } from '@tanstack/react-table';
 import { Transition, Popover } from '@headlessui/react';
-import { FiChevronDown } from 'react-icons/fi';
+import { FiChevronDown, FiChevronLeft, FiChevronsLeft, FiChevronRight } from 'react-icons/fi';
 import { Modal } from 'components/modal';
 import { Packet } from 'utils/types/packet';
 import { Client } from 'utils/types/client';
 import { IdentifiedConnection } from 'cosmjs-types/ibc/core/connection/v1/connection';
 import { IdentifiedChannel } from 'utils/types/channel';
 import { classNames, classLogic } from 'utils/functions';
-import { Select } from 'components/select';
 import { OrbitLoader } from 'components/loading/loader';
 import { useState, Fragment } from 'react';
 
 interface IbcTableProps<TableType> {
   table: Table<TableType>,
   loading: boolean,
-  rowDetails?: (row: TableType) => JSX.Element
+  rowDetails?: (row: TableType) => JSX.Element,
+  pageNumber: number,
+  setPageNumber: (pageNumber: number) => void,
+  pageLimit: number
 }
 
 export function PacketsTable<TableType extends Packet | Client | IdentifiedChannel | IdentifiedConnection>
-  ({ table, loading, rowDetails }: IbcTableProps<TableType>)
+  ({ table, loading, rowDetails, pageNumber, setPageNumber, pageLimit }: IbcTableProps<TableType>)
 {
   const [rowSelected, setRowSelected] = useState<boolean>(false);
   const [selectedRow, setSelectedRow] = useState<TableType | null>(null);
@@ -30,10 +32,12 @@ export function PacketsTable<TableType extends Packet | Client | IdentifiedChann
     <div className="relative mt-4">
 
       {/* Table View Options */}
-      <div className="flex flex-row justify-between mb-2 ml-1.5 mr-1 text-slate-700 dark:text-slate-300">
+      <div className="flex flex-row justify-between mb-1 ml-1.5 text-slate-700 dark:text-slate-300">
+
+        {/* Columns */}
         <Popover>
           {({ open }) => (<>
-            <Popover.Button className="flex flex-row h-[1.5rem]">
+            <Popover.Button className="flex flex-row h-[1.5rem] mt-[0.45rem]">
               Columns
               <FiChevronDown className={classNames(
                 open
@@ -73,12 +77,36 @@ export function PacketsTable<TableType extends Packet | Client | IdentifiedChann
               </Popover.Panel>
             </Transition>
           </>)}
-        </Popover>
+        </Popover> 
+
+        {/* Pagination */}
+        <div className="flex flex-row justify-center items-center">
+          <button
+            className="rounded p-2 disabled:opacity-60 enabled:hover:bg-bg-light-accent enabled:dark:hover:bg-bg-dark-accent transition-colors ease-in-out duration-200"
+            onClick={() => setPageNumber(1)}
+            disabled={(pageNumber < 2) || loading}>
+            <FiChevronsLeft className="w-6 h-6"/>
+          </button>
+          <button
+            className="rounded p-2 disabled:opacity-60 enabled:hover:bg-bg-light-accent enabled:dark:hover:bg-bg-dark-accent transition-colors ease-in-out duration-200"
+            onClick={() => setPageNumber(pageNumber - 1)}
+            disabled={(pageNumber < 2) || loading}>
+            <FiChevronLeft className="w-5 h-5"/>
+          </button>
+
+          <span className="mx-4 mb-[2px]">{pageNumber}</span>
+
+          <button
+            className="rounded p-2 disabled:opacity-60 enabled:hover:bg-bg-light-accent enabled:dark:hover:bg-bg-dark-accent transition-colors ease-in-out duration-200"
+            onClick={() => setPageNumber(pageNumber + 1)}
+            disabled={(table.getRowCount() < pageLimit) || loading}>
+            <FiChevronRight className="w-5 h-5"/>
+          </button>
+        </div>
       </div>
 
       { /* Table */ }
-      <div className="w-full border-2 border-slate-300 dark:border-slate-700 rounded-md bg-bg-light-accent dark:bg-bg-dark-accent overflow-y-auto table-height scroll-smooth min-h-72
-        max-h-[calc(100vh-21rem)] xl:max-h-[calc(100vh-22rem)]">
+      <div className="w-full border-2 border-slate-300 dark:border-slate-700 rounded-md bg-bg-light-accent dark:bg-bg-dark-accent overflow-y-auto scroll-smooth min-h-72">
         {loading && 
           <div className="absolute mt-40 z-10 w-full grid justify-items-center">
             <OrbitLoader />

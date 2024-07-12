@@ -22,7 +22,7 @@ import { StateCell } from 'components/state-cell';
 import { ChainCell, Arrow } from 'components/chain-cell';
 import { shortenHex } from 'components/format-strings';
 import { classNames } from 'utils/functions';
-import { FiChevronDown, FiChevronLeft, FiChevronsLeft, FiChevronRight } from 'react-icons/fi';
+import { FiChevronDown } from 'react-icons/fi';
 import { Transition, Popover } from '@headlessui/react';
 
 const columnHelper = createColumnHelper<Packet>();
@@ -133,7 +133,8 @@ const PAGE_SIZE = 20;
 
 export default function Packets() {
   const [packets, setPackets] = useState<Packet[]>([]);
-  const [searchValue, setSearchValue] = useState<string>('');
+  const [textField, setTextField] = useState<string>('');
+  const [paginationSearchValue, setPaginationSearchValue] = useState<string>('');
   const [showFilters, setShowFilters] = useState(false);
   const [srcFilter, setSrcFilter] = useState<string>('');
   const [destFilter, setDestFilter] = useState<string>('');
@@ -169,11 +170,17 @@ export default function Packets() {
   }, []);
 
   useEffect(() => {
-    searchPackets();
+    searchPackets(paginationSearchValue, false);
   }, [pageNumber]);
 
   const controller = new AbortController();
-  function searchPackets() {
+  function searchPackets(searchValue?: string, resetPage: boolean = true) {
+    if (searchValue === undefined) {
+      searchValue = textField;
+    }
+    if (resetPage) {
+      setPageNumber(1);
+    }
     setLoading(true);
     setFoundPacket(null);
     let states = '';
@@ -201,6 +208,7 @@ export default function Packets() {
           setFoundPacket(data.packets[0]);
         } else if (data.packets.length > 1) {
           setPackets(data.packets);
+          setPaginationSearchValue(searchValue || '');
         }
         else {
           setFoundPacket(null);
@@ -236,7 +244,7 @@ export default function Packets() {
   });
 
   return (
-    <div className="h-0">
+    <div className="mb-10">
       <Modal 
         open={error}
         onClose={() => {
@@ -246,7 +254,7 @@ export default function Packets() {
         content={<>
           <h2>Error</h2>
           <p className="mt-1 mr-8">
-            There was an issue fetching packet data {errorMessage? `: ${errorMessage}` : ''}
+            There was an issue fetching packet data{errorMessage? `: ${errorMessage}` : ''}
           </p>
         </>}
       />
@@ -255,7 +263,6 @@ export default function Packets() {
         open={foundPacket !== null} 
         onClose={() => {
           setFoundPacket(null);
-          setSearchValue('');
         }}
         content={PacketDetails(foundPacket)}
       />
@@ -267,15 +274,15 @@ export default function Packets() {
             type="text"
             placeholder="Tx Hash, Sender Address or Packet ID"
             className="inpt w-full px-3 rounded-md font-mono placeholder:font-primary"
-            value={searchValue}
-            onChange={e => setSearchValue(e.target.value)}
+            value={textField}
+            onChange={e => setTextField(e.target.value)}
             onKeyUp={e => { if (e.key === 'Enter') searchPackets() }}
           />
           <button
             className="btn ml-3"
             disabled={
               loading || (
-                searchValue.length === 0 &&
+                textField.length === 0 &&
                 srcFilter === '' &&
                 destFilter === '' &&
                 stateFilter.filter(state => state.selected).length === 0
@@ -393,32 +400,16 @@ export default function Packets() {
         </div>
       </div>
 
-      <PacketsTable {...{table, loading, rowDetails: PacketDetails}} />
+      <PacketsTable {...{
+        table,
+        loading,
+        rowDetails: PacketDetails,
+        pageNumber,
+        setPageNumber,
+        pageLimit: PAGE_SIZE
+      }} />
 
-      { /* Pagination */ }
-      <div className="flex flex-row justify-center items-center mt-4">
-        <button
-          className="rounded p-2 disabled:opacity-60 enabled:hover:bg-bg-light-accent enabled:dark:hover:bg-bg-dark-accent transition-colors ease-in-out duration-200"
-          onClick={() => setPageNumber(1)}
-          disabled={pageNumber < 2}>
-          <FiChevronsLeft className="w-6 h-6"/>
-        </button>
-        <button
-          className="rounded p-2 disabled:opacity-60 enabled:hover:bg-bg-light-accent enabled:dark:hover:bg-bg-dark-accent transition-colors ease-in-out duration-200"
-          onClick={() => setPageNumber(pageNumber - 1)}
-          disabled={pageNumber < 2}>
-          <FiChevronLeft className="w-5 h-5"/>
-        </button>
 
-        <span className="mx-4 mb-[2px] font-medium">{pageNumber}</span>
-
-        <button
-          className="rounded p-2 disabled:opacity-60 enabled:hover:bg-bg-light-accent enabled:dark:hover:bg-bg-dark-accent transition-colors ease-in-out duration-200"
-          onClick={() => setPageNumber(pageNumber + 1)}
-          disabled={table.getRowCount() < PAGE_SIZE}>
-          <FiChevronRight className="w-5 h-5"/>
-        </button>
-      </div>
     </div>
   );
 }
