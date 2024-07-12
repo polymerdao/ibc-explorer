@@ -301,7 +301,7 @@ export default function Packets() {
             )}>
             </div>
             <div
-              className='h-0.5 w-[15.5px] bg-slate-400'>
+              className="h-0.5 w-[15.5px] bg-slate-400">
             </div>
             <div className={classNames(
               showFilters
