@@ -13,7 +13,7 @@
     "@cosmjs/tendermint-rpc": "^0.32.3",
     "@headlessui/react": "^1.7.18",
     "@sentry/nextjs": "^8.12.0",
-    "@tanstack/react-table": "^8.17.3",
+    "@tanstack/react-table": "^8.19.3",
     "@types/flat-cache": "^2.0.2",
     "ethers": "^6.13.1",
     "flat-cache": "^5.0.0",
