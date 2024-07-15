@@ -29,7 +29,7 @@ export async function getAllPackets(
 
   const queryParams = generateQueryParams({
     orderBy: 'blockTimestamp_DESC',
-    where: 'AND: [{' + filters + '}]',
+    where: `AND: [{${filters}}]`,
     limit,
     offset
   });
@@ -64,7 +64,7 @@ export async function searchSenderAddresses(
 
   const queryParams = generateQueryParams({
     orderBy: 'blockTimestamp_DESC',
-    where: 'AND: [{' + senderFilter + '}, {' + filters +' }]',
+    where: `AND: [{${senderFilter}}, {${filters}}]`,
     limit: limit,
     offset: offset
   });

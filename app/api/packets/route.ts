@@ -21,14 +21,14 @@ export async function GET(request: NextRequest) {
   let dest = searchParams.get('dest') || '';
 
   // Format as strings for graphql query
-  if (searchValue) { searchValue = '"' + searchValue + '"'; }
-  if (start) { start = '"' + start + '"'; }
-  if (end) { end = '"' + end + '"'; }
-  if (src) { src = '"' + src + '"'; }
-  if (dest) { dest = '"' + dest + '"'; }
+  if (searchValue) { searchValue = `"${searchValue}"`; }
+  if (start) { start = `"${start}"`; }
+  if (end) { end = `"${end}"`; }
+  if (src) { src = `"${src}"`; }
+  if (dest) { dest = `"${dest}"` }
   if (states) {
     states = states.toUpperCase();
-    states = '[' + states + ']';
+    states = `[${states}]`;
   }
  
   // No txHash provided, return all packets
