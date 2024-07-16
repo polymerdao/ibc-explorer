@@ -356,10 +356,10 @@ export default function Packets() {
                   <div className="bg-bg-light dark:bg-bg-dark pl-5 pr-9 pt-3.5 pb-4 border-[0.5px] rounded-md border-slate-500">
                     {stateFilter.map(state => { return (
                       <div key={state.value} className="py-[0.25rem]">
-                        <label>
+                        <label className="hover:cursor-pointer">
                           <input
                             className="appearance-none border border-slate-500 bg-transparent rounded-lg w-3 h-3 mr-2.5 transition-colors ease-in-out duration-150
-                              checked:bg-emerald-500 checked:border-transparent"
+                              checked:bg-emerald-500 checked:border-transparent hover:cursor-pointer"
                             {...{
                               type: 'checkbox',
                               checked: state.selected,
