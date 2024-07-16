@@ -136,7 +136,7 @@ export function PacketsTable<TableType extends Packet | Client | IdentifiedChann
                     style={{width: header.getSize()}}>
                     {(header.isPlaceholder) ? null : (
                       <div className="h-10 grid justify-items-start content-center">
-                        <div className='ml-2 transition-opacity ease-in-out duration-100'> 
+                        <div className="ml-2 transition-opacity ease-in-out duration-100"> 
                           {flexRender(
                             header.column.columnDef.header,
                             header.getContext()
