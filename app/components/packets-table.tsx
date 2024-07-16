@@ -54,7 +54,7 @@ export function PacketsTable<TableType extends Packet | Client | IdentifiedChann
               leave="ease-in duration-200"
               leaveFrom="transform scale-100 opacity-100"
               leaveTo="transform scale-95 opacity-0">
-              <Popover.Panel className="absolute z-20 mt-2 right-0">
+              <Popover.Panel className="absolute z-20 mt-2 left-0">
                 <div className="bg-bg-light dark:bg-bg-dark pl-6 pr-9 py-4 border-[0.5px] rounded-md border-slate-500">
                   {table.getAllLeafColumns().map(column => { return (
                     <div key={column.id} className="py-[0.17rem]">
@@ -136,12 +136,7 @@ export function PacketsTable<TableType extends Packet | Client | IdentifiedChann
                     style={{width: header.getSize()}}>
                     {(header.isPlaceholder) ? null : (
                       <div className="h-10 grid justify-items-start content-center">
-                        <div className={classNames(
-                          loading
-                          ? 'opacity-0'
-                          : 'opacity-100'
-                          , 'ml-2 transition-opacity ease-in-out duration-100'
-                        )}> 
+                        <div className='ml-2 transition-opacity ease-in-out duration-100'> 
                           {flexRender(
                             header.column.columnDef.header,
                             header.getContext()

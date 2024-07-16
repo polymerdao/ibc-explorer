@@ -53,7 +53,7 @@ export function Select({ options, onChange, containerClassName, buttonClassName,
                     active
                     ? 'bg-bg-dark-accent'
                     : ''
-                    , 'relative cursor-default select-none py-1.5 ml-2 mr-2.5 pl-2.5 pr-3 rounded'
+                    , 'relative hover:cursor-pointer select-none py-1.5 ml-2 mr-2.5 pl-2.5 pr-3 rounded'
                   )}>
                   <div className="flex flex-row">
                     <span className="text-fg-light dark:text-fg-dark whitespace-nowrap">
