@@ -42,10 +42,10 @@
   }
 
   ::-webkit-scrollbar {
-    @apply w-2 h-2 rounded-lg bg-bg-light-accent dark:bg-bg-dark;
+    @apply w-0 h-2 rounded-lg bg-bg-light-accent dark:bg-bg-dark;
   }
   ::-webkit-scrollbar-track {
-    @apply mt-[60px] rounded-lg bg-bg-light dark:bg-bg-dark;
+    @apply rounded-lg bg-bg-light dark:bg-bg-dark;
   }
   ::-webkit-scrollbar-thumb {
     @apply rounded-lg bg-slate-300 dark:bg-slate-500;

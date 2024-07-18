@@ -41,8 +41,9 @@ export async function GET(request: NextRequest) {
   }
 
   // Currently nothing this short is searchable
+  let emptyRes: PacketRes = { type: 'none', packets: [] };
   if (searchValue.length < 40) {
-    return NextResponse.json([]);
+    return NextResponse.json(emptyRes);
   }
 
   // Address searches
@@ -75,7 +76,5 @@ export async function GET(request: NextRequest) {
     return NextResponse.json(packetRes);
   }
 
-  packetRes.type = 'none';
-  packetRes.packets = [];
-  return NextResponse.json(packetRes);
+  return NextResponse.json(emptyRes);
 }

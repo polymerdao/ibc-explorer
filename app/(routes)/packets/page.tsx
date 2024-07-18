@@ -146,6 +146,7 @@ export default function Packets() {
   const [pageNumber, setPageNumber] = useState(1);
   const [foundPacket, setFoundPacket] = useState<Packet | null>(null);
   const [resType, setResType] = useState<string>('all');
+  const [noResults, setNoResults] = useState<boolean>(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
@@ -175,14 +176,15 @@ export default function Packets() {
 
   const controller = new AbortController();
   function searchPackets(searchValue?: string, resetPage: boolean = true) {
+    setLoading(true);
+    setFoundPacket(null);
+
     if (searchValue === undefined) {
       searchValue = textField;
     }
     if (resetPage) {
       setPageNumber(1);
     }
-    setLoading(true);
-    setFoundPacket(null);
     let states = '';
     for (const state of stateFilter) {
       if (state.selected) {
@@ -190,6 +192,7 @@ export default function Packets() {
       }
     }
     const offset = (pageNumber - 1) * PAGE_SIZE;
+
     fetch(
       `/api/packets?searchValue=${searchValue}&src=${srcFilter}&dest=${destFilter}&states=${states}&limit=${PAGE_SIZE}&offset=${offset}`,
       { signal: controller.signal }
@@ -211,8 +214,7 @@ export default function Packets() {
           setPaginationSearchValue(searchValue || '');
         }
         else {
-          setFoundPacket(null);
-          setPackets([]);
+          setNoResults(true);
         }
         setLoading(false);
       }).catch(() => {
@@ -260,9 +262,10 @@ export default function Packets() {
       />
 
       <Modal 
-        open={foundPacket !== null} 
+        open={(foundPacket !== null) || noResults} 
         onClose={() => {
           setFoundPacket(null);
+          setNoResults(false);
         }}
         content={PacketDetails(foundPacket)}
       />
@@ -355,8 +358,8 @@ export default function Packets() {
                 <Popover.Panel className="absolute z-20 mt-2 left-0">
                   <div className="bg-bg-light dark:bg-bg-dark pl-5 pr-9 pt-3.5 pb-4 border-[0.5px] rounded-md border-slate-500">
                     {stateFilter.map(state => { return (
-                      <div key={state.value} className="py-[0.25rem]">
-                        <label className="hover:cursor-pointer">
+                      <div key={state.value} className="py-[0.25rem] flex w-full">
+                        <label className="hover:cursor-pointer w-full">
                           <input
                             className="appearance-none border border-slate-500 bg-transparent rounded-lg w-3 h-3 mr-2.5 transition-colors ease-in-out duration-150
                               checked:bg-emerald-500 checked:border-transparent hover:cursor-pointer"
