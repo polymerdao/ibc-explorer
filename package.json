@@ -9,7 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "@cosmjs/stargate": "^0.32.3",
+    "@cosmjs/stargate": "^0.32.4",
     "@cosmjs/tendermint-rpc": "^0.32.4",
     "@headlessui/react": "^1.7.18",
     "@sentry/nextjs": "^8.12.0",
