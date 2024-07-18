@@ -18,12 +18,22 @@ const config: Config = {
         'fg-dark': colors.slate[50],
         'primary': colors.emerald,
         'secondary': colors.sky,
+        'vapor': '#f1e9f7'
       },
       fontFamily: {
         primary: ['var(--primary-font)'],
         mono: ['var(--mono-font)'],
         accent: ['var(--secondary-font)']
-      }
+      },
+      keyframes: {
+        pulselight: {
+          '0%, 100%': { opacity: '0' },
+          '50%': { opacity: '.3' },
+        },
+      },
+      animation: {
+        'pulse-light': 'pulselight 2.2s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+      },
     }
   },
   darkMode: 'selector',
