@@ -1,10 +1,13 @@
 import { CHAIN, CHAIN_CONFIGS } from 'utils/chains/configs';
-import { SimIcon } from 'components/icons'
+import { SimIcon, UnknownIcon } from 'components/icons'
 
 export function ChainCell({chain}: {chain: string}) {
-  if (!chain) return null;
-
   const size = 32;
+
+  if (!chain) {
+    return UnknownIcon(size);
+  }
+
   const sim: boolean = chain.toLowerCase().includes('sim');
   const chainName = chain.split('-')[0];
   let icon: JSX.Element = <span>{chain}</span>;

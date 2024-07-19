@@ -91,9 +91,9 @@ function processSendPacketResponse(packetResponse: any[]): Packet[] {
     const newPacket: Packet = {
       sequence: sendPacket.sequence,
       sourcePortAddress: sendPacket.sourcePortAddress,
-      sourceChannelId: sendPacket.sourceChannel.channelId,
+      sourceChannelId: sendPacket.sourceChannel?.channelId,
       destPortAddress: sendPacket.packetRelation?.recvPacket?.destPortAddress || '',
-      destChannelId: sendPacket.sourceChannel.counterpartyChannelId,
+      destChannelId: sendPacket.sourceChannel?.counterpartyChannelId,
       timeout: sendPacket.timeoutTimestamp,
       id: sendPacket.packetRelation?.id || '',
       state: state,
@@ -103,8 +103,8 @@ function processSendPacketResponse(packetResponse: any[]): Packet[] {
       sendTx: sendPacket.transactionHash,
       rcvTx: sendPacket.packetRelation?.recvPacket?.transactionHash,
       ackTx: sendPacket.packetRelation?.ackPacket?.transactionHash,
-      sourceClient: sendPacket.sourceChannel.portId.split('.')[1],
-      destClient: sendPacket.sourceChannel.counterpartyPortId.split('.')[1],
+      sourceClient: sendPacket.sourceChannel?.portId.split('.')[1],
+      destClient: sendPacket.sourceChannel?.counterpartyPortId.split('.')[1],
       senderAddress: sendPacket.uchEventSender || sendPacket.packetDataSender || ''
     };
     packets.push(newPacket);
