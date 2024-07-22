@@ -16,7 +16,7 @@ export async function GET(request: NextRequest) {
   const offset = Number(searchParams.get('offset'));
   let start = searchParams.get('start') || '';
   let end = searchParams.get('end') || '';
-  let states = searchParams.get('states') || '';
+  let states = searchParams.get('states') || 'SENT,RECV,WRITE_ACK,ACK';
   let src = searchParams.get('src') || '';
   let dest = searchParams.get('dest') || '';
 

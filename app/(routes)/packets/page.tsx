@@ -139,9 +139,9 @@ export default function Packets() {
   const [srcFilter, setSrcFilter] = useState<string>('');
   const [destFilter, setDestFilter] = useState<string>('');
   const [stateFilter, setStateFilter] = useState<Array<state>>([
-    { value: 'SENT', label: 'Relaying', selected: false },
-    { value: 'RECV,WRITE_ACK', label: 'Confirming', selected: false },
-    { value: 'ACK', label: 'Delivered', selected: false }
+    { value: 'SENT', label: 'Relaying', selected: true },
+    { value: 'RECV,WRITE_ACK', label: 'Confirming', selected: true },
+    { value: 'ACK', label: 'Delivered', selected: true }
   ]);
   const [pageNumber, setPageNumber] = useState(1);
   const [foundPacket, setFoundPacket] = useState<Packet | null>(null);
