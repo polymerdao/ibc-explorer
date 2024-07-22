@@ -194,7 +194,7 @@ export default function Packets() {
     const offset = (pageNumber - 1) * PAGE_SIZE;
 
     fetch(
-      `/api/packets?searchValue=${searchValue}&src=${srcFilter}&dest=${destFilter}&states=${states}&limit=${PAGE_SIZE}&offset=${offset}`,
+      `/api/packets?searchValue=${searchValue}&src=${srcFilter}&dest=${destFilter}&states=${states}&limit=${PAGE_SIZE}&offset=${offset}&timestamp=${Date.now()}`,
       {
         cache: 'no-store',
         signal: controller.signal
