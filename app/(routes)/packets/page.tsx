@@ -195,7 +195,10 @@ export default function Packets() {
 
     fetch(
       `/api/packets?searchValue=${searchValue}&src=${srcFilter}&dest=${destFilter}&states=${states}&limit=${PAGE_SIZE}&offset=${offset}`,
-      { signal: controller.signal }
+      {
+        cache: 'no-store',
+        signal: controller.signal
+      }
     )
       .then(res => {
         if (!res.ok) {
