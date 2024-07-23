@@ -20,7 +20,7 @@ export async function processRequest(packetRequest: {
   const headers = {
     'Content-Type': 'application/json',
   };
-  const packetOptions = {
+  const packetOptions: RequestInit = {
     method: 'POST',
     headers,
     body: JSON.stringify(packetRequest),
