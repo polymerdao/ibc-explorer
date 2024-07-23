@@ -34,14 +34,14 @@ export function PacketsTable<TableType extends Packet | Client | IdentifiedChann
       setDelayedLoading(false);
       const timeout = setTimeout(() => {
         setHideCells(false);
-      }, 100);
+      }, 150);
       return () => clearTimeout(timeout);
     }
     if (loading) {
       setHideCells(true);
       const timeout = setTimeout(() => {
         setDelayedLoading(true);
-      }, 100);
+      }, 150);
       return () => clearTimeout(timeout);
     }
   }, [loading]);
@@ -149,7 +149,7 @@ export function PacketsTable<TableType extends Packet | Client | IdentifiedChann
                     style={{width: header.getSize()}}>
                     {(header.isPlaceholder) ? null : (
                       <div className="h-10 grid justify-items-start content-center">
-                        <div className="ml-2 transition-opacity ease-in-out duration-100"> 
+                        <div className="ml-2 transition-opacity ease-in-out duration-150"> 
                           {flexRender(
                             header.column.columnDef.header,
                             header.getContext()
@@ -211,7 +211,7 @@ export function PacketsTable<TableType extends Packet | Client | IdentifiedChann
                         , hideCells
                         ? 'opacity-0'
                         : 'opacity-100'
-                        , 'last:pr-6 transition-opacity ease-in-out duration-100'
+                        , 'last:pr-6 transition-opacity ease-in-out duration-150'
                       )}
                       style={{width: cell.column.getSize()}}>
                       {flexRender(cell.column.columnDef.cell, cell.getContext())}

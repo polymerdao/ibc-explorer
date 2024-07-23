@@ -15,16 +15,12 @@ function stringToState(state: string) {
 }
 
 export async function processRequest(packetRequest: { query: string }): Promise<Packet[]>{
-  const headers = {
-    'Content-Type': 'application/json',
-    'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
-    'Pragma': 'no-cache',
-    'Expires': '0',
-  };
+  const headers = { 'Content-Type': 'application/json' };
   const packetOptions = {
     method: 'POST',
     headers,
-    body: JSON.stringify(packetRequest)
+    body: JSON.stringify(packetRequest),
+    cache: 'no-store' as RequestCache
   };
 
   let packetRes;
