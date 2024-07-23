@@ -14,22 +14,24 @@ function stringToState(state: string) {
   }
 }
 
-export async function processRequest(packetRequest: { query: string }): Promise<Packet[]>{
+export async function processRequest(packetRequest: {
+  query: string;
+}): Promise<Packet[]> {
   const headers = {
     'Content-Type': 'application/json',
-    'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
-    'Pragma': 'no-cache',
-    'Expires': '0',
   };
   const packetOptions = {
     method: 'POST',
     headers,
-    body: JSON.stringify(packetRequest)
+    body: JSON.stringify(packetRequest),
+    cache: 'no-store',
   };
 
   let packetRes;
   try {
-    packetRes = await (await fetch(process.env.INDEXER_URL!, packetOptions)).json();
+    packetRes = await (
+      await fetch(process.env.INDEXER_URL!, packetOptions)
+    ).json();
   } catch (err) {
     logger.error('Error processing packet request: ' + err);
     return [];
@@ -42,8 +44,7 @@ export async function processRequest(packetRequest: { query: string }): Promise<
 
   if (packetRes?.data?.packets) {
     return processPacketResponse(packetRes.data.packets);
-  }
-  else if (packetRes?.data?.sendPackets) {
+  } else if (packetRes?.data?.sendPackets) {
     return processSendPacketResponse(packetRes.data.sendPackets);
   }
 
@@ -55,9 +56,15 @@ function processPacketResponse(packetResponse: any[]): Packet[] {
   for (const packet of packetResponse) {
     const state = stringToState(packet.state);
 
-    const createTime = packet.sendPacket?.blockTimestamp ? packet.sendPacket.blockTimestamp / 1000 : 0;
-    const recvTime = packet.recvPacket?.blockTimestamp ? packet.recvPacket.blockTimestamp / 1000 : undefined;
-    const endTime = packet.ackPacket?.blockTimestamp ? packet.ackPacket.blockTimestamp / 1000 : undefined;
+    const createTime = packet.sendPacket?.blockTimestamp
+      ? packet.sendPacket.blockTimestamp / 1000
+      : 0;
+    const recvTime = packet.recvPacket?.blockTimestamp
+      ? packet.recvPacket.blockTimestamp / 1000
+      : undefined;
+    const endTime = packet.ackPacket?.blockTimestamp
+      ? packet.ackPacket.blockTimestamp / 1000
+      : undefined;
 
     const newPacket: Packet = {
       sequence: packet.sendPacket?.sequence,
@@ -75,8 +82,12 @@ function processPacketResponse(packetResponse: any[]): Packet[] {
       rcvTx: packet.recvPacket?.transactionHash,
       ackTx: packet.ackPacket?.transactionHash,
       sourceClient: packet.sendPacket?.sourceChannel?.portId.split('.')[1],
-      destClient: packet.sendPacket?.sourceChannel?.counterpartyPortId.split('.')[1],
-      senderAddress: packet.sendPacket?.uchEventSender || packet.sendPacket?.packetDataSender || ''
+      destClient:
+        packet.sendPacket?.sourceChannel?.counterpartyPortId.split('.')[1],
+      senderAddress:
+        packet.sendPacket?.uchEventSender ||
+        packet.sendPacket?.packetDataSender ||
+        '',
     };
     packets.push(newPacket);
   }
@@ -90,14 +101,19 @@ function processSendPacketResponse(packetResponse: any[]): Packet[] {
     const state = stringToState(sendPacket.packetRelation?.state);
 
     const createTime = sendPacket.blockTimestamp / 1000;
-    const recvTime = sendPacket.packetRelation?.recvPacket?.blockTimestamp ? sendPacket.packetRelation?.recvPacket.blockTimestamp / 1000 : undefined;
-    const endTime = sendPacket.packetRelation?.ackPacket?.blockTimestamp ? sendPacket.packetRelation?.ackPacket.blockTimestamp / 1000 : undefined;
+    const recvTime = sendPacket.packetRelation?.recvPacket?.blockTimestamp
+      ? sendPacket.packetRelation?.recvPacket.blockTimestamp / 1000
+      : undefined;
+    const endTime = sendPacket.packetRelation?.ackPacket?.blockTimestamp
+      ? sendPacket.packetRelation?.ackPacket.blockTimestamp / 1000
+      : undefined;
 
     const newPacket: Packet = {
       sequence: sendPacket.sequence,
       sourcePortAddress: sendPacket.sourcePortAddress,
       sourceChannelId: sendPacket.sourceChannel?.channelId,
-      destPortAddress: sendPacket.packetRelation?.recvPacket?.destPortAddress || '',
+      destPortAddress:
+        sendPacket.packetRelation?.recvPacket?.destPortAddress || '',
       destChannelId: sendPacket.sourceChannel?.counterpartyChannelId,
       timeout: sendPacket.timeoutTimestamp,
       id: sendPacket.packetRelation?.id || '',
@@ -110,7 +126,8 @@ function processSendPacketResponse(packetResponse: any[]): Packet[] {
       ackTx: sendPacket.packetRelation?.ackPacket?.transactionHash,
       sourceClient: sendPacket.sourceChannel?.portId.split('.')[1],
       destClient: sendPacket.sourceChannel?.counterpartyPortId.split('.')[1],
-      senderAddress: sendPacket.uchEventSender || sendPacket.packetDataSender || ''
+      senderAddress:
+        sendPacket.uchEventSender || sendPacket.packetDataSender || '',
     };
     packets.push(newPacket);
   }
@@ -154,7 +171,7 @@ export function generatePacketQuery(params?: string): { query: string } {
         }
         state
       }
-    }`
+    }`,
   };
 }
 
@@ -196,15 +213,15 @@ export function generateSendPacketQuery(params?: string): { query: string } {
           state
         }
       }
-    }`
+    }`,
   };
 }
 
 export interface QueryParams {
-  where?: string,
-  orderBy?: string,
-  limit?: number,
-  offset?: number,
+  where?: string;
+  orderBy?: string;
+  limit?: number;
+  offset?: number;
 }
 
 export function generateQueryParams(params: QueryParams): string {
@@ -214,32 +231,44 @@ export function generateQueryParams(params: QueryParams): string {
   if (params.offset) reqParams += `offset: ${params.offset}, `;
   if (params.orderBy) reqParams += `orderBy: ${params.orderBy}, `;
   if (params.where) reqParams += `where: {${params.where}}`;
-  return `(${reqParams})`
+  return `(${reqParams})`;
 }
 
 export interface FiltersProps {
-  start?: string,
-  end?: string,
-  states?: string,
-  src?: string,
-  dest?: string
+  start?: string;
+  end?: string;
+  states?: string;
+  src?: string;
+  dest?: string;
 }
 
 export function generateSendPacketFilters(filters: FiltersProps): string {
-  const startFilter = filters.start ? `blockTimestamp_gte: ${filters.start}` : '';
+  const startFilter = filters.start
+    ? `blockTimestamp_gte: ${filters.start}`
+    : '';
   const endFilter = filters.end ? `blockTimestamp_lte: ${filters.end}` : '';
-  const stateFilter = filters.states ? `packetRelation: {state_in: ${filters.states}}` : '';
+  const stateFilter = filters.states
+    ? `packetRelation: {state_in: ${filters.states}}`
+    : '';
   const srcFilter = filters.src ? `portId_contains: ${filters.src}` : '';
-  const destFilter = filters.dest ? `counterpartyPortId_contains: ${filters.dest}` : '';
-
-  const channelFilter = (srcFilter || destFilter) 
-    ? `sourceChannel: {AND: {${srcFilter}${srcFilter && destFilter ? ', ' : ''}${destFilter}}}`
+  const destFilter = filters.dest
+    ? `counterpartyPortId_contains: ${filters.dest}`
     : '';
 
+  const channelFilter =
+    srcFilter || destFilter
+      ? `sourceChannel: {AND: {${srcFilter}${
+          srcFilter && destFilter ? ', ' : ''
+        }${destFilter}}}`
+      : '';
+
   return [
-    startFilter, 
-    endFilter, 
-    stateFilter && `${startFilter || endFilter ? ', ' : ''}${stateFilter}`, 
-    channelFilter && `${startFilter || endFilter || stateFilter ? ', ' : ''}${channelFilter}`
-  ].filter(Boolean).join('');
+    startFilter,
+    endFilter,
+    stateFilter && `${startFilter || endFilter ? ', ' : ''}${stateFilter}`,
+    channelFilter &&
+      `${startFilter || endFilter || stateFilter ? ', ' : ''}${channelFilter}`,
+  ]
+    .filter(Boolean)
+    .join('');
 }
