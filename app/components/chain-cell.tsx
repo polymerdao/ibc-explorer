@@ -20,7 +20,7 @@ export function ChainCell({chain}: {chain: string}) {
 
   return (
     <div className="relative">
-      <div className="opacity-75 mr-1" title={chain}>
+      <div className="opacity-80 mr-1" title={chain}>
         {icon}
       </div>
       {sim && 
@@ -35,9 +35,9 @@ export function ChainCell({chain}: {chain: string}) {
 export function Arrow() {
   return (
     <div className="w-full min-w-6 ml-8 mr-1.5 relative grid justify-items-end content-center opacity-70">
-      <div className="h-[1px] rounded-full w-full bg-fg-light dark:bg-fg-dark"></div>
-      <div className="h-[1px] rounded-full absolute w-[10px] mt-[15.6px] origin-right rotate-[40deg] bg-fg-light dark:bg-fg-dark"></div>
-      <div className="h-[1px] rounded-full absolute w-[10px] mt-[15.6px] origin-right -rotate-[40deg] bg-fg-light dark:bg-fg-dark"></div>
+      <div className="h-[1px] rounded-full w-full bg-black dark:bg-white"></div>
+      <div className="h-[1px] rounded-full absolute w-[10px] mt-[15.6px] origin-right rotate-[40deg] bg-black dark:bg-white"></div>
+      <div className="h-[1px] rounded-full absolute w-[10px] mt-[15.6px] origin-right -rotate-[40deg] bg-black dark:bg-white"></div>
     </div>
   );
 }

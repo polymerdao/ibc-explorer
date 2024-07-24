@@ -29,12 +29,12 @@ export default function Navbar() {
   }
 
   return (
-    <nav className="w-full z-20 sticky top-0 bg-bg-light-accent dark:bg-bg-dark border-b-[0px] border-gray-300 dark:border-gray-700 ease-in-out">
-      <div className="h-16 min-w-0 xl:min-w-[80rem] max-w-screen-xl xl:w-4/5 mx-auto px-6 sm:px-8 flex justify-between sm:justify-start">
+    <nav className="w-full z-20 sticky top-0 bg-white dark:bg-black border-b-[0px] border-gray-300 dark:border-gray-700 ease-in-out">
+      <div className="h-16 min-w-0 xl:min-w-[80rem] max-w-screen-2xl xl:w-4/5 mx-auto px-6 sm:px-8 flex justify-between sm:justify-start">
 
-        <div className="flex items-center shrink-0 mr-10 pt-1">
+        <div className="flex items-center shrink-0 ml-1 mr-10 pt-1">
           <Link href="/">
-            <Image className="relative dark:invert opacity-95" src={'/logo512.png'} width={32} height={32} alt={'Logo'} />
+            <Image className="relative dark:invert opacity-95" src={'/Polymer_Logomark_Black.png'} width={32} height={32} alt={'Logo'} />
           </Link>
         </div>
 
@@ -46,8 +46,8 @@ export default function Navbar() {
                 href={item.href}
                 className={classNames(
                   pathname === item.href
-                    ? 'border-fg-light border-opacity-60 dark:border-fg-dark dark:border-opacity-60'
-                    : 'border-transparent text-gray-600 dark:text-gray-300 hover:text-fg-light dark:hover:text-fg-dark'
+                    ? 'border-black border-opacity-60 dark:border-white dark:border-opacity-60'
+                    : 'border-transparent text-gray-600 dark:text-gray-300 hover:text-black dark:hover:text-white'
                     , 'inline-flex items-center px-1 pt-1 border-b-2 text-md font-medium transition ease-in-out'
                 )}>
                 {item.name}
@@ -57,10 +57,10 @@ export default function Navbar() {
 
           {/* <button
             onClick={() => toggleTheme()}
-            className="flex items-center justify-center h-10 mt-3 p-3 rounded-md bg-bg-light-accent hover:bg-bg-light dark:bg-bg-dark hover:dark:bg-bg-dark-accent transition ease-in-out">
+            className="flex items-center justify-center h-10 mt-3 p-3 bg-white hover:bg-vapor dark:bg-black hover:dark:bg-purple transition ease-in-out">
             {dark
-              ? <FiSun className="text-fg-dark w-5 h-5" />
-              : <FiMoon className="text-fg-light w-5 h-5" />
+              ? <FiSun className="text-white w-5 h-5" />
+              : <FiMoon className="text-black w-5 h-5" />
             }
           </button> */}
 
@@ -78,7 +78,7 @@ export default function Navbar() {
               nav
                 ? 'rotate-45 translate-y-[0.315rem]'
                 : 'rotate-0 translate-y-0',
-                  'w-full h-0.5 bg-fg-light dark:bg-fg-dark opacity-95 rounded-md mt-1 transition ease-in-out'
+                  'w-full h-0.5 bg-black dark:bg-white opacity-95 mt-1 transition ease-in-out'
             )}
           ></div>
           <div 
@@ -86,7 +86,7 @@ export default function Navbar() {
               nav
                 ? 'rotate-[-45deg] -translate-y-[0.315rem]'
                 : 'rotate-0 translate-y-0',
-                  'w-full h-0.5 bg-fg-light dark:bg-fg-dark opacity-95 rounded-md mb-1 transition ease-in-out'
+                  'w-full h-0.5 bg-black dark:bg-white opacity-95 mb-1 transition ease-in-out'
             )}
           ></div>
         </button>
@@ -97,7 +97,7 @@ export default function Navbar() {
             nav
               ? 'right-0'
               : 'right-[-100%] hidden'
-              , 'fixed sm:hidden flex flex-col space-y-8 border-[0.8px] p-8 w-full h-screen top-16 border-gray-300 dark:border-gray-700 bg-bg-light-accent dark:bg-bg-dark ease-in-out duration-[400ms]'
+              , 'fixed sm:hidden flex flex-col space-y-8 border-[0.8px] p-8 w-full h-screen top-16 border-gray-300 dark:border-gray-700 bg-white dark:bg-black ease-in-out duration-[400ms]'
           )}>
           {tabs.map((item) => (
             <Link
@@ -105,9 +105,9 @@ export default function Navbar() {
               href={item.href}
               className={classNames(
                 pathname === item.href
-                  ? 'decoration-fg-light/70 dark:decoration-fg-dark/70'
-                  : 'text-gray-600 dark:text-gray-300 decoration-fg-light/0 dark:decoration-fg-dark/0'
-                  , 'inline-flex items-center px-1 pt-1 text-lg font-bold underline underline-offset-8 decoration-2 rounded-md transition ease-in-out'
+                  ? 'decoration-black/70 dark:decoration-white/70'
+                  : 'text-gray-600 dark:text-gray-300 decoration-black/0 dark:decoration-white/0'
+                  , 'inline-flex items-center px-1 pt-1 text-lg font-bold underline underline-offset-8 decoration-2 transition ease-in-out'
               )}>
               {item.name}
             </Link>

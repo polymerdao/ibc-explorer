@@ -24,7 +24,7 @@ export function Modal({open, onClose, content, loading}: ModalProps) {
           leave="ease-in duration-150"
           leaveFrom="opacity-100"
           leaveTo="opacity-0">
-          <div className="fixed inset-0 bg-bg-dark/40 dark:bg-bg-dark/60 backdrop-blur-sm" />
+          <div className="fixed inset-0 bg-black/40 dark:bg-black/60 backdrop-blur-sm" />
         </Transition.Child>
 
         <div className="fixed inset-0 overflow-y-auto">
@@ -39,7 +39,7 @@ export function Modal({open, onClose, content, loading}: ModalProps) {
               leaveFrom="opacity-100 translate-y-0"
               leaveTo="opacity-0 translate-y-12">
               <Dialog.Panel
-                className="w-fit max-w-full min-w-36 transform border-[1.5px] border-slate-800 dark:border-slate-300 rounded-md bg-bg-light dark:bg-bg-dark p-6 transition-all">
+                className="w-fit max-w-full min-w-36 transform border-[0.5px] border-vapor dark:border-slate-400 bg-vapor dark:bg-black p-6 transition-all">
                 {!loading &&
                 <button className="absolute top-0 right-0 m-4"
                   onClick={() => onClose()}>

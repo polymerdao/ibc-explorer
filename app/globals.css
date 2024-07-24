@@ -5,9 +5,18 @@
 :root {
   --background-main: #F1F5F9;
   --background-accent: #FFFFFF;
-  --dark-background-main: #020617;
-  --dark-background-accent: #0F172A;
-  --dark-background-accent-2: #0B1224;
+  --black: #050505;
+  --purple: #1E093A;
+  --blue: #190F45;
+  --lavender: #7A00D9;
+  --vapor: #F1E9f7;
+}
+
+/* CSS Reset */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
 }
 
 @layer base {
@@ -22,58 +31,61 @@
     );
   }
 
+  /* .dark body {
+  /*   background: linear-gradient(0deg in hsl shorter hue,
+  /*     var(--black) 0%,
+  /*     var(--purple) 20%,
+  /*     var(--blue) 50%,
+  /*     var(--purple) 80%,
+  /*     var(--black) 100%
+  /*   );
+  /* } */
+
   .dark body {
-    background: linear-gradient(203deg in hsl shorter hue,
-      var(--dark-background-main) 15%,
-      var(--dark-background-accent-2),
-      var(--dark-background-main) 35%,
-      var(--dark-background-main) 50%,
-      var(--dark-background-accent),
-      var(--dark-background-main) 80%
-    );
+    background-color: var(--vapor);
   }
 
   body {
-    @apply min-h-screen flex flex-col items-center bg-bg-light text-fg-light dark:bg-bg-dark dark:text-fg-dark antialiased font-primary;
+    @apply min-h-screen flex flex-col items-center text-black dark:text-white antialiased font-primary;
   }
 
   main {
-    @apply h-full w-full min-w-0 xl:min-w-[80rem] max-w-screen-xl xl:w-4/5 mx-auto px-4 sm:px-8 pt-4 md:pt-6 xl:pt-8 pb-6;
+    @apply h-full w-full min-w-0 xl:min-w-[80rem] max-w-screen-2xl xl:w-4/5 mx-auto px-4 sm:px-8 pt-4 md:pt-6 xl:pt-9 pb-6;
   }
 
   ::-webkit-scrollbar {
-    @apply w-0 h-2 rounded-lg bg-bg-light-accent dark:bg-bg-dark;
+    @apply w-0 h-2 bg-white dark:bg-black;
   }
   ::-webkit-scrollbar-track {
-    @apply rounded-lg bg-bg-light dark:bg-bg-dark;
+    @apply bg-white dark:bg-black;
   }
   ::-webkit-scrollbar-thumb {
-    @apply rounded-lg bg-slate-300 dark:bg-slate-500;
+    @apply bg-lavender;
   }
   ::-webkit-scrollbar-corner {
-    @apply rounded-lg bg-bg-light dark:bg-bg-dark;
+    @apply bg-white dark:bg-black;
   }
 
   h1 {
-    @apply text-2xl font-semibold font-accent;
+    @apply text-2xl;
   }
   h2 {
-    @apply text-xl font-medium;
+    @apply text-xl;
   }
   h3 {
     @apply text-lg;
   }
 
   .btn {
-    @apply h-[42px] px-4 py-2 rounded-md bg-bg-light-accent dark:bg-bg-dark dark:hover:text-white border-[1px] border-slate-400 dark:border-slate-500 dark:hover:border-fg-dark disabled:hover:border-slate-300 disabled:hover:dark:border-slate-500 transition ease-in-out duration-200 font-medium disabled:text-slate-400 disabled:hover:text-slate-400 dark:disabled:text-slate-400 dark:disabled:hover:text-slate-400;
+    @apply h-[46px] px-5 py-2 bg-white dark:bg-black hover:ring-1 disabled:ring-0 hover:disabled:ring-0 ring-vapor ring-inset transition-all ease-in-out duration-200 disabled:text-slate-400 disabled:hover:text-slate-400;
   }
 
-  .btn-accent {
-    @apply border-[1px] text-sky-700 bg-sky-100 dark:text-sky-100 dark:bg-sky-950 dark:hover:bg-sky-950;
+  .btn-secondary {
+    @apply p-2 disabled:opacity-60 enabled:hover:bg-white enabled:dark:hover:bg-black transition-colors ease-in-out duration-200;
   }
 
   .inpt {
-    @apply h-[42px] border-[1px] border-slate-500 hover:border-fg-light focus:border-fg-light dark:hover:border-fg-dark dark:focus:border-fg-dark shadow-none rounded text-fg-light dark:text-fg-dark dark:bg-bg-dark-accent transition ease-in-out duration-200;
+    @apply h-[46px] focus:ring-1 hover:ring-1 ring-vapor/0 hover:ring-vapor ring-inset transition-all ease-in-out duration-200 shadow-none text-black dark:text-white dark:bg-black;
   }
   
   *:focus {

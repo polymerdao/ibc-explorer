@@ -24,6 +24,7 @@ import { shortenHex } from 'components/format-strings';
 import { classNames } from 'utils/functions';
 import { FiChevronDown } from 'react-icons/fi';
 import { Transition, Popover } from '@headlessui/react';
+const { shuffle } = require('txt-shuffle');
 
 const columnHelper = createColumnHelper<Packet>();
 const columns = [
@@ -31,14 +32,14 @@ const columns = [
     header: 'ID',
     enableHiding: true
   }),
-  columnHelper.accessor(row => stateToString(row.state), {
-    header: 'State',
-    cell: props => StateCell(props.getValue()),
-    enableHiding: true
-  }),
   columnHelper.accessor('sendTx', {
     header: 'Send Tx',
     cell: props => shortenHex(props.getValue()),
+    enableHiding: true
+  }),
+  columnHelper.accessor(row => stateToString(row.state), {
+    header: 'State',
+    cell: props => StateCell(props.getValue()),
     enableHiding: true
   }),
   columnHelper.accessor('sourceClient', {
@@ -132,6 +133,7 @@ interface state {
 const PAGE_SIZE = 20;
 
 export default function Packets() {
+  const [header, setHeader] = useState<string>('');
   const [packets, setPackets] = useState<Packet[]>([]);
   const [textField, setTextField] = useState<string>('');
   const [paginationSearchValue, setPaginationSearchValue] = useState<string>('');
@@ -168,6 +170,16 @@ export default function Packets() {
 
   useEffect(() => {
     searchPackets();
+    shuffle({
+      text: 'Recent Packets', // our text
+      fps: 20, // how many times per second it refreshes
+      delayResolve: 0, // reveal right away
+      direction: 'right',
+      animation: 'show', // don't hide things
+      delay: 0.3, // delay in seconds + an extra delay if it's in a paragraph by line
+      duration: 1, // usually 1 second or 0.3 seconds for hovers
+      onUpdate: (output: string) => {setHeader(output);}
+    });
   }, []);
 
   useEffect(() => {
@@ -273,13 +285,13 @@ export default function Packets() {
         content={PacketDetails(foundPacket)}
       />
 
-      <h1 className="ml-1">Recent Packets</h1>
+      <h1 className="ml-1 h-8">{header}</h1>
       <div className="flex flex-row justify-between mt-4">
-        <div className="flex flex-row justify-left w-[45%] min-w-[248px]">
+        <div className="flex flex-row justify-left w-[50%] min-w-[248px]">
           <input
             type="text"
             placeholder="Tx Hash, Sender Address or Packet ID"
-            className="inpt w-full px-3 rounded-md font-mono placeholder:font-primary"
+            className="inpt w-full px-4 font-mono placeholder:font-primary"
             value={textField}
             onChange={e => setTextField(e.target.value)}
             onKeyUp={e => { if (e.key === 'Enter') searchPackets() }}
@@ -297,23 +309,23 @@ export default function Packets() {
             Search
           </button>
           <button
-            className="ml-3.5 pt-2 pb-2.5 px-2 grid justify-items-center items-center"
+            className="ml-3.5 pt-2.5 pb-3 px-2 grid justify-items-center items-center"
             onClick={() => setShowFilters(!showFilters)}>
             <div className={classNames(
               showFilters
               ? 'translate-y-4'
               : '',
-              'relative h-0.5 w-6 bg-slate-400 transition-transform duration-200 ease-in-out'
+              'relative h-0.5 w-6 bg-vapor transition-transform duration-200 ease-in-out'
             )}>
             </div>
             <div
-              className="h-0.5 w-[15.5px] bg-slate-400">
+              className="h-0.5 w-[15.5px] bg-vapor">
             </div>
             <div className={classNames(
               showFilters
               ? '-translate-y-4'
               : '',
-              'relative h-0.5 w-[7px] bg-slate-400 transition-transform duration-200 ease-in-out'
+              'relative h-0.5 w-[7px] bg-vapor transition-transform duration-200 ease-in-out'
             )}>
             </div>
           </button>
@@ -341,7 +353,7 @@ export default function Packets() {
           )}>
           <Popover>
             {({ open }) => (<>
-              <Popover.Button className="inpt w-32 flex flex-row justify-between items-center pl-3 pr-[0.4rem] text-fg-light dark:text-fg-dark transition east-in-out duration-200 cursor-default">
+              <Popover.Button className="inpt w-32 flex flex-row justify-between items-center pl-4 pr-[0.4rem] text-black dark:text-white transition east-in-out duration-200 cursor-default">
                 State
                 <FiChevronDown className={classNames(
                   open
@@ -359,13 +371,13 @@ export default function Packets() {
                 leaveFrom="transform scale-100 opacity-100"
                 leaveTo="transform scale-95 opacity-0">
                 <Popover.Panel className="absolute z-20 mt-2 left-0">
-                  <div className="bg-bg-light dark:bg-bg-dark pl-5 pr-9 pt-3.5 pb-4 border-[0.5px] rounded-md border-slate-500">
+                  <div className="bg-vapor dark:bg-black pl-5 pr-9 pt-3.5 pb-4 border-[0.5px] border-slate-500">
                     {stateFilter.map(state => { return (
                       <div key={state.value} className="py-[0.25rem] flex w-full">
                         <label className="hover:cursor-pointer w-full">
                           <input
                             className="appearance-none border border-slate-500 bg-transparent rounded-lg w-3 h-3 mr-2.5 transition-colors ease-in-out duration-150
-                              checked:bg-emerald-500 checked:border-transparent hover:cursor-pointer"
+                              checked:bg-turquoise checked:border-transparent hover:cursor-pointer"
                             {...{
                               type: 'checkbox',
                               checked: state.selected,
@@ -390,8 +402,8 @@ export default function Packets() {
             }
             onChange={value => setSrcFilter(value as string)}
             containerClassName="w-32"
-            buttonClassName="inpt pl-3 cursor-default"
-            dropdownClassName="bg-bg-light dark:bg-bg-dark"
+            buttonClassName="inpt pl-4 cursor-default"
+            dropdownClassName="bg-vapor dark:bg-black"
           />
           <Select 
             options={
@@ -400,8 +412,8 @@ export default function Packets() {
             }
             onChange={value => setDestFilter(value as string)}
             containerClassName="w-32"
-            buttonClassName="inpt pl-3 cursor-default"
-            dropdownClassName="bg-bg-light dark:bg-bg-dark"
+            buttonClassName="inpt pl-4 cursor-default"
+            dropdownClassName="bg-vapor dark:bg-black"
           />
         </div>
       </div>

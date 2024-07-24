@@ -1,5 +1,4 @@
 import type { Config } from "tailwindcss";
-const colors = require('tailwindcss/colors');
 
 const config: Config = {
   content: [
@@ -10,29 +9,32 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        'bg-light': colors.slate[100],
-        'bg-light-accent': colors.white,
-        'fg-light': colors.slate[800],
-        'bg-dark': colors.slate[950],
-        'bg-dark-accent': colors.slate[900],
-        'fg-dark': colors.slate[50],
-        'primary': colors.emerald,
-        'secondary': colors.sky,
-        'vapor': '#f1e9f7'
+        'black': '#050505',
+        'purple': '#1E093A',
+        'blue': '#09246B',
+        'lavender': '#7A00D9',
+        'light-blue': '#00A6EE',
+        'turquoise': '#02DBC4',
+        'vapor': '#F1E9f7',
+        'white': '#FFFFFF'
       },
       fontFamily: {
         primary: ['var(--primary-font)'],
-        mono: ['var(--mono-font)'],
-        accent: ['var(--secondary-font)']
+        mono: ['var(--mono-font)']
       },
       keyframes: {
         pulselight: {
           '0%, 100%': { opacity: '0' },
           '50%': { opacity: '.3' },
         },
+        blacktovapor: {
+          '0%': { backgroundColor: '#050505' },
+          '100%': { backgroundColor: '#F1E9f7' },
+        },
       },
       animation: {
         'pulse-light': 'pulselight 2.2s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+        'black-to-vapor': 'blacktovapor 1s ease-in-out',
       },
     }
   },

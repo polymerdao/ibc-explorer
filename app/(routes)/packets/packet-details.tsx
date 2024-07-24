@@ -31,7 +31,7 @@ export function PacketDetails(packet: Packet | null) {
 
       {/* Status Bar */}
       <div className="w-full h-20 flex flex-row mt-6 mb-9">
-        <div className="w-60 h-full grid justify-items-center content-center border border-fg-dark border-fg-dark rounded-lg bg-sky-600/50 font-accent font-medium text-lg">
+        <div className="w-60 h-full grid justify-items-center content-center bg-sky-600/50 font-mono font-medium text-lg">
           <p>Src Chain:</p>
           <p>{clientToDisplay(packet.sourceClient)}</p>
         </div>
@@ -66,15 +66,15 @@ export function PacketDetails(packet: Packet | null) {
             : ''
             , 'relative flex flex-row justify-center items-start w-full pl-[3.75rem] pr-[2.3rem]'
           )}>
-            <div className="absolute h-[7px] w-[7px] rounded-full bg-fg-dark left-[58px] -top-[2.8px]"></div>
+            <div className="absolute h-[7px] w-[7px] rounded-full bg-white left-[58px] -top-[2.8px]"></div>
             <div className="absolute right-[37.4px] bottom-[18.5px]">
-              <div className="w-1 h-[2px] skew-y-[30deg] ml-[5px] bg-fg-dark"></div>
-              <div className="w-[10px] h-[1px] border-[1px] border-fg-dark rounded rotate-[75deg] origin-right -mb-[2.7px]"></div>
-              <div className="w-[10px] h-[1px] border-[1px] border-fg-dark rounded -rotate-[15deg] origin-right -mr-[1px]"></div>
+              <div className="w-1 h-[2px] skew-y-[30deg] ml-[5px] bg-white"></div>
+              <div className="w-[10px] h-[1px] border-[1px] border-white rounded rotate-[75deg] origin-right -mb-[2.7px]"></div>
+              <div className="w-[10px] h-[1px] border-[1px] border-white rounded -rotate-[15deg] origin-right -mr-[1px]"></div>
             </div>
-            <div className="grow flex justify-end pr-1 items-center h-10 border-t-[1.5px] border-fg-dark font-mono text-lg">
+            <div className="grow flex justify-end pr-1 items-center h-10 border-t-[1.5px] border-white font-mono text-lg">
             </div>
-            <div className="h-10 w-2 border-r-[2px] border-t-[3.5px] border-fg-dark rounded-tr-lg skew-y-[60deg] origin-bottom-right -rotate-[60deg] -mt-[20.2px] ml-[40px]">
+            <div className="h-10 w-2 border-r-[2px] border-t-[3.5px] border-white rounded-tr-lg skew-y-[60deg] origin-bottom-right -rotate-[60deg] -mt-[20.2px] ml-[40px]">
             </div>
           </div>
 
@@ -85,20 +85,20 @@ export function PacketDetails(packet: Packet | null) {
             : ''
             , 'relative flex flex-row justify-center items-end w-full h-fit pl-[2.3rem] pr-[3.75rem]'
           )}>
-            <div className="absolute h-[7px] w-[7px] rounded-full bg-fg-dark right-[58px] -bottom-[2.5px]"></div>
+            <div className="absolute h-[7px] w-[7px] rounded-full bg-white right-[58px] -bottom-[2.5px]"></div>
             <div className="absolute left-[37.8px] top-[18.8px]">
-              <div className="w-1 h-[2px] skew-y-[30deg] mr-[6px] bg-fg-dark ml-[1px] mt-[1.5px]"></div>
-              <div className="w-[10px] h-[2px] border-[1.2px] border-fg-dark rounded -rotate-[15deg] origin-left -mt-[3.1px]"></div>
-              <div className="w-[10px] h-[2px] border-[1.2px] border-fg-dark rounded rotate-[75deg] origin-left -mt-[2.5px]"></div>
+              <div className="w-1 h-[2px] skew-y-[30deg] mr-[6px] bg-white ml-[1px] mt-[1.5px]"></div>
+              <div className="w-[10px] h-[2px] border-[1.2px] border-white rounded -rotate-[15deg] origin-left -mt-[3.1px]"></div>
+              <div className="w-[10px] h-[2px] border-[1.2px] border-white rounded rotate-[75deg] origin-left -mt-[2.5px]"></div>
             </div>
-            <div className="h-10 w-2 border-l-[2px] border-b-[3.5px] border-fg-dark rounded-bl-lg skew-y-[60deg] origin-top-left -rotate-[60deg] -mb-[20.2px] mr-[40px]">
+            <div className="h-10 w-2 border-l-[2px] border-b-[3.5px] border-white rounded-bl-lg skew-y-[60deg] origin-top-left -rotate-[60deg] -mb-[20.2px] mr-[40px]">
             </div>
-            <div className="grow flex justify-start pl-1 items-center h-10 border-b-[1.5px] border-fg-dark font-mono text-lg">
+            <div className="grow flex justify-start pl-1 items-center h-10 border-b-[1.5px] border-white font-mono text-lg">
             </div>
           </div>
         </div>
 
-        <div className="w-60 h-full grid justify-items-center content-center border border-fg-dark border-fg-dark rounded-lg bg-sky-600/50 font-accent font-medium text-lg">
+        <div className="w-60 h-full grid justify-items-center content-center bg-sky-600/50 font-mono font-medium text-lg">
           <p>Dest Chain:</p>
           <p>{clientToDisplay(packet.destClient)}</p>
         </div>
@@ -155,7 +155,7 @@ export function PacketDetails(packet: Packet | null) {
 function Divider () {
   return (
     <div className="flex flex-row justify-center my-0.5">
-      <div className="h-0 mb-[0.5px] mt-[1.5px] w-[calc(100%-0.5rem)] border-b border-fg-dark/30"></div>
+      <div className="h-0 mb-[0.5px] mt-[1.5px] w-[calc(100%-0.5rem)] border-b border-white/30"></div>
     </div>
   );
 }
