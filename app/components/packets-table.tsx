@@ -73,13 +73,13 @@ export function PacketsTable<TableType extends Packet | Client | IdentifiedChann
               leaveFrom="transform scale-100 opacity-100"
               leaveTo="transform scale-95 opacity-0">
               <Popover.Panel className="absolute z-20 mt-2 left-0">
-                <div className="bg-bg-light dark:bg-bg-dark pl-6 pr-9 py-4 border-[0.5px] rounded-md border-slate-500">
+                <div className="bg-vapor dark:bg-black pl-6 pr-9 py-4 border-[0.5px] border-slate-500">
                   {table.getAllLeafColumns().map(column => { return (
                     <div key={column.id} className="py-[0.17rem] flex w-full">
                       <label className="hover:cursor-pointer w-full">
                         <input
                           className="appearance-none border border-slate-500 bg-transparent rounded-lg w-3 h-3 mr-3 transition-colors ease-in-out duration-150
-                            checked:bg-emerald-500 checked:border-transparent"
+                            checked:bg-turquoise checked:border-transparent"
                           {...{
                             type: 'checkbox',
                             checked: column.getIsVisible(),
@@ -100,13 +100,13 @@ export function PacketsTable<TableType extends Packet | Client | IdentifiedChann
         { /* Pagination */ }
         <div className="flex flex-row justify-center items-center">
           <button
-            className="rounded p-2 disabled:opacity-60 enabled:hover:bg-bg-light-accent enabled:dark:hover:bg-bg-dark-accent transition-colors ease-in-out duration-200"
+            className="btn-secondary"
             onClick={() => setPageNumber(1)}
             disabled={(pageNumber < 2) || loading}>
             <FiChevronsLeft className="w-6 h-6"/>
           </button>
           <button
-            className="rounded p-2 disabled:opacity-60 enabled:hover:bg-bg-light-accent enabled:dark:hover:bg-bg-dark-accent transition-colors ease-in-out duration-200"
+            className="btn-secondary"
             onClick={() => setPageNumber(pageNumber - 1)}
             disabled={(pageNumber < 2) || loading}>
             <FiChevronLeft className="w-5 h-5"/>
@@ -115,7 +115,7 @@ export function PacketsTable<TableType extends Packet | Client | IdentifiedChann
           <span className="mx-4 mb-[2px]">{pageNumber}</span>
 
           <button
-            className="rounded p-2 disabled:opacity-60 enabled:hover:bg-bg-light-accent enabled:dark:hover:bg-bg-dark-accent transition-colors ease-in-out duration-200"
+            className="btn-secondary"
             onClick={() => setPageNumber(pageNumber + 1)}
             disabled={(table.getRowCount() < pageLimit) || loading}>
             <FiChevronRight className="w-5 h-5"/>
@@ -124,17 +124,16 @@ export function PacketsTable<TableType extends Packet | Client | IdentifiedChann
       </div>
 
       { /* Table */ }
-      <div className="w-full border-2 border-slate-300 dark:border-slate-700 rounded-md bg-bg-light-accent dark:bg-bg-dark-accent overflow-y-auto scroll-smooth min-h-72">
+      <div className="w-full bg-white dark:bg-transparent overflow-y-auto scroll-smooth min-h-72">
         {(!delayedLoading && !table.getFilteredRowModel().rows.length) &&
           <div className="absolute mt-36 z-10 w-full grid justify-items-center font-medium font-mono text-lg">
             <div>No results</div>
           </div>
         }
-        <div className="absolute mt-[55px] left-[0.8px] w-[calc(100%-2px)] z-10 border-t border-2 border-slate-300 dark:border-slate-700"></div>
         <table
-          className="min-w-full"
+          className="min-w-full border-separate border-spacing-y-[0px]"
           style={{width: table.getCenterTotalSize()}}>
-          <thead className="sticky top-0 bg-bg-light-accent dark:bg-dark-accent z-10">
+          <thead className="sticky top-0 z-10">
             {table.getHeaderGroups().map(headerGroup => (
               <tr key={headerGroup.id}>
               {headerGroup.headers.map(header => {
@@ -144,11 +143,11 @@ export function PacketsTable<TableType extends Packet | Client | IdentifiedChann
                       header.id === 'destClient'
                       ? 'pl-2'
                       : 'pl-5'
-                      , 'py-2 dark:bg-bg-dark last:pr-6 whitespace-nowrap font-medium first:pl-6'
+                      , 'py-2 dark:bg-black first:pl-6 last:pr-6 whitespace-nowrap font-medium border-y-[0.5px] border-slate-500'
                     )}
                     style={{width: header.getSize()}}>
                     {(header.isPlaceholder) ? null : (
-                      <div className="h-10 grid justify-items-start content-center">
+                      <div className="h-11 grid justify-items-start content-center">
                         <div className="ml-2 transition-opacity ease-in-out duration-150"> 
                           {flexRender(
                             header.column.columnDef.header,
@@ -167,7 +166,7 @@ export function PacketsTable<TableType extends Packet | Client | IdentifiedChann
             {delayedLoading ? (
               Array.from({ length: pageLimit }).map((_, index) => (
                 <tr 
-                  className="w-full h-14 even:bg-bg-light dark:even:bg-bg-dark"
+                  className="w-full h-[3.5rem]"
                   key={index}>
                   {table.getHeaderGroups()[0].headers.map(column => (
                     <td
@@ -177,7 +176,7 @@ export function PacketsTable<TableType extends Packet | Client | IdentifiedChann
                         column.id === 'destClient'
                         ? 'pl-2'
                         : 'pl-7'
-                        , 'last:pr-6'
+                        , 'first:pl-9 last:pr-6'
                       )}>
                       <div
                         className="opacity-0 h-5 w-3/4 bg-vapor animate-initial animate-pulse-light"
@@ -195,7 +194,7 @@ export function PacketsTable<TableType extends Packet | Client | IdentifiedChann
                     rowDetails
                     ? 'hover:cursor-pointer'
                     : ''
-                    , 'h-14 w-full hover:bg-sky-100 dark:hover:bg-sky-950 transition-colors ease-in-out duration-200 even:bg-bg-light dark:even:bg-bg-dark',
+                    , 'h-[3.4rem] w-full bg-black hover:bg-gradient-to-r from-blue/0 via-blue/80 via-30% to-purple transition-colors ease-in-out duration-200',
                   )}
                   onClick={() => {if (rowDetails) {
                     setSelectedRow(row.original);
@@ -211,7 +210,7 @@ export function PacketsTable<TableType extends Packet | Client | IdentifiedChann
                         , hideCells
                         ? 'opacity-0'
                         : 'opacity-100'
-                        , 'last:pr-6 transition-opacity ease-in-out duration-150'
+                        , 'first:pl-9 last:pr-6 transition-opacity ease-in-out duration-150 border-b-[0.5px] border-gray-700'
                       )}
                       style={{width: cell.column.getSize()}}>
                       {flexRender(cell.column.columnDef.cell, cell.getContext())}

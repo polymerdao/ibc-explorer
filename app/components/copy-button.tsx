@@ -27,7 +27,7 @@ export function CopyButton({str}: {str: string}) {
         showCheck
         ? ''
         : 'invisible'
-        , 'absolute cursor-pointer bottom-[4px] left-[6px] w-[18px] h-[18px] text-emerald-500'
+        , 'absolute cursor-pointer bottom-[4px] left-[6px] w-[18px] h-[18px] text-turquoise'
       )} />
     </div>
   );

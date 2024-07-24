@@ -209,7 +209,7 @@ export default function Packets() {
           <input
             type="text"
             placeholder="Search Custom Channels by ID"
-            className="inpt border-[1px] w-full px-3 rounded-md font-mono placeholder:font-primary"
+            className="inpt w-full px-3 font-mono placeholder:font-primary"
             value={searchId}
             onChange={e => setSearchId(e.target.value)}
             onKeyUp={e => { if (e.key === 'Enter') searchChannels(searchId) }}

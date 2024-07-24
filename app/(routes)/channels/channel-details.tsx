@@ -55,7 +55,7 @@ export function ChannelDetails(channel: IdentifiedChannel | null) {
 function Divider () {
   return (
     <div className="flex flex-row justify-center my-0.5">
-      <div className="h-0 mb-[0.5px] mt-[1.5px] w-[calc(100%-0.5rem)] border-b border-fg-dark/30"></div>
+      <div className="h-0 mb-[0.5px] mt-[1.5px] w-[calc(100%-0.5rem)] border-b border-white/30"></div>
     </div>
   );
 }
