@@ -29,7 +29,7 @@ export default function Navbar() {
   }
 
   return (
-    <nav className="w-full z-20 sticky top-0 bg-white dark:bg-black border-b-[0px] border-gray-300 dark:border-gray-700 ease-in-out">
+    <nav className="w-full z-20 sticky top-0 bg-white/65 dark:bg-black/65 backdrop-blur-md border-b-[0px] border-gray-300 dark:border-gray-700 ease-in-out">
       <div className="h-16 min-w-0 xl:min-w-[80rem] max-w-screen-2xl xl:w-4/5 mx-auto px-6 sm:px-8 flex justify-between sm:justify-start">
 
         <div className="flex items-center shrink-0 ml-1 mr-10 pt-1">
@@ -46,7 +46,7 @@ export default function Navbar() {
                 href={item.href}
                 className={classNames(
                   pathname === item.href
-                    ? 'border-black border-opacity-60 dark:border-white dark:border-opacity-60'
+                    ? 'border-black/60 dark:border-white/60'
                     : 'border-transparent text-gray-600 dark:text-gray-300 hover:text-black dark:hover:text-white'
                     , 'inline-flex items-center px-1 pt-1 border-b-2 text-md font-medium transition ease-in-out'
                 )}>
@@ -97,7 +97,7 @@ export default function Navbar() {
             nav
               ? 'right-0'
               : 'right-[-100%] hidden'
-              , 'fixed sm:hidden flex flex-col space-y-8 border-[0.8px] p-8 w-full h-screen top-16 border-gray-300 dark:border-gray-700 bg-white dark:bg-black ease-in-out duration-[400ms]'
+              , 'fixed sm:hidden flex flex-col space-y-8 border-[1px] p-8 w-full h-screen top-16 border-gray-300 dark:border-gray-700 bg-white dark:bg-black ease-in-out duration-[400ms]'
           )}>
           {tabs.map((item) => (
             <Link

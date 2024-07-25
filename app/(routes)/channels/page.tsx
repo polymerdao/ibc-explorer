@@ -11,13 +11,14 @@ import {
   useReactTable,
   VisibilityState
 } from '@tanstack/react-table';
-import { IbcTable } from 'components/ibc-table';
+import { Table } from 'components/table';
 import { IdentifiedChannel, stateToString } from 'utils/types/channel';
 import { ChannelDetails } from './channel-details';
 import { Modal } from 'components/modal';
 import { StateCell } from 'components/state-cell';
 import { ChainCell, Arrow } from 'components/chain-cell';
 import { formatPortId, formatConnectionHops } from 'components/format-strings';
+const { shuffle } = require('txt-shuffle');
 
 const columnHelper = createColumnHelper<IdentifiedChannel>();
 const columns = [
@@ -77,7 +78,10 @@ const columns = [
   })
 ];
 
-export default function Packets() {
+const PAGE_SIZE = 20;
+
+export default function Channels() {
+  const [header, setHeader] = useState<string>('');
   const [channels, setChannels] = useState<IdentifiedChannel[]>([]);
   const [searchId, setSearchId] = useState<string>('');
   const [channelSearch, setChannelSearch] = useState(false);
@@ -97,6 +101,16 @@ export default function Packets() {
 
   useEffect(() => {
     loadData();
+    shuffle({
+      text: 'Universal Channels',
+      fps: 20,
+      delayResolve: 0,
+      direction: 'right',
+      animation: 'show',
+      delay: 0.3,
+      duration: 1,
+      onUpdate: (output: string) => {setHeader(output);}
+    });
     // Check if url contains a channelId to load by default
     const urlParams = new URLSearchParams(window.location.search);
     const channelId = urlParams.get('channelId');
@@ -164,7 +178,7 @@ export default function Packets() {
     columns,
     initialState: {
       pagination: {
-        pageSize: 10
+        pageSize: PAGE_SIZE
       }
     },
     onColumnVisibilityChange: setColumnVisibility,
@@ -175,7 +189,7 @@ export default function Packets() {
   });
 
   return (
-    <div className="h-0">
+    <div>
       <Modal 
         open={error}
         onClose={() => {
@@ -203,7 +217,7 @@ export default function Packets() {
         loading={searchLoading}
       />
 
-      <h1 className="ml-1">Universal Channels</h1>
+      <h1 className="ml-1 h-8">{header}</h1>
       <div className="flex flex-row justify-between mt-4">
         <div className="flex flex-row justify-left w-2/5 min-w-[248px]">
           <input
@@ -221,12 +235,12 @@ export default function Packets() {
             Search
           </button>
         </div>
-        <button onClick={() => loadData()} className="btn btn-accent">
+        <button onClick={() => loadData()} className="btn">
           Reload
         </button>
       </div>
 
-      <IbcTable {...{table, loading, rowDetails: ChannelDetails}} />
+      <Table {...{table, loading, rowDetails: ChannelDetails, pageLimit: PAGE_SIZE}} />
     </div>
   );
 }

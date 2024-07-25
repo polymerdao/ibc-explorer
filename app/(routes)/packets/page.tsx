@@ -11,7 +11,7 @@ import {
   SortingState,
   useReactTable }
 from '@tanstack/react-table';
-import { PacketsTable } from 'components/packets-table';
+import { Table } from 'components/table';
 import { Modal } from 'components/modal';
 import { Packet } from 'utils/types/packet';
 import { PacketDetails } from './packet-details';
@@ -171,19 +171,21 @@ export default function Packets() {
   useEffect(() => {
     searchPackets();
     shuffle({
-      text: 'Recent Packets', // our text
-      fps: 20, // how many times per second it refreshes
-      delayResolve: 0, // reveal right away
+      text: 'Recent Packets',
+      fps: 20,
+      delayResolve: 0,
       direction: 'right',
-      animation: 'show', // don't hide things
-      delay: 0.3, // delay in seconds + an extra delay if it's in a paragraph by line
-      duration: 1, // usually 1 second or 0.3 seconds for hovers
+      animation: 'show',
+      delay: 0.3,
+      duration: 1,
       onUpdate: (output: string) => {setHeader(output);}
     });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
     searchPackets(paginationSearchValue, false);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pageNumber]);
 
   const controller = new AbortController();
@@ -261,7 +263,7 @@ export default function Packets() {
   });
 
   return (
-    <div className="mb-10">
+    <div>
       <Modal 
         open={error}
         onClose={() => {
@@ -332,7 +334,7 @@ export default function Packets() {
         </div>
         <button 
           onClick={() => searchPackets()}
-          className="btn btn-accent">
+          className="btn">
           Reload
         </button>
       </div>
@@ -371,12 +373,12 @@ export default function Packets() {
                 leaveFrom="transform scale-100 opacity-100"
                 leaveTo="transform scale-95 opacity-0">
                 <Popover.Panel className="absolute z-20 mt-2 left-0">
-                  <div className="bg-vapor dark:bg-black pl-5 pr-9 pt-3.5 pb-4 border-[0.5px] border-slate-500">
+                  <div className="bg-vapor dark:bg-black pl-5 pr-9 pt-3.5 pb-4 border-[0.5px] border-gray-500">
                     {stateFilter.map(state => { return (
                       <div key={state.value} className="py-[0.25rem] flex w-full">
                         <label className="hover:cursor-pointer w-full">
                           <input
-                            className="appearance-none border border-slate-500 bg-transparent rounded-lg w-3 h-3 mr-2.5 transition-colors ease-in-out duration-150
+                            className="appearance-none border border-gray-500 bg-transparent rounded-lg w-3 h-3 mr-2.5 transition-colors ease-in-out duration-150
                               checked:bg-turquoise checked:border-transparent hover:cursor-pointer"
                             {...{
                               type: 'checkbox',
@@ -418,7 +420,7 @@ export default function Packets() {
         </div>
       </div>
 
-      <PacketsTable {...{
+      <Table {...{
         table,
         loading,
         rowDetails: PacketDetails,
