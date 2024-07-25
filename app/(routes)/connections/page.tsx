@@ -11,10 +11,11 @@ import {
   SortingState,
   useReactTable }
 from '@tanstack/react-table';
-import { IbcTable } from 'components/ibc-table';
+import { Table } from 'components/table';
 import { SimIcon } from 'components/icons';
 import { Modal } from 'components/modal';
 import { IdentifiedConnection, State } from 'cosmjs-types/ibc/core/connection/v1/connection';
+const { shuffle } = require('txt-shuffle');
 
 const columnHelper = createColumnHelper<IdentifiedConnection>();
 const columns = [
@@ -58,7 +59,10 @@ const columns = [
   })
 ];
 
-export default function Packets() {
+const PAGE_SIZE = 20;
+
+export default function Connections() {
+  const [header, setHeader] = useState<string>('');
   const [connections, setConnections] = useState<IdentifiedConnection[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
@@ -70,6 +74,16 @@ export default function Packets() {
 
   useEffect(() => {
     loadData();
+    shuffle({
+      text: 'Connections',
+      fps: 20,
+      delayResolve: 0,
+      direction: 'right',
+      animation: 'show',
+      delay: 0.3,
+      duration: 1,
+      onUpdate: (output: string) => {setHeader(output);}
+    });
   }, []);
 
   function loadData() {
@@ -101,7 +115,7 @@ export default function Packets() {
     },
     initialState: {
       pagination: {
-        pageSize: 10
+        pageSize: PAGE_SIZE
       }
     },
     onColumnVisibilityChange: setColumnVisibility,
@@ -123,13 +137,13 @@ export default function Packets() {
       />
 
       <div className="flex flex-row justify-between">
-        <h1 className="ml-1">Connections</h1>
-        <button onClick={() => loadData()} className="btn btn-accent">
+        <h1 className="ml-1 h-8">{header}</h1>
+        <button onClick={() => loadData()} className="btn">
           Reload
         </button>
       </div>
 
-      <IbcTable {...{table, loading}} />
+      <Table {...{table, loading, pageLimit: PAGE_SIZE}} />
     </div>
   );
 }

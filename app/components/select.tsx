@@ -46,17 +46,17 @@ export function Select({ options, onChange, containerClassName, buttonClassName,
             leave="ease-in duration-150"
             leaveFrom="transform scale-100 opacity-100"
             leaveTo="transform scale-95 opacity-0">
-            <Listbox.Options className={`${dropdownClassName || ''} absolute z-20 left-0 mt-2 overflow-auto py-2.5 px-2 border-[0.5px] border-slate-500`}>
+            <Listbox.Options className={`${dropdownClassName || ''} absolute z-20 left-0 mt-2 overflow-auto py-2.5 px-2 border-[0.5px] border-gray-500`}>
               {options.map((option) => (
                 <Listbox.Option key={option.value} value={option}
                   className={({ active }) => classNames(
                     active
-                    ? 'bg-blue'
+                    ? 'bg-turquoise rounded-sm text-black'
                     : ''
                     , 'relative hover:cursor-pointer select-none py-1.5 ml-2 mr-2.5 pl-2.5 pr-3'
                   )}>
                   <div className="flex flex-row">
-                    <span className="text-black dark:text-white whitespace-nowrap">
+                    <span className="whitespace-nowrap pr-1">
                       {option.label}
                     </span>
                   </div>

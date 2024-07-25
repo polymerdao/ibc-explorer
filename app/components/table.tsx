@@ -1,5 +1,5 @@
 import { 
-  Table,
+  Table as TanStackTable,
   flexRender
 } from '@tanstack/react-table';
 import { Transition, Popover } from '@headlessui/react';
@@ -12,17 +12,17 @@ import { IdentifiedChannel } from 'utils/types/channel';
 import { classNames } from 'utils/functions';
 import { useState, Fragment, useEffect } from 'react';
 
-interface IbcTableProps<TableType> {
-  table: Table<TableType>,
+interface TableProps<TableType> {
+  table: TanStackTable<TableType>,
   loading: boolean,
   rowDetails?: (row: TableType) => JSX.Element,
-  pageNumber: number,
-  setPageNumber: (pageNumber: number) => void,
+  pageNumber?: number,
+  setPageNumber?: (pageNumber: number) => void,
   pageLimit: number
 }
 
-export function PacketsTable<TableType extends Packet | Client | IdentifiedChannel | IdentifiedConnection>
-  ({ table, loading, rowDetails, pageNumber, setPageNumber, pageLimit }: IbcTableProps<TableType>)
+export function Table<TableType extends Packet | Client | IdentifiedChannel | IdentifiedConnection>
+  ({ table, loading, rowDetails, pageNumber, setPageNumber, pageLimit }: TableProps<TableType>)
 {
   const [rowSelected, setRowSelected] = useState<boolean>(false);
   const [selectedRow, setSelectedRow] = useState<TableType | null>(null);
@@ -47,10 +47,10 @@ export function PacketsTable<TableType extends Packet | Client | IdentifiedChann
   }, [loading]);
 
   return (
-    <div className="relative mt-4">
+    <div className="relative mt-4 mb-10">
 
       { /* Table View Options */ }
-      <div className="flex flex-row justify-between mb-1 ml-1.5 text-slate-700 dark:text-slate-300">
+      <div className="flex flex-row justify-between mb-1 ml-1.5 text-gray-700 dark:text-gray-300">
 
         { /* Columns */ }
         <Popover>
@@ -73,12 +73,12 @@ export function PacketsTable<TableType extends Packet | Client | IdentifiedChann
               leaveFrom="transform scale-100 opacity-100"
               leaveTo="transform scale-95 opacity-0">
               <Popover.Panel className="absolute z-20 mt-2 left-0">
-                <div className="bg-vapor dark:bg-black pl-6 pr-9 py-4 border-[0.5px] border-slate-500">
+                <div className="bg-vapor dark:bg-black pl-6 pr-9 py-4 border-[0.5px] border-gray-500">
                   {table.getAllLeafColumns().map(column => { return (
                     <div key={column.id} className="py-[0.17rem] flex w-full">
                       <label className="hover:cursor-pointer w-full">
                         <input
-                          className="appearance-none border border-slate-500 bg-transparent rounded-lg w-3 h-3 mr-3 transition-colors ease-in-out duration-150
+                          className="appearance-none border border-gray-500 bg-transparent rounded-lg w-3 h-3 mr-3 transition-colors ease-in-out duration-150
                             checked:bg-turquoise checked:border-transparent"
                           {...{
                             type: 'checkbox',
@@ -101,23 +101,50 @@ export function PacketsTable<TableType extends Packet | Client | IdentifiedChann
         <div className="flex flex-row justify-center items-center">
           <button
             className="btn-secondary"
-            onClick={() => setPageNumber(1)}
-            disabled={(pageNumber < 2) || loading}>
+            onClick={() => {
+              if (setPageNumber) {
+                setPageNumber(1)
+              } else {
+                table.setPageIndex(0);
+              }
+            }}
+            disabled={
+              (pageNumber ? pageNumber < 2 : !table.getCanPreviousPage()) ||
+              loading
+            }>
             <FiChevronsLeft className="w-6 h-6"/>
           </button>
           <button
             className="btn-secondary"
-            onClick={() => setPageNumber(pageNumber - 1)}
-            disabled={(pageNumber < 2) || loading}>
+            onClick={() => {
+              if (setPageNumber && pageNumber) {
+                setPageNumber(pageNumber - 1)
+              } else {
+                table.setPageIndex(table.getState().pagination.pageIndex - 1);
+              }
+            }}
+            disabled={
+              (pageNumber ? pageNumber < 2 : !table.getCanPreviousPage()) ||
+              loading
+            }>
             <FiChevronLeft className="w-5 h-5"/>
           </button>
 
-          <span className="mx-4 mb-[2px]">{pageNumber}</span>
+          <span className="mx-4 mb-[2px]">{pageNumber || table.getState().pagination.pageIndex + 1}</span>
 
           <button
             className="btn-secondary"
-            onClick={() => setPageNumber(pageNumber + 1)}
-            disabled={(table.getRowCount() < pageLimit) || loading}>
+            onClick={() => {
+              if (setPageNumber && pageNumber) {
+                setPageNumber(pageNumber + 1)
+              } else {
+                table.setPageIndex(table.getState().pagination.pageIndex + 1);
+              }
+            }}
+            disabled={
+              (pageNumber ? table.getRowCount() < pageLimit : !table.getCanNextPage()) ||
+              loading
+            }>
             <FiChevronRight className="w-5 h-5"/>
           </button>
         </div>
@@ -143,7 +170,7 @@ export function PacketsTable<TableType extends Packet | Client | IdentifiedChann
                       header.id === 'destClient'
                       ? 'pl-2'
                       : 'pl-5'
-                      , 'py-2 dark:bg-black first:pl-6 last:pr-6 whitespace-nowrap font-medium border-y-[0.5px] border-slate-500'
+                      , 'py-2 dark:bg-black first:pl-6 last:pr-6 whitespace-nowrap font-medium border-y-[0.5px] border-gray-500'
                     )}
                     style={{width: header.getSize()}}>
                     {(header.isPlaceholder) ? null : (
@@ -194,7 +221,7 @@ export function PacketsTable<TableType extends Packet | Client | IdentifiedChann
                     rowDetails
                     ? 'hover:cursor-pointer'
                     : ''
-                    , 'h-[3.4rem] w-full bg-black hover:bg-gradient-to-r from-blue/0 via-blue/80 via-30% to-purple transition-colors ease-in-out duration-200',
+                    , 'h-[3.4rem] w-full bg-black hover:bg-vapor/[5%] transition-colors ease-in-out duration-200',
                   )}
                   onClick={() => {if (rowDetails) {
                     setSelectedRow(row.original);

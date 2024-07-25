@@ -4,7 +4,7 @@ import Navbar from './components/navbar';
 import './globals.css';
 
 export const metadata: Metadata = {
-  title: 'IBC Explorer',
+  title: 'Polymer Explorer',
   description: 'Polymer Labs IBC Explorer',
 };
 
