@@ -31,7 +31,7 @@ export function PacketDetails(packet: Packet | null) {
 
       {/* Status Bar */}
       <div className="w-full h-24 flex flex-row mt-6 mb-9">
-        <div className="w-60 h-full grid justify-items-center content-center rounded-sm bg-vapor/90 text-black font-mono font-medium text-lg">
+        <div className="w-60 h-full grid justify-items-center content-center rounded-sm bg-vapor text-black font-mono font-medium text-lg">
           <p>Src Chain:</p>
           <p>{clientToDisplay(packet.sourceClient)}</p>
         </div>
