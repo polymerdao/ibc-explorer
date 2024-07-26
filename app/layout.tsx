@@ -18,7 +18,7 @@ export default function RootLayout({
       <body className="animate-black-to-vapor">
         <video
           autoPlay muted loop
-          className="fixed z-[-10] border-l-[1px] border-black object-cover w-full h-full opacity-[93%] transform"
+          className="fixed z-[-10] border-l-[1px] border-black object-cover w-full h-full opacity-[93%] transform rotate-180"
           src="/Polymer_Background-Loop_Final_Black.mp4">
         </video>
         <Navbar />
