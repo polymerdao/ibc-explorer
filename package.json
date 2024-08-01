@@ -12,7 +12,7 @@
     "@cosmjs/stargate": "^0.32.4",
     "@cosmjs/tendermint-rpc": "^0.32.4",
     "@headlessui/react": "^1.7.18",
-    "@sentry/nextjs": "^8.12.0",
+    "@sentry/nextjs": "^8.21.0",
     "@tanstack/react-table": "^8.19.3",
     "@types/flat-cache": "^2.0.2",
     "ethers": "^6.13.1",
