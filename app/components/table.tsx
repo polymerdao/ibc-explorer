@@ -28,6 +28,7 @@ export function Table<TableType extends Packet | Client | IdentifiedChannel | Id
   const [selectedRow, setSelectedRow] = useState<TableType | null>(null);
   const [delayedLoading, setDelayedLoading] = useState<boolean>(true);
   const [hideCells, setHideCells] = useState<boolean>(true);
+  const [originalUrl, setOriginalUrl] = useState<string>('');
 
   useEffect(() => {
     if (!loading) {
@@ -224,7 +225,13 @@ export function Table<TableType extends Packet | Client | IdentifiedChannel | Id
                     , 'h-[3.4rem] w-full bg-black hover:bg-vapor/[5%] transition-colors ease-in-out duration-200',
                   )}
                   onClick={() => {if (rowDetails) {
+                    setOriginalUrl(window.location.href);
                     setSelectedRow(row.original);
+                    if ('sequence' in row.original) {
+                      window.history.replaceState({}, '', `/packets?searchValue=${row.original.id}`);
+                    } else if ('channelId' in row.original) {
+                      window.history.replaceState({}, '', `/channels?channelId=${row.original.channelId}`);
+                    }
                     setRowSelected(true); 
                   }}}>
                   {row.getVisibleCells().map(cell => (
@@ -254,7 +261,10 @@ export function Table<TableType extends Packet | Client | IdentifiedChannel | Id
       {rowDetails && 
         <Modal
           open={rowSelected}
-          onClose={() => setRowSelected(false)}
+          onClose={() => {
+            setRowSelected(false);
+            window.history.replaceState({}, '', originalUrl);
+          }}
           content={rowDetails(selectedRow as TableType)}
         />
       }
