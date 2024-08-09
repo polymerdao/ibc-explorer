@@ -169,7 +169,14 @@ export default function Packets() {
   }]);
 
   useEffect(() => {
-    searchPackets();
+    if (window.location.search) {
+      const searchParams = new URLSearchParams(window.location.search);
+      const searchValue = searchParams.get('searchValue') || '';
+      if (searchValue) setTextField(searchValue);
+      searchPackets(searchValue);
+    } else {
+      searchPackets();
+    }
     shuffle({
       text: 'Recent Packets',
       fps: 20,
@@ -195,6 +202,9 @@ export default function Packets() {
 
     if (searchValue === undefined) {
       searchValue = textField;
+    }
+    if (searchValue !== '') {
+      window.history.replaceState({}, '', `/packets?searchValue=${searchValue}`);
     }
     if (resetPage) {
       setPageNumber(1);
@@ -283,6 +293,7 @@ export default function Packets() {
         onClose={() => {
           setFoundPacket(null);
           setNoResults(false);
+          window.history.replaceState({}, '', '/packets');
         }}
         content={PacketDetails(foundPacket)}
       />

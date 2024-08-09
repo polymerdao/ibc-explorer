@@ -112,8 +112,8 @@ export default function Channels() {
       onUpdate: (output: string) => {setHeader(output);}
     });
     // Check if url contains a channelId to load by default
-    const urlParams = new URLSearchParams(window.location.search);
-    const channelId = urlParams.get('channelId');
+    const searchParams = new URLSearchParams(window.location.search);
+    const channelId = searchParams.get('channelId');
     if (channelId) {
       searchChannels(channelId);
     }
@@ -208,6 +208,7 @@ export default function Channels() {
         open={channelSearch} 
         onClose={() => {
           setChannelSearch(false);
+          window.history.replaceState(null, '', '/channels');
           if (searchLoading) {
             controller.abort();
             setSearchLoading(false);

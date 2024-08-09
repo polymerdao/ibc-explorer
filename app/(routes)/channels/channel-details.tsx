@@ -2,13 +2,6 @@ import { useEffect } from 'react';
 import { IdentifiedChannel, stateToString } from 'utils/types/channel';
 
 export function ChannelDetails(channel: IdentifiedChannel | null) {
-  useEffect(() => {
-    if (channel) {
-      // Update URL with channelId
-      window.history.pushState({}, '', `/channels/?channelId=${channel.channelId}`);
-    }
-  }, [channel]);
-
   return !channel ? (
     <>
       <h2 className="mt-1 mb-2 mr-8">No Results</h2>
