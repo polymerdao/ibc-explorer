@@ -208,6 +208,7 @@ export default function Channels() {
         open={channelSearch} 
         onClose={() => {
           setChannelSearch(false);
+          window.history.pushState(null, '', '/channels');
           if (searchLoading) {
             controller.abort();
             setSearchLoading(false);
