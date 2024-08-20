@@ -1,19 +1,16 @@
 import { Chain } from 'utils/types/chain';
-import { OptimismIcon, BaseIcon, MoltenIcon } from './icons';
+import { OptimismIcon, BaseIcon } from './icons';
 
-export type CHAIN = 'optimism' | 'base' | 'molten';
+export type CHAIN = 'optimism' | 'base';
 
 let opDispatcher = process.env.DISPATCHER_ADDRESS_OPTIMISM!;
 let baseDispatcher = process.env.DISPATCHER_ADDRESS_BASE!;
-let moltenDispatcher = process.env.DISPATCHER_ADDRESS_MOLTEN!;
 
 let opClientName = process.env.OPTIMISM_CLIENT_NAME!;
 let baseClientName = process.env.BASE_CLIENT_NAME!;
-let moltenClientName = process.env.MOLTEN_CLIENT_NAME!;
 
 let optimismRPC = process.env.OPTIMISM_RPC || 'https://opt-sepolia.g.alchemy.com/v2/jKvLhhXvtnWdNeZrKst0demxnwJcYH1o';
 let baseRPC = process.env.BASE_RPC || 'https://base-sepolia.g.alchemy.com/v2/776dC6qT-NTtupdnxlUJuXGbUIKWWhLe';
-let moltenRPC = process.env.MOLTEN_RPC || 'https://unidex-sepolia.rpc.caldera.xyz/http';
 
 export const CHAIN_CONFIGS: {
   [key in CHAIN]: Chain;
@@ -37,17 +34,7 @@ export const CHAIN_CONFIGS: {
     clients: [baseClientName],
     blockTime: 2,
     icon: BaseIcon,
-  },
-  molten: {
-    id: 49483,
-    display: 'Molten',
-    rpc: moltenRPC,
-    txUrl: 'https://unidex-sepolia.explorer.caldera.xyz/',
-    dispatchers: [moltenDispatcher],
-    clients: [moltenClientName],
-    blockTime: 2,
-    icon: MoltenIcon,
-  },
+  }
 };
 
 export function clientToDisplay(client: string) {
