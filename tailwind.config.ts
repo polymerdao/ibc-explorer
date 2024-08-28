@@ -17,7 +17,8 @@ const config: Config = {
         'turquoise': '#02DBC4',
         'vapor': '#F1E9f7',
         'white': '#FFFFFF',
-        'dark-gray': '#282729'
+        'dark-gray': '#282729',
+        'warning': '#F695A1'
       },
       fontFamily: {
         primary: ['var(--primary-font)'],

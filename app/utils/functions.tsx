@@ -5,3 +5,7 @@ export function classNames(...classes: string[]) {
 export function classLogic(func: () => string): string {
   return func();
 }
+
+export function numberWithCommas(input: number): string {
+  return input.toLocaleString('en');
+}
