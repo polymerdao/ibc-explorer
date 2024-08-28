@@ -16,6 +16,10 @@ export interface Packet {
   sourceClient: string;
   destClient: string;
   senderAddress?: string;
+  totalRecvFeesDeposited: number;
+  recvGasLimit?: number;
+  totalAckFeesDeposited: number;
+  ackGasLimit?: number;
 }
 
 export enum PacketStates {

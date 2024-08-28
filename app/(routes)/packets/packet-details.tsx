@@ -1,23 +1,44 @@
 import Link from 'next/link';
 import { Packet, PacketStates, stateToString } from 'utils/types/packet';
 import { CHAIN_CONFIGS, CHAIN, clientToDisplay } from 'utils/chains/configs';
-import { classNames } from 'utils/functions';
+import { Chain } from 'utils/types/chain';
+import { classNames, numberWithCommas } from 'utils/functions';
 import { CopyButton } from 'components/copy-button';
+import { ethers } from 'ethers';
+import { useEffect, useState } from 'react';
 
 export function PacketDetails(packet: Packet | null) {
-  let sourceUrl = '';
-  let destUrl = '';
+  const [sourceChain, setSourceChain] = useState<Chain | undefined>();
+  const [destChain, setDestChain] = useState<Chain | undefined>();
+  const [recvFunding, setRecvFunding] = useState<number>(0);
+  const [ackFunding, setAckFunding] = useState<number>(0);
 
-  for (const chain of Object.keys(CHAIN_CONFIGS)) {
-    const chainName = chain as CHAIN;
-    const chainVals = CHAIN_CONFIGS[chainName];
-    if (packet?.sourceClient?.toLowerCase().startsWith(chain)) {
-      sourceUrl = chainVals.txUrl;
+  useEffect(() => {
+    for (const chain of Object.keys(CHAIN_CONFIGS)) {
+      const chainName = chain as CHAIN;
+      const chainVals = CHAIN_CONFIGS[chainName];
+      if (packet?.sourceClient?.toLowerCase().startsWith(chain)) {
+        setSourceChain(chainVals);
+      }
+      if (packet?.destClient?.toLowerCase().startsWith(chain)) {
+        setDestChain(chainVals);
+      }
     }
-    if (packet?.destClient?.toLowerCase().startsWith(chain)) {
-      destUrl = chainVals.txUrl;
+  }, [packet]);
+
+  useEffect(() => {
+    async function checkTxFunding() {
+      if (packet && sourceChain && destChain) {
+        const recv = await calcTxFunding(destChain.rpc, packet.totalRecvFeesDeposited, packet.recvGasLimit);
+        const ack = await calcTxFunding(sourceChain.rpc, packet.totalAckFeesDeposited, packet.ackGasLimit);
+        setRecvFunding(recv);
+        setAckFunding(ack);
+      }
     }
-  }
+    checkTxFunding();
+    let intervalId = setInterval(checkTxFunding, 2000);
+    return () => clearInterval(intervalId);
+  }, [packet, sourceChain, destChain]);
 
   return !packet ? (
     <>
@@ -124,27 +145,27 @@ export function PacketDetails(packet: Packet | null) {
         {/* Links */}
         <div className="flex flex-row justify-between">
           <p className="mr-8 font-medium">Source Port Address</p>
-          {linkAndCopy(sourceUrl, 'address', packet.sourcePortAddress)}
+          {linkAndCopy(sourceChain?.txUrl || '', 'address', packet.sourcePortAddress)}
         </div>
         <Divider />
         <div className="flex flex-row justify-between">
           <p className="mr-8 font-medium">Dest Port Address</p>
-          {linkAndCopy(destUrl, 'address', packet.destPortAddress)}
+          {linkAndCopy(destChain?.txUrl || '', 'address', packet.destPortAddress)}
         </div>
         <Divider />
         <div className="flex flex-row justify-between">
           <p className="mr-8 font-medium">Send Tx</p>
-          {linkAndCopy(sourceUrl, 'tx', packet.sendTx)}
+          {linkAndCopy(sourceChain?.txUrl || '', 'tx', packet.sendTx)}
         </div>
         <Divider />
         <div className="flex flex-row justify-between">
           <p className="mr-8 font-medium">Rcv Tx</p>
-          {linkAndCopy(destUrl, 'tx', packet.rcvTx)}
+          {txWithFeeInfo(recvFunding, destChain?.txUrl || '', packet.rcvTx)}
         </div>
         <Divider />
         <div className="flex flex-row justify-between">
           <p className="mr-8 font-medium">Ack Tx</p>
-          {linkAndCopy(sourceUrl, 'tx', packet.ackTx)}
+          {txWithFeeInfo(ackFunding, sourceChain?.txUrl || '', packet.ackTx)}
         </div>
 
       </div>
@@ -193,4 +214,35 @@ function formatDuration(duration: number) {
     return `${Math.floor(duration / 60)}m`;
   }
   return `${(duration / 3600).toFixed(1)}h`;
+}
+
+async function calcTxFunding(chainRpc: string, feesDeposited?: number, gasLimit?: number) {
+  if (!feesDeposited || !gasLimit) {
+    return 0;
+  }
+
+  const provider = new ethers.JsonRpcProvider(chainRpc)
+  const feeData = await provider.getFeeData();
+  const gasPrice = Number(feeData.gasPrice);
+
+  feesDeposited = Number(feesDeposited);
+  gasLimit = Number(gasLimit);
+
+  if (feesDeposited < (gasLimit * gasPrice)) {
+    return (gasLimit * gasPrice) - feesDeposited;
+  } else {
+    return 0;
+  }
+}
+
+function txWithFeeInfo(fundingStatus: number, url: string, txHash?: string) {
+  if (txHash) {
+    return linkAndCopy(url, 'tx', txHash);
+  }
+  else if (fundingStatus > 0) {
+    return <p className="font-mono text-warning">~{numberWithCommas(Math.round(fundingStatus / 1000000000))} Gwei Underfunded</p>;
+  }
+  else {
+    return <p className="font-mono animate-pulse">...</p>;
+  }
 }

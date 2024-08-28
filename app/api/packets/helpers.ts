@@ -70,9 +70,13 @@ function processPacketResponse(packetResponse: any[]): Packet[] {
       sendTx: packet.sendPacket?.transactionHash,
       rcvTx: packet.recvPacket?.transactionHash,
       ackTx: packet.ackPacket?.transactionHash,
-      sourceClient: packet.sendPacket?.sourceChannel?.portId.split('.')[1],
-      destClient: packet.sendPacket?.sourceChannel?.counterpartyPortId.split('.')[1],
-      senderAddress: packet.sendPacket?.uchEventSender || packet.sendPacket?.packetDataSender || ''
+      sourceClient: packet.sendPacket?.sourceChannel?.portId.split('.')[1] || '',
+      destClient: packet.sendPacket?.sourceChannel?.counterpartyPortId.split('.')[1] || '',
+      senderAddress: packet.sendPacket?.uchEventSender || packet.sendPacket?.packetDataSender || '',
+      totalRecvFeesDeposited: packet.sendPacket?.totalRecvFeesDeposited || 0,
+      recvGasLimit: packet.sendPacket?.firstFeeDeposited?.recvGasLimit || undefined,
+      totalAckFeesDeposited: packet.sendPacket?.totalAckFeesDeposited || 0,
+      ackGasLimit: packet.sendPacket?.firstFeeDeposited?.ackGasLimit || undefined
     };
     packets.push(newPacket);
   }
@@ -104,9 +108,13 @@ function processSendPacketResponse(packetResponse: any[]): Packet[] {
       sendTx: sendPacket.transactionHash,
       rcvTx: sendPacket.packetRelation?.recvPacket?.transactionHash,
       ackTx: sendPacket.packetRelation?.ackPacket?.transactionHash,
-      sourceClient: sendPacket.sourceChannel?.portId.split('.')[1],
-      destClient: sendPacket.sourceChannel?.counterpartyPortId.split('.')[1],
-      senderAddress: sendPacket.uchEventSender || sendPacket.packetDataSender || ''
+      sourceClient: sendPacket.sourceChannel?.portId.split('.')[1] || '',
+      destClient: sendPacket.sourceChannel?.counterpartyPortId.split('.')[1] || '',
+      senderAddress: sendPacket.uchEventSender || sendPacket.packetDataSender || '',
+      totalRecvFeesDeposited: sendPacket.totalRecvFeesDeposited || 0,
+      recvGasLimit: sendPacket.firstFeeDeposited?.recvGasLimit || undefined,
+      totalAckFeesDeposited: sendPacket.totalAckFeesDeposited || 0,
+      ackGasLimit: sendPacket.firstFeeDeposited?.ackGasLimit || undefined
     };
     packets.push(newPacket);
   }
@@ -127,6 +135,12 @@ export function generatePacketQuery(params?: string): { query: string } {
           transactionHash
           packetDataSender
           uchEventSender
+          totalRecvFeesDeposited
+          totalAckFeesDeposited
+          firstFeeDeposited {
+            recvGasLimit
+            ackGasLimit
+          }
           sourceChannel {
             channelId
             counterpartyChannelId
@@ -167,6 +181,12 @@ export function generateSendPacketQuery(params?: string): { query: string } {
         transactionHash
         packetDataSender
         uchEventSender
+        totalRecvFeesDeposited
+        totalAckFeesDeposited
+        firstFeeDeposited {
+          recvGasLimit
+          ackGasLimit
+        }
         sourceChannel {
           channelId
           counterpartyChannelId
