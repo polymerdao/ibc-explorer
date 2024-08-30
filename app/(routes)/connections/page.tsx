@@ -126,7 +126,7 @@ export default function Connections() {
   });
 
   return (
-    <div className="h-0">
+    <div>
       <Modal 
         open={error}
         onClose={() => setError(false)}

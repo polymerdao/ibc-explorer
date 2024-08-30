@@ -112,7 +112,7 @@ export default function Clients() {
   });
 
   return (
-    <div className="h-0">
+    <div>
       <Modal 
         open={error}
         onClose={() => {
