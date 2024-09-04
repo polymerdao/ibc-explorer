@@ -11,13 +11,21 @@ import {
   useReactTable,
   VisibilityState
 } from '@tanstack/react-table';
-import { Table } from 'components/table';
-import { IdentifiedChannel, stateToString } from 'utils/types/channel';
+import {
+  Table,
+  Modal,
+  StateCell,
+  ChainCell,
+  Arrow,
+  formatPortId,
+  formatConnectionHops,
+  FilterButton,
+  Select,
+  shortenHex
+} from 'components';
 import { ChannelDetails } from './channel-details';
-import { Modal } from 'components/modal';
-import { StateCell } from 'components/state-cell';
-import { ChainCell, Arrow } from 'components/chain-cell';
-import { formatPortId, formatConnectionHops } from 'components/format-strings';
+import { IdentifiedChannel, stateToString } from 'utils/types/channel';
+import { classNames } from 'utils/functions';
 const { shuffle } = require('txt-shuffle');
 
 const columnHelper = createColumnHelper<IdentifiedChannel>();
@@ -39,7 +47,7 @@ const columns = [
     id: 'sourceClient',
     cell: props => (
       <div className="flex flex-row justify-between">
-        <div className="ml-4"><ChainCell chain={props.getValue()} /></div>
+        <div className="ml-2.5"><ChainCell chain={props.getValue()} /></div>
         <Arrow />
       </div>
     ),
@@ -51,7 +59,7 @@ const columns = [
     id: 'destClient',
     cell: props => (
       <div className="flex flex-row justify-between">
-        <div className="ml-5"><ChainCell chain={props.getValue()} /></div>
+        <div className="ml-3"><ChainCell chain={props.getValue()} /></div>
       </div>
     ),
     enableColumnFilter: true,
@@ -75,6 +83,18 @@ const columns = [
     header: 'Connection Hops',
     id: 'connectionHops',
     enableHiding: true
+  }),
+  columnHelper.accessor('createTime', {
+    header: 'Create Time',
+    enableHiding: true,
+    cell: props => new Date((props.getValue() || 0) * 1000).toLocaleString(),
+    enableColumnFilter: false
+  }),
+  columnHelper.accessor('transactionHash', {
+    header: 'Transaction Hash',
+    cell: props => shortenHex(props.getValue()),
+    enableHiding: true,
+    enableSorting: true
   })
 ];
 
@@ -86,6 +106,9 @@ export default function Channels() {
   const [searchId, setSearchId] = useState<string>('');
   const [channelSearch, setChannelSearch] = useState(false);
   const [foundChannel, setFoundChannel] = useState<IdentifiedChannel | null>(null);
+  const [showFilters, setShowFilters] = useState(false);
+  const [showInProgressChannels, setShowInProgressChannels] = useState(false);
+  const [pageNumber, setPageNumber] = useState(1);
   const [loading, setLoading] = useState(true);
   const [searchLoading, setSearchLoading] = useState(false);
   const [error, setError] = useState(false);
@@ -93,6 +116,8 @@ export default function Channels() {
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({
     'connectionHops': false,
     'counterparty_portId': false,
+    'createTime': false,
+    'transactionHash': false
   });
   const [sorting, setSorting] = useState<SortingState>([{
     id: 'channelId',
@@ -101,16 +126,7 @@ export default function Channels() {
 
   useEffect(() => {
     loadData();
-    shuffle({
-      text: 'Universal Channels',
-      fps: 20,
-      delayResolve: 0,
-      direction: 'right',
-      animation: 'show',
-      delay: 0.3,
-      duration: 1,
-      onUpdate: (output: string) => {setHeader(output);}
-    });
+    updateHeader('Universal Channels');
     // Check if url contains a channelId to load by default
     const searchParams = new URLSearchParams(window.location.search);
     const channelId = searchParams.get('channelId');
@@ -120,9 +136,40 @@ export default function Channels() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  function loadData() {
+  useEffect(() => {
+    loadData(true);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pageNumber]);
+
+  function updateHeader(newHeader: string) {
+    shuffle({
+      text: newHeader,
+      fps: 20,
+      delayResolve: 0,
+      direction: 'right',
+      animation: 'show',
+      delay: 0.3,
+      duration: 1,
+      onUpdate: (output: string) => {setHeader(output);}
+    });
+  }
+
+  function updateChannelType(channelType: string) {
+    loadData(channelType === 'in-progress');
+    if (channelType === 'universal') {
+      setShowInProgressChannels(false);
+      updateHeader('Universal Channels');
+    } else if (channelType === 'in-progress') {
+      updateHeader('In-Progress Channels');
+      setShowInProgressChannels(true);
+    }
+  }
+
+  function loadData(inProgress = false) {
     setLoading(true);
-    fetch('/api/channels')
+    const offset = (pageNumber - 1) * PAGE_SIZE;
+
+    fetch(`/api/channels${inProgress ? `?inProgress=true&offset=${offset}&limit=${PAGE_SIZE}` : ''}`)
       .then(res => {
         if (!res.ok) {
           console.error(res.status);
@@ -235,13 +282,53 @@ export default function Channels() {
             onClick={() => searchChannels(searchId)}>
             Search
           </button>
+          <FilterButton open={showFilters} setOpen={setShowFilters} />
         </div>
         <button onClick={() => loadData()} className="btn">
           Reload
         </button>
       </div>
 
-      <Table {...{table, loading, rowDetails: ChannelDetails, pageLimit: PAGE_SIZE}} />
+      <div 
+        className={classNames(
+          showFilters
+          ? 'h-14 duration-100'
+          : 'h-0 duration-100 delay-100'
+          , 'w-full transition-all ease-in-out'
+        )}>
+        <div
+          className={classNames(
+            showFilters
+            ? 'opacity-100 duration-100 delay-100'
+            : 'opacity-0 duration-100'
+            , 'relative flex flex-row space-x-4 items-center w-full mx-auto pt-4 transition-all ease-in-out'
+          )}>
+
+          <Select 
+            options={
+              [
+                {value: 'universal', label: 'Universal'},
+                {value: 'in-progress', label: 'In-Progress'}
+              ]
+            }
+            onChange={value => updateChannelType(value as string)}
+            containerClassName="w-36"
+            buttonClassName="inpt pl-4 cursor-default"
+            dropdownClassName="bg-vapor dark:bg-black"
+          />
+        </div>
+      </div>
+
+      {showInProgressChannels ? (
+        // Only do server-side pagination when fetching in-progress channels
+        <Table {...{
+          table, loading, rowDetails: ChannelDetails, pageLimit: PAGE_SIZE, pageNumber, setPageNumber
+        }} />
+      ) : (
+        <Table {...{
+          table, loading, rowDetails: ChannelDetails, pageLimit: PAGE_SIZE
+        }} />
+      )}
     </div>
   );
 }

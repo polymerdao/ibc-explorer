@@ -1,7 +1,22 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { IdentifiedChannel, stateToString } from 'utils/types/channel';
+import { LinkAndCopy } from 'components/link-and-copy';
+import { CHAIN_CONFIGS, CHAIN } from 'utils/chains/configs';
+import { Chain } from 'utils/types/chain';
 
 export function ChannelDetails(channel: IdentifiedChannel | null) {
+  const [sourceChain, setSourceChain] = useState<Chain | undefined>();
+
+  useEffect(() => {
+    for (const chain of Object.keys(CHAIN_CONFIGS)) {
+      const chainName = chain as CHAIN;
+      const chainVals = CHAIN_CONFIGS[chainName];
+      if (channel?.portId?.toLowerCase().includes(chain)) {
+        setSourceChain(chainVals);
+      }
+    }
+  }, [channel]);
+
   return !channel ? (
     <>
       <h2 className="mt-1 mb-2 mr-8">No Results</h2>
@@ -22,6 +37,11 @@ export function ChannelDetails(channel: IdentifiedChannel | null) {
         </div>
         <Divider />
         <div className="flex flex-row justify-between">
+          <p className="mr-8 font-medium">Create Time</p>
+          {channel.createTime && <p className="font-mono text-[17px]/[24px]">{new Date(channel.createTime*1000).toLocaleString()}</p>}
+        </div>
+        <Divider />
+        <div className="flex flex-row justify-between">
           <p className="mr-8 font-medium">Counterparty Channel ID</p>
           <p className="font-mono text-[17px]/[24px]">{ channel.counterparty.channelId }</p>
         </div>
@@ -39,6 +59,11 @@ export function ChannelDetails(channel: IdentifiedChannel | null) {
         <div className="flex flex-row justify-between">
           <p className="mr-8 font-medium">Connection Hops</p>
           <p className="font-mono text-[17px]/[24px]">{ channel.connectionHops[0] }, { channel.connectionHops[1] }</p>
+        </div>
+        <Divider />
+        <div className="flex flex-row justify-between">
+          <p className="mr-8 font-medium">Tx Hash</p>
+          <LinkAndCopy url={sourceChain?.txUrl} path="tx" hex={channel.transactionHash} />
         </div>
       </div>
     </div>
