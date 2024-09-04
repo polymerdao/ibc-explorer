@@ -11,7 +11,7 @@
   "dependencies": {
     "@cosmjs/stargate": "^0.32.4",
     "@cosmjs/tendermint-rpc": "^0.32.4",
-    "@headlessui/react": "^2.1.3",
+    "@headlessui/react": "^2.1.2",
     "@sentry/nextjs": "^8.28.0",
     "@tanstack/react-table": "^8.20.5",
     "@types/flat-cache": "^2.0.2",
