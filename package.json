@@ -28,7 +28,7 @@
     "sharp": "^0.33.5",
     "stats-lite": "^2.2.0",
     "txt-shuffle": "^1.0.3",
-    "winston": "^3.13.1",
+    "winston": "^3.14.2",
     "zod": "^3.23.8"
   },
   "devDependencies": {
