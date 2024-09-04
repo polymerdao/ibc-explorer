@@ -1,4 +1,3 @@
-import { connect } from 'http2';
 import { CopyButton } from './copy-button';
 
 export function shortenHex(hex?: string, copyable?: boolean) {

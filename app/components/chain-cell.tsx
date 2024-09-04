@@ -1,5 +1,6 @@
 import { CHAIN, CHAIN_CONFIGS } from 'utils/chains/configs';
 import { SimIcon, UnknownIcon } from 'components/icons'
+import { shortenHex } from './format-strings';
 
 export function ChainCell({chain}: {chain: string}) {
   const size = 32;
@@ -10,7 +11,9 @@ export function ChainCell({chain}: {chain: string}) {
 
   const sim: boolean = chain.toLowerCase().includes('sim');
   const chainName = chain.split('-')[0];
-  let icon: JSX.Element = <span>{chain}</span>;
+  let icon: JSX.Element = <span>{
+    chain.length > 25 ? shortenHex(chain) : chain
+  }</span>;
 
   for (const key in CHAIN_CONFIGS) {
     if (chainName.toLowerCase().includes(key.toLowerCase())) {

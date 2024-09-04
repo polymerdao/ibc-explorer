@@ -1,9 +1,8 @@
-import Link from 'next/link';
 import { Packet, PacketStates, stateToString } from 'utils/types/packet';
 import { CHAIN_CONFIGS, CHAIN, clientToDisplay } from 'utils/chains/configs';
 import { Chain } from 'utils/types/chain';
 import { classNames, numberWithCommas } from 'utils/functions';
-import { CopyButton } from 'components/copy-button';
+import { LinkAndCopy } from 'components/link-and-copy';
 import { ethers } from 'ethers';
 import { useEffect, useState } from 'react';
 
@@ -145,17 +144,17 @@ export function PacketDetails(packet: Packet | null) {
         {/* Links */}
         <div className="flex flex-row justify-between">
           <p className="mr-8 font-medium">Source Port Address</p>
-          {linkAndCopy(sourceChain?.txUrl || '', 'address', packet.sourcePortAddress)}
+          <LinkAndCopy url={sourceChain?.txUrl} path="address" hex={packet.sourcePortAddress} />
         </div>
         <Divider />
         <div className="flex flex-row justify-between">
           <p className="mr-8 font-medium">Dest Port Address</p>
-          {linkAndCopy(destChain?.txUrl || '', 'address', packet.destPortAddress)}
+          <LinkAndCopy url={destChain?.txUrl} path="address" hex={packet.destPortAddress} />
         </div>
         <Divider />
         <div className="flex flex-row justify-between">
           <p className="mr-8 font-medium">Send Tx</p>
-          {linkAndCopy(sourceChain?.txUrl || '', 'tx', packet.sendTx)}
+          <LinkAndCopy url={sourceChain?.txUrl} path="tx" hex={packet.sendTx} />
         </div>
         <Divider />
         <div className="flex flex-row justify-between">
@@ -177,31 +176,6 @@ function Divider () {
   return (
     <div className="flex flex-row justify-center my-0.5">
       <div className="h-0 mb-[0.5px] mt-[1.5px] w-[calc(100%-0.5rem)] border-b border-gray-500"></div>
-    </div>
-  );
-}
-
-function linkAndCopy(url: string, path: string, hex?: string) {
-  if (!hex) {
-    return <p className="font-mono animate-pulse">...</p>;
-  }
-
-  hex = hex.toLowerCase();
-  if (hex[0] != '0' || hex[1] != 'x') {
-    let split = hex.split('.');
-    if (split.length > 0) {
-      hex = split.pop();
-    }
-    hex = '0x' + hex;
-  }
-
-  return (
-    <div className="whitespace-nowrap flex flex-row">
-      <Link href={url + path + '/' + hex} target="_blank"
-        className="text-light-blue dark:text-light-blue font-mono text-[17px]/[24px] hover:underline underline-offset-2">
-        {hex}
-      </Link>
-      <CopyButton str={hex} />
     </div>
   );
 }
@@ -237,7 +211,7 @@ async function calcTxFunding(chainRpc: string, feesDeposited?: number, gasLimit?
 
 function txWithFeeInfo(fundingStatus: number, url: string, txHash?: string) {
   if (txHash) {
-    return linkAndCopy(url, 'tx', txHash);
+    return <LinkAndCopy url={url} path="tx" hex={txHash} />;
   }
   else if (fundingStatus > 0) {
     return <p className="font-mono text-warning">~{numberWithCommas(Math.round(fundingStatus / 1000000000))} Gwei Underfunded</p>;

@@ -27,7 +27,7 @@ const columns = [
     id: 'chain',
     cell: props => (
       <div className="">
-        <div className="ml-5"><ChainCell chain={props.getValue()} /></div>
+        <div className="ml-2.5"><ChainCell chain={props.getValue()} /></div>
       </div>
     ),
     enableHiding: true

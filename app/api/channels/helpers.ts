@@ -42,6 +42,54 @@ export async function getUniversalChannels(): Promise<IdentifiedChannel[]> {
   return universalChannels;
 }
 
+export async function getIncompleteChannels(limit: number = 100, offset: number = 0): Promise<IdentifiedChannel[]> {
+  const channelsRequest = {
+    query: `query Channels($limit:Int! $offset:Int!){
+              channels(where: {state_not_eq: OPEN}, limit: $limit, offset: $offset, orderBy: blockTimestamp_DESC){
+                state
+                ordering
+                version
+                portId
+                channelId
+                counterpartyPortId
+                counterpartyChannelId
+                connectionHops
+                blockTimestamp
+                transactionHash
+              }
+            }`,
+    variables: { limit: limit, offset: offset }
+  };
+
+  return await processChannelRequest(channelsRequest);
+}
+
+export async function getChannel(searchId: string) {
+  const channelRequest = {
+    query: `query Channel($searchId:String!){
+              channels(where: {
+                OR: [
+                  {channelId_eq: $searchId}
+                ]
+              }){
+                state
+                ordering
+                version
+                portId
+                channelId
+                counterpartyPortId
+                counterpartyChannelId
+                connectionHops
+                blockTimestamp
+                transactionHash
+              }
+            }`,
+    variables: { searchId: searchId }
+  };
+
+  return await processChannelRequest(channelRequest);
+}
+
 async function processChannelRequest(channelRequest: {
   variables: { searchId?: string, limit?: number };
   query: string
@@ -66,55 +114,13 @@ async function processChannelRequest(channelRequest: {
       counterparty: {
         portId: item.counterpartyPortId,
         channelId: item.counterpartyChannelId
-      }
+      },
+      createTime: item.blockTimestamp ? item.blockTimestamp / 1000 : undefined,
+      transactionHash: item.transactionHash || undefined
     };
     channels.push(channel);
   }
   return channels;
-}
-
-export async function getChannels(limit: number = 100) {
-  const channelsRequest = {
-    query: `query Channels($limit:Int!){
-              channels(limit: $limit, orderBy: blockTimestamp_DESC){
-                state
-                ordering
-                version
-                portId
-                channelId
-                counterpartyPortId
-                counterpartyChannelId
-                connectionHops
-              }
-            }`,
-    variables: { limit: limit }
-  };
-
-  return await processChannelRequest(channelsRequest);
-}
-
-export async function getChannel(searchId: string) {
-  const channelRequest = {
-    query: `query Channel($searchId:String!){
-              channels(where: {
-                OR: [
-                  {channelId_eq: $searchId}
-                ]
-              }){
-                state
-                ordering
-                version
-                portId
-                channelId
-                counterpartyPortId
-                counterpartyChannelId
-                connectionHops
-              }
-            }`,
-    variables: { searchId: searchId }
-  };
-
-  return await processChannelRequest(channelRequest);
 }
 
 async function getPolymerRegistry() {
