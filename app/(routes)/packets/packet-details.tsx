@@ -3,7 +3,6 @@ import { CHAIN_CONFIGS, CHAIN, clientToDisplay } from 'utils/chains/configs';
 import { Chain } from 'utils/types/chain';
 import { classNames, numberWithCommas } from 'utils/functions';
 import { LinkAndCopy } from 'components/link-and-copy';
-import { ethers } from 'ethers';
 import { useEffect, useState } from 'react';
 
 export function PacketDetails(packet: Packet | null) {
@@ -28,15 +27,13 @@ export function PacketDetails(packet: Packet | null) {
   useEffect(() => {
     async function checkTxFunding() {
       if (packet && sourceChain && destChain) {
-        const recv = await calcTxFunding(destChain.rpc, packet.totalRecvFeesDeposited, packet.recvGasLimit);
-        const ack = await calcTxFunding(sourceChain.rpc, packet.totalAckFeesDeposited, packet.ackGasLimit);
+        const recv = await calcTxFunding(destChain.id, packet.totalRecvFeesDeposited, packet.recvGasLimit);
+        const ack = await calcTxFunding(sourceChain.id, packet.totalAckFeesDeposited, packet.ackGasLimit);
         setRecvFunding(recv);
         setAckFunding(ack);
       }
     }
     checkTxFunding();
-    let intervalId = setInterval(checkTxFunding, 2000);
-    return () => clearInterval(intervalId);
   }, [packet, sourceChain, destChain]);
 
   return !packet ? (
@@ -190,13 +187,13 @@ function formatDuration(duration: number) {
   return `${(duration / 3600).toFixed(1)}h`;
 }
 
-async function calcTxFunding(chainRpc: string, feesDeposited?: number, gasLimit?: number) {
+async function calcTxFunding(chainId: Number, feesDeposited?: number, gasLimit?: number) {
   if (!feesDeposited || !gasLimit) {
     return 0;
   }
 
-  const provider = new ethers.JsonRpcProvider(chainRpc)
-  const feeData = await provider.getFeeData();
+  const feeResponse = await fetch(`/api/packets/fee-data?chainId=${chainId}`, { cache: 'no-store' });
+  const feeData = await feeResponse.json();
   const gasPrice = Number(feeData.gasPrice);
 
   feesDeposited = Number(feesDeposited);
