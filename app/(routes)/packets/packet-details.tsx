@@ -187,7 +187,7 @@ function formatDuration(duration: number) {
   return `${(duration / 3600).toFixed(1)}h`;
 }
 
-async function calcTxFunding(chainId: Number, feesDeposited?: number, gasLimit?: number) {
+async function calcTxFunding(chainId: number, feesDeposited?: number, gasLimit?: number) {
   if (!feesDeposited || !gasLimit) {
     return 0;
   }
