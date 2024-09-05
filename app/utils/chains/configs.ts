@@ -9,8 +9,8 @@ let baseDispatcher = process.env.DISPATCHER_ADDRESS_BASE!;
 let opClientName = process.env.OPTIMISM_CLIENT_NAME!;
 let baseClientName = process.env.BASE_CLIENT_NAME!;
 
-let optimismRPC = process.env.OPTIMISM_RPC || 'https://opt-sepolia.g.alchemy.com/v2/jKvLhhXvtnWdNeZrKst0demxnwJcYH1o';
-let baseRPC = process.env.BASE_RPC || 'https://base-sepolia.g.alchemy.com/v2/776dC6qT-NTtupdnxlUJuXGbUIKWWhLe';
+let optimismRPC = process.env.OPTIMISM_RPC!;
+let baseRPC = process.env.BASE_RPC!;
 
 export const CHAIN_CONFIGS: {
   [key in CHAIN]: Chain;
