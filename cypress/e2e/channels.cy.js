@@ -48,6 +48,6 @@ describe('Search by Channel ID', () => {
     // Ensure the channel details are displayed
     cy.get('[data-testid="channel-details"]').should('be.visible');
     cy.get('[data-testid="tx-hash"]').find('a').should('exist');
-    cy.get('[data-testid="tx-hash"]').find('a').should('include.text', '0x');
+    cy.get('[data-testid="tx-hash"]').find('a').should('include.text', '0xaaa000');
   })
 })
