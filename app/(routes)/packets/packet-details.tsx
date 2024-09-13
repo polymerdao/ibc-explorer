@@ -43,7 +43,7 @@ export function PacketDetails(packet: Packet | null) {
     </>
   ) : (
 
-    <div className="pl-8 pr-6 pt-2 pb-5 min-w-[870px]">
+    <div className="pl-8 pr-6 pt-2 pb-5 min-w-[870px]" data-testid="packet-details">
       <h1>Packet Details</h1>
 
       {/* Status Bar */}
@@ -149,17 +149,17 @@ export function PacketDetails(packet: Packet | null) {
           <LinkAndCopy url={destChain?.txUrl} path="address" hex={packet.destPortAddress} />
         </div>
         <Divider />
-        <div className="flex flex-row justify-between">
+        <div className="flex flex-row justify-between" data-testid="send-tx">
           <p className="mr-8 font-medium">Send Tx</p>
           <LinkAndCopy url={sourceChain?.txUrl} path="tx" hex={packet.sendTx} />
         </div>
         <Divider />
-        <div className="flex flex-row justify-between">
+        <div className="flex flex-row justify-between" data-testid="recv-tx">
           <p className="mr-8 font-medium">Rcv Tx</p>
           {txWithFeeInfo(recvFunding, destChain?.txUrl || '', packet.rcvTx)}
         </div>
         <Divider />
-        <div className="flex flex-row justify-between">
+        <div className="flex flex-row justify-between" data-testid="ack-tx">
           <p className="mr-8 font-medium">Ack Tx</p>
           {txWithFeeInfo(ackFunding, sourceChain?.txUrl || '', packet.ackTx)}
         </div>

@@ -1,0 +1,22 @@
+name: E2E Tests
+
+on:
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  cypress-run:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v2
+
+      - name: Cypress run
+        uses: cypress-io/github-action@v6
+        environment:
+          REGISTRY_URL: https://raw.githubusercontent.com/polymerdao/polymer-registry/main/dist/output.json
+          INDEXER_URL: https://index.sepolia.polymer.zone/graphql
+        with:
+          build: npm run build
+          start: npm start

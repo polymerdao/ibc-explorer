@@ -306,6 +306,7 @@ export default function Packets() {
         <div className="flex flex-row justify-left w-[50%] min-w-[248px]">
           <input
             type="text"
+            data-testid="search-input"
             placeholder="Tx Hash, Sender Address or Packet ID"
             className="inpt w-full px-4 font-mono placeholder:font-primary"
             value={textField}
@@ -314,6 +315,7 @@ export default function Packets() {
           />
           <button
             className="btn ml-3"
+            data-testid="search-button"
             disabled={
               loading || (
                 textField.length === 0 &&
@@ -324,7 +326,7 @@ export default function Packets() {
             onClick={() => searchPackets()}>
             Search
           </button>
-          <FilterButton open={showFilters} setOpen={setShowFilters}/> 
+          <FilterButton open={showFilters} setOpen={setShowFilters} />
         </div>
         <button 
           onClick={() => searchPackets()}
@@ -349,7 +351,9 @@ export default function Packets() {
           )}>
           <Popover>
             {({ open }) => (<>
-              <Popover.Button className="inpt w-32 flex flex-row justify-between items-center pl-4 pr-[0.4rem] text-black dark:text-white transition east-in-out duration-200 cursor-default">
+              <Popover.Button
+                data-testid="state-filter"
+                className="inpt w-32 flex flex-row justify-between items-center pl-4 pr-[0.4rem] text-black dark:text-white transition east-in-out duration-200 cursor-default">
                 State
                 <FiChevronDown className={classNames(
                   open
@@ -372,6 +376,7 @@ export default function Packets() {
                       <div key={state.value} className="py-[0.25rem] flex w-full">
                         <label className="hover:cursor-pointer w-full">
                           <input
+                            data-testid={state.value}
                             className="appearance-none border border-gray-500 bg-transparent rounded-lg w-3 h-3 mr-2.5 transition-colors ease-in-out duration-150
                               checked:bg-turquoise checked:border-transparent hover:cursor-pointer"
                             {...{
@@ -394,9 +399,10 @@ export default function Packets() {
           <Select 
             options={
               [{ value: '', label: 'Source' }, 
-              ...Object.entries(CHAIN_CONFIGS).map(([key, value]) => ({ value: key, label: value.display }))]
+              ...Object.entries(CHAIN_CONFIGS).map(([key, value]) => ({ value: key, label: value.display, dataTestId: key }))]
             }
             onChange={value => setSrcFilter(value as string)}
+            dataTestId="src-filter"
             containerClassName="w-32"
             buttonClassName="inpt pl-4 cursor-default"
             dropdownClassName="bg-vapor dark:bg-black"
@@ -404,9 +410,10 @@ export default function Packets() {
           <Select 
             options={
               [{ value: '', label: 'Dest' }, 
-              ...Object.entries(CHAIN_CONFIGS).map(([key, value]) => ({ value: key, label: value.display }))]
+              ...Object.entries(CHAIN_CONFIGS).map(([key, value]) => ({ value: key, label: value.display, dataTestId: key }))]
             }
             onChange={value => setDestFilter(value as string)}
+            dataTestId="dest-filter"
             containerClassName="w-32"
             buttonClassName="inpt pl-4 cursor-default"
             dropdownClassName="bg-vapor dark:bg-black"

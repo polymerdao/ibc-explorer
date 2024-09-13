@@ -6,6 +6,7 @@ import { classNames } from 'utils/functions'
 interface Option {
   value: string | number;
   label: string | number;
+  dataTestId?: string;
 }
 
 interface Props {
@@ -14,9 +15,10 @@ interface Props {
   containerClassName?: string;
   buttonClassName?: string;
   dropdownClassName?: string;
+  dataTestId?: string;
 }
 
-export function Select({ options, onChange, containerClassName, buttonClassName, dropdownClassName }: Props) {
+export function Select({ options, onChange, containerClassName, buttonClassName, dropdownClassName, dataTestId }: Props) {
   const [selectedOption, setSelectedOption] = useState(options[0]);
 
   const handleChange = (option: Option) => {
@@ -28,7 +30,9 @@ export function Select({ options, onChange, containerClassName, buttonClassName,
     <div className={`${containerClassName || ''} relative`}>
       <Listbox value={selectedOption} onChange={(e) => {handleChange(e)}}>
         {({ open }) => (<>
-          <Listbox.Button className={`${buttonClassName || ''} w-full flex flex-row justify-between items-center pr-[0.4rem] text-black dark:text-white transition east-in-out duration-200`}>
+          <Listbox.Button
+            data-testid={dataTestId}
+            className={`${buttonClassName || ''} w-full flex flex-row justify-between items-center pr-[0.4rem] text-black dark:text-white transition east-in-out duration-200`}>
             <span className="truncate">{selectedOption.label}</span>
             <FiChevronDown className={classNames(
               open
@@ -56,7 +60,9 @@ export function Select({ options, onChange, containerClassName, buttonClassName,
                     , 'relative hover:cursor-pointer select-none py-1.5 ml-2 mr-2.5 pl-2.5 pr-3'
                   )}>
                   <div className="flex flex-row">
-                    <span className="whitespace-nowrap pr-1">
+                    <span 
+                      data-testid={option.dataTestId}
+                      className="whitespace-nowrap pr-1">
                       {option.label}
                     </span>
                   </div>

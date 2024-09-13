@@ -117,6 +117,7 @@ export function Table<TableType extends Packet | Client | IdentifiedChannel | Id
           </button>
           <button
             className="btn-secondary"
+            data-testid="prev-page"
             onClick={() => {
               if (setPageNumber && pageNumber) {
                 setPageNumber(pageNumber - 1)
@@ -135,6 +136,7 @@ export function Table<TableType extends Packet | Client | IdentifiedChannel | Id
 
           <button
             className="btn-secondary"
+            data-testid="next-page"
             onClick={() => {
               if (setPageNumber && pageNumber) {
                 setPageNumber(pageNumber + 1)
