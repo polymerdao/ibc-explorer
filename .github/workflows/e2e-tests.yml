@@ -14,9 +14,9 @@ jobs:
 
       - name: Cypress run
         uses: cypress-io/github-action@v6
-        environment:
-          REGISTRY_URL: https://raw.githubusercontent.com/polymerdao/polymer-registry/main/dist/output.json
-          INDEXER_URL: https://index.sepolia.polymer.zone/graphql
         with:
           build: npm run build
           start: npm start
+        env:
+          REGISTRY_URL: https://raw.githubusercontent.com/polymerdao/polymer-registry/main/dist/output.json
+          INDEXER_URL: https://index.sepolia.polymer.zone/graphql
