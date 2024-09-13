@@ -270,6 +270,7 @@ export default function Channels() {
         <div className="flex flex-row justify-left w-2/5 min-w-[248px]">
           <input
             type="text"
+            data-testid="search-input"
             placeholder="Search Custom Channels by ID"
             className="inpt w-full px-3 font-mono placeholder:font-primary"
             value={searchId}
@@ -278,6 +279,7 @@ export default function Channels() {
           />
           <button
             className="btn ml-3"
+            data-testid="search-button"
             disabled={searchLoading || searchId.length === 0}
             onClick={() => searchChannels(searchId)}>
             Search
@@ -307,11 +309,12 @@ export default function Channels() {
           <Select 
             options={
               [
-                {value: 'universal', label: 'Universal'},
-                {value: 'in-progress', label: 'In-Progress'}
+                {value: 'universal', label: 'Universal', dataTestId: 'universal'},
+                {value: 'in-progress', label: 'In-Progress', dataTestId: 'in-progress'}
               ]
             }
             onChange={value => updateChannelType(value as string)}
+            dataTestId="channel-type"
             containerClassName="w-36"
             buttonClassName="inpt pl-4 cursor-default"
             dropdownClassName="bg-vapor dark:bg-black"

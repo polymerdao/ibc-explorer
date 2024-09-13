@@ -23,7 +23,7 @@ export function ChannelDetails(channel: IdentifiedChannel | null) {
       <p>Channel not found</p>
     </>
   ) : (
-    <div className="pl-8 pr-6 pt-2 pb-5 min-w-[870px]">
+    <div className="pl-8 pr-6 pt-2 pb-5 min-w-[870px]" data-testid="channel-details">
       <h1>Channel Details</h1>
       <div className="flex flex-col gap-2 mt-7">
         <div className="flex flex-row justify-between">
@@ -61,7 +61,7 @@ export function ChannelDetails(channel: IdentifiedChannel | null) {
           <p className="font-mono text-[17px]/[24px]">{ channel.connectionHops[0] }, { channel.connectionHops[1] }</p>
         </div>
         <Divider />
-        <div className="flex flex-row justify-between">
+        <div className="flex flex-row justify-between" data-testid="tx-hash">
           <p className="mr-8 font-medium">Tx Hash</p>
           <LinkAndCopy url={sourceChain?.txUrl} path="tx" hex={channel.transactionHash} />
         </div>
