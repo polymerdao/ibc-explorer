@@ -10,7 +10,7 @@ import { FiSun, FiMoon } from 'react-icons/fi';
 const tabs = [
   { name: 'Packets', href: '/packets' },
   { name: 'Channels', href: '/channels' },
-  { name: 'Connections', href: '/connections' },
+  // { name: 'Connections', href: '/connections' },
   { name: 'Clients', href: '/clients' }
 ];
 
