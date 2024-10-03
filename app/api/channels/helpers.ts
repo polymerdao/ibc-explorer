@@ -14,27 +14,29 @@ function stringToState(state: string) {
 
 export async function getUniversalChannels(): Promise<IdentifiedChannel[]> {
   const universalChannels: IdentifiedChannel[] = [];
-  // Fetch polymer-registry to get Universal Channel IDs
-  const registry = await getPolymerRegistry();
+  const registry = await fetchRegistry();
 
   for (const chain in registry) {
     const clients = registry[chain].clients;
     for (const client in clients) {
       const clientProps = clients[client];
-      if (!clientProps.universalChannelId) {
-        logger.info(`No universal channel found for ${chain} ${client}`);
-        continue;
-      }
-      try {
-        const universalChannel = await getChannel(clientProps.universalChannelId);
-        if (universalChannel.length === 0) {
-          logger.info(`Could not find universal channel ${chain} ${client} ${clientProps.universalChannelId}`);
+      for (const channel of clientProps.universalChannels) {
+        if (!channel.id) {
+          logger.info(`No universal channel found for ${chain} ${client}`);
           continue;
         }
-        universalChannels.push(universalChannel[0]);
-      }
-      catch (err) {
-        logger.error(`Error fetching universal channel for ${chain} ${client}: ` + err);
+
+        try {
+          const universalChannel = await getChannel(channel.id);
+          if (universalChannel.length === 0) {
+            logger.info(`Could not find universal channel ${chain} ${client} ${channel.id}`);
+            continue;
+          }
+          universalChannels.push(universalChannel[0]);
+        }
+        catch (err) {
+          logger.error(`Error fetching universal channel for ${chain} ${client}: ` + err);
+        }
       }
     }
   }
@@ -123,17 +125,34 @@ async function processChannelRequest(channelRequest: {
   return channels;
 }
 
-async function getPolymerRegistry() {
+
+async function fetchRegistry() {
+  let data;
+
   try {
-    const res = await fetch(process.env.REGISTRY_URL!);
+    let res;
+
+    if (process.env.GITHUB_TOKEN) {
+      res = await fetch(process.env.REGISTRY_URL!, {
+        headers: {
+          Authorization: `token ${process.env.GITHUB_TOKEN}`,
+        },
+        cache: 'no-store'
+      });
+    } else {
+      res = await fetch(process.env.REGISTRY_URL!);
+    }
+
     if (!res.ok) {
       logger.error('Error fetching polymer-registry: ' + res.statusText);
       return {};
     }
-    const data = await res.json();
-    return data;
-  } catch (error) {
+    data = await res.json();
+  }
+  catch (error) {
     logger.error('Error fetching polymer-registry: ' + error);
     return {};
   }
+
+  return data;
 }
