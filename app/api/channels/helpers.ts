@@ -20,6 +20,10 @@ export async function getUniversalChannels(): Promise<IdentifiedChannel[]> {
     const clients = registry[chain].clients;
     for (const client in clients) {
       const clientProps = clients[client];
+      if (!clientProps.universalChannels) {
+        continue;
+      }
+
       for (const channel of clientProps.universalChannels) {
         if (!channel.id) {
           logger.info(`No universal channel found for ${chain} ${client}`);
@@ -35,7 +39,7 @@ export async function getUniversalChannels(): Promise<IdentifiedChannel[]> {
           universalChannels.push(universalChannel[0]);
         }
         catch (err) {
-          logger.error(`Error fetching universal channel for ${chain} ${client}: ` + err);
+          logger.error(`Error fetching universal channel for ${chain} ${client}`);
         }
       }
     }
@@ -150,7 +154,7 @@ async function fetchRegistry() {
     data = await res.json();
   }
   catch (error) {
-    logger.error('Error fetching polymer-registry: ' + error);
+    logger.error('Error fetching polymer-registry');
     return {};
   }
 
