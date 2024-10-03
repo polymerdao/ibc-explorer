@@ -38,8 +38,8 @@ export async function getUniversalChannels(): Promise<IdentifiedChannel[]> {
           }
           universalChannels.push(universalChannel[0]);
         }
-        catch (err) {
-          logger.error(`Error fetching universal channel for ${chain} ${client}`);
+        catch (error) {
+          logger.error(`Error fetching universal channel for ${chain} ${client}: ${error}`);
         }
       }
     }
@@ -154,7 +154,7 @@ async function fetchRegistry() {
     data = await res.json();
   }
   catch (error) {
-    logger.error('Error fetching polymer-registry');
+    logger.error('Error fetching polymer-registry: ' + error);
     return {};
   }
 
