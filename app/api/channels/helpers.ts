@@ -136,10 +136,7 @@ async function fetchRegistry() {
   try {
     let res;
 
-    logger.info(process.env.REGISTRY_URL);
-
     if (process.env.GITHUB_TOKEN) {
-      logger.info('Using GitHub token for polymer-registry');
       res = await fetch(process.env.REGISTRY_URL!, {
         headers: {
           Authorization: `token ${process.env.GITHUB_TOKEN}`,
@@ -147,7 +144,6 @@ async function fetchRegistry() {
         cache: 'no-store'
       });
     } else {
-      logger.info('No token');
       res = await fetch(process.env.REGISTRY_URL!);
     }
 
