@@ -12,6 +12,9 @@ let baseClientName = process.env.BASE_CLIENT_NAME!;
 let optimismRPC = process.env.OPTIMISM_RPC!;
 let baseRPC = process.env.BASE_RPC!;
 
+let opExplorer = process.env.NEXT_PUBLIC_OP_EXPLORER_URL!;
+let baseExplorer = process.env.NEXT_PUBLIC_BASE_EXPLORER_URL!;
+
 export const CHAIN_CONFIGS: {
   [key in CHAIN]: Chain;
 } = {
@@ -19,7 +22,7 @@ export const CHAIN_CONFIGS: {
     id: 11155420,
     display: 'Optimism',
     rpc: optimismRPC,
-    txUrl: 'https://optimism-sepolia.blockscout.com/',
+    txUrl: opExplorer,
     dispatchers: [opDispatcher],
     clients: [opClientName],
     blockTime: 2,
@@ -29,7 +32,7 @@ export const CHAIN_CONFIGS: {
     id: 84532,
     display: 'Base',
     rpc: baseRPC,
-    txUrl: 'https://base-sepolia.blockscout.com/',
+    txUrl: baseExplorer,
     dispatchers: [baseDispatcher],
     clients: [baseClientName],
     blockTime: 2,

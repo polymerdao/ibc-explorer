@@ -34,7 +34,7 @@ export default function Navbar() {
 
         <div className="flex items-center shrink-0 ml-1 mr-10 pt-1">
           <Link href="/">
-            <Image className="relative dark:invert opacity-95" src={'/Polymer_Logomark_Black.png'} width={32} height={32} alt={'Logo'} />
+            <Image className="relative dark:invert opacity-95" src={'/logo512.png'} width={32} height={32} alt={'Logo'} />
           </Link>
         </div>
 
