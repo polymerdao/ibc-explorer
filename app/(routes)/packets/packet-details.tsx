@@ -1,40 +1,44 @@
 import { Packet, PacketStates, stateToString } from 'utils/types/packet';
 import { CHAIN_CONFIGS, CHAIN, clientToDisplay } from 'utils/chains/configs';
-import { Chain } from 'utils/types/chain';
-import { classNames, numberWithCommas } from 'utils/functions';
+import { classNames, numberWithCommas, getExplorerFromRegistry } from 'utils/functions';
 import { LinkAndCopy } from 'components/link-and-copy';
 import { useEffect, useState } from 'react';
 
 export function PacketDetails(packet: Packet | null) {
-  const [sourceChain, setSourceChain] = useState<Chain | undefined>();
-  const [destChain, setDestChain] = useState<Chain | undefined>();
+  const [sourceChainName, setSourceChainName] = useState<CHAIN | ''>('');
+  const [destChainName, setDestChainName] = useState<CHAIN | ''>('');
+  const [sourceChainExplorer, setSourceChainExplorer] = useState<string>('');
+  const [destChainExplorer, setDestChainExplorer] = useState<string>('');
   const [recvFunding, setRecvFunding] = useState<number>(0);
   const [ackFunding, setAckFunding] = useState<number>(0);
 
   useEffect(() => {
     for (const chain of Object.keys(CHAIN_CONFIGS)) {
       const chainName = chain as CHAIN;
-      const chainVals = CHAIN_CONFIGS[chainName];
       if (packet?.sourceClient?.toLowerCase().startsWith(chain)) {
-        setSourceChain(chainVals);
+        setSourceChainName(chainName);
       }
       if (packet?.destClient?.toLowerCase().startsWith(chain)) {
-        setDestChain(chainVals);
+        setDestChainName(chainName);
       }
     }
   }, [packet]);
 
   useEffect(() => {
-    async function checkTxFunding() {
-      if (packet && sourceChain && destChain) {
-        const recv = await calcTxFunding(destChain.id, packet.totalRecvFeesDeposited, packet.recvGasLimit);
-        const ack = await calcTxFunding(sourceChain.id, packet.totalAckFeesDeposited, packet.ackGasLimit);
+    async function fetchVars() {
+      if (packet && sourceChainName && destChainName) {
+        const recv = await calcTxFunding(sourceChainName, packet.totalRecvFeesDeposited, packet.recvGasLimit);
+        const ack = await calcTxFunding(destChainName, packet.totalAckFeesDeposited, packet.ackGasLimit);
+        const sourceExplorer = await getExplorerFromRegistry(sourceChainName);
+        const destExplorer = await getExplorerFromRegistry(destChainName);
         setRecvFunding(recv);
         setAckFunding(ack);
+        setSourceChainExplorer(sourceExplorer);
+        setDestChainExplorer(destExplorer);
       }
     }
-    checkTxFunding();
-  }, [packet, sourceChain, destChain]);
+    fetchVars();
+  }, [packet, sourceChainName, destChainName]);
 
   return !packet ? (
     <>
@@ -141,27 +145,27 @@ export function PacketDetails(packet: Packet | null) {
         {/* Links */}
         <div className="flex flex-row justify-between">
           <p className="mr-8 font-medium">Source Port Address</p>
-          <LinkAndCopy url={sourceChain?.txUrl} path="address" hex={packet.sourcePortAddress} />
+          <LinkAndCopy url={sourceChainExplorer} path="address" hex={packet.sourcePortAddress} />
         </div>
         <Divider />
         <div className="flex flex-row justify-between">
           <p className="mr-8 font-medium">Dest Port Address</p>
-          <LinkAndCopy url={destChain?.txUrl} path="address" hex={packet.destPortAddress} />
+          <LinkAndCopy url={destChainExplorer} path="address" hex={packet.destPortAddress} />
         </div>
         <Divider />
         <div className="flex flex-row justify-between" data-testid="send-tx">
           <p className="mr-8 font-medium">Send Tx</p>
-          <LinkAndCopy url={sourceChain?.txUrl} path="tx" hex={packet.sendTx} />
+          <LinkAndCopy url={sourceChainExplorer} path="tx" hex={packet.sendTx} />
         </div>
         <Divider />
         <div className="flex flex-row justify-between" data-testid="recv-tx">
           <p className="mr-8 font-medium">Rcv Tx</p>
-          {txWithFeeInfo(recvFunding, destChain?.txUrl || '', packet.rcvTx)}
+          {txWithFeeInfo(recvFunding, destChainExplorer, packet.rcvTx)}
         </div>
         <Divider />
         <div className="flex flex-row justify-between" data-testid="ack-tx">
           <p className="mr-8 font-medium">Ack Tx</p>
-          {txWithFeeInfo(ackFunding, sourceChain?.txUrl || '', packet.ackTx)}
+          {txWithFeeInfo(ackFunding, sourceChainExplorer, packet.ackTx)}
         </div>
 
       </div>
@@ -187,25 +191,6 @@ function formatDuration(duration: number) {
   return `${(duration / 3600).toFixed(1)}h`;
 }
 
-async function calcTxFunding(chainId: number, feesDeposited?: number, gasLimit?: number) {
-  if (!feesDeposited || !gasLimit) {
-    return 0;
-  }
-
-  const feeResponse = await fetch(`/api/packets/fee-data?chainId=${chainId}`, { cache: 'no-store' });
-  const feeData = await feeResponse.json();
-  const gasPrice = Number(feeData.gasPrice);
-
-  feesDeposited = Number(feesDeposited);
-  gasLimit = Number(gasLimit);
-
-  if (feesDeposited < (gasLimit * gasPrice)) {
-    return (gasLimit * gasPrice) - feesDeposited;
-  } else {
-    return 0;
-  }
-}
-
 function txWithFeeInfo(fundingStatus: number, url: string, txHash?: string) {
   if (txHash) {
     return <LinkAndCopy url={url} path="tx" hex={txHash} />;
@@ -215,5 +200,28 @@ function txWithFeeInfo(fundingStatus: number, url: string, txHash?: string) {
   }
   else {
     return <p className="font-mono animate-pulse">...</p>;
+  }
+}
+
+async function calcTxFunding(chainName: string, feesDeposited?: number, gasLimit?: number) {
+  if (!feesDeposited || !gasLimit) {
+    return 0;
+  }
+
+  const feeResponse = await fetch(`/api/rpc-data?chain=${chainName}`,
+    { cache: 'no-store' });
+  if (!feeResponse.ok) { return 0; }
+  const feeData = await feeResponse.json();
+  if (feeData.error) { return 0; }
+
+  const gasPrice = Number(feeData.gasPrice);
+
+  feesDeposited = Number(feesDeposited);
+  gasLimit = Number(gasLimit);
+
+  if (feesDeposited < (gasLimit * gasPrice)) {
+    return (gasLimit * gasPrice) - feesDeposited;
+  } else {
+    return 0;
   }
 }

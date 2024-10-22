@@ -17,10 +17,17 @@ export function LinkAndCopy({url, path, hex}: {url?: string, path: string, hex?:
 
   return (
     <div className="whitespace-nowrap flex flex-row">
-      <Link href={url + path + '/' + hex} target="_blank"
-        className="text-light-blue dark:text-light-blue font-mono text-[17px]/[24px] hover:underline underline-offset-2">
-        {hex}
-      </Link>
+      { url &&
+        <Link href={url + '/' + path + '/' + hex} target="_blank"
+          className="text-light-blue dark:text-light-blue font-mono text-[17px]/[24px] hover:underline underline-offset-2">
+          {hex}
+        </Link>
+      }
+      { !url &&
+        <p className="font-mono text-[17px]/[24px]">
+          {hex}
+        </p>
+      }
       <CopyButton str={hex} />
     </div>
   );

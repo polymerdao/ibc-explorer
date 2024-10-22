@@ -1,19 +1,28 @@
 import { useEffect, useState } from 'react';
 import { IdentifiedChannel, stateToString } from 'utils/types/channel';
+import { getExplorerFromRegistry } from 'utils/functions';
 import { LinkAndCopy } from 'components/link-and-copy';
 import { CHAIN_CONFIGS, CHAIN } from 'utils/chains/configs';
 import { Chain } from 'utils/types/chain';
 
 export function ChannelDetails(channel: IdentifiedChannel | null) {
-  const [sourceChain, setSourceChain] = useState<Chain | undefined>();
+  const [explorerUrl, setExplorerUrl] = useState<string>('');
 
   useEffect(() => {
+    async function fetchExplorer(chainName: string) {
+      const url = await getExplorerFromRegistry(chainName);
+      setExplorerUrl(url);
+    }
+
+    let chainName;
     for (const chain of Object.keys(CHAIN_CONFIGS)) {
-      const chainName = chain as CHAIN;
-      const chainVals = CHAIN_CONFIGS[chainName];
       if (channel?.portId?.toLowerCase().includes(chain)) {
-        setSourceChain(chainVals);
+        chainName = chain as CHAIN;
+        break;
       }
+    }
+    if (chainName) {
+      fetchExplorer(chainName);
     }
   }, [channel]);
 
@@ -63,7 +72,7 @@ export function ChannelDetails(channel: IdentifiedChannel | null) {
         <Divider />
         <div className="flex flex-row justify-between" data-testid="tx-hash">
           <p className="mr-8 font-medium">Tx Hash</p>
-          <LinkAndCopy url={sourceChain?.txUrl} path="tx" hex={channel.transactionHash} />
+          <LinkAndCopy url={explorerUrl} path="tx" hex={channel.transactionHash} />
         </div>
       </div>
     </div>

@@ -19,7 +19,6 @@ export const CHAIN_CONFIGS: {
   [key in CHAIN]: Chain;
 } = {
   optimism: {
-    id: 11155420,
     display: 'Optimism',
     rpc: optimismRPC,
     txUrl: opExplorer,
@@ -29,7 +28,6 @@ export const CHAIN_CONFIGS: {
     icon: OptimismIcon,
   },
   base: {
-    id: 84532,
     display: 'Base',
     rpc: baseRPC,
     txUrl: baseExplorer,
