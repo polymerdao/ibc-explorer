@@ -20,7 +20,7 @@ export const calculateStats = (
   return { avg, min, median, max };
 };
 
-export async function calcMetrics(baseUrl: string = '') {
+export async function calcMetrics(baseUrl: string = '', chainId: string) {
   const results = await Promise.all(
     Object.keys(CHAIN_CONFIGS).map(async (chainKey) => {
       const chainConfig = CHAIN_CONFIGS[chainKey as CHAIN];
@@ -29,7 +29,7 @@ export async function calcMetrics(baseUrl: string = '') {
         let dispatcherAddress = chainConfig.dispatchers[i];
 
         let response;
-        const requestUrl = baseUrl + `/api/metrics?chain=${chainKey}&dispatcher=${dispatcherAddress}`;
+        const requestUrl = baseUrl + `/api/metrics?chain=${chainKey}&dispatcher=${dispatcherAddress}&chainId=${chainId}`;
         try {
           response = await fetch(requestUrl);
         } catch (error) {

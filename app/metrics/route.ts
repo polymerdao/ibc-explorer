@@ -8,9 +8,15 @@ export const dynamic = 'force-dynamic'; // defaults to auto
 let gauges: { [key: string]: Gauge } = {};
 
 export async function GET(request: NextRequest) {
+  const { searchParams } = request.nextUrl;
+  let chainId = searchParams.get('chainId');
+  if (!chainId) {
+    return new Response('Invalid request', { status: 400 });
+  }
+
   let metrics;
   try {
-    metrics = await calcMetrics('http://' + request.nextUrl.host);
+    metrics = await calcMetrics('http://' + request.nextUrl.host, chainId);
   } catch (error) {
     logger.error('Failed to calculate metrics: ', error);
     return new Response('Internal Server Error', { status: 500 });

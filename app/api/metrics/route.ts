@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { CHAIN, CHAIN_CONFIGS } from 'utils/chains/configs';
 import { PacketData, getPackets } from './helpers';
 
 export const dynamic = 'force-dynamic'; // defaults to auto
@@ -9,8 +8,8 @@ export async function GET(request: NextRequest) {
   const from = searchParams.get('from');
   const to = searchParams.get('to');
   const dispatcher = searchParams.get('dispatcher');
+  const chainId = Number(searchParams.get('chainId'));
   const chain = searchParams.get('chain');
-  const chainName = chain as CHAIN;
 
   let packets: PacketData[] = [];
   try {
@@ -25,7 +24,6 @@ export async function GET(request: NextRequest) {
   }
 
   if (chain) {
-    const chainId = CHAIN_CONFIGS[chainName].id;
     packets = packets.filter((packet) => packet.chainId === chainId);
   }
 
