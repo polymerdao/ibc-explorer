@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { unstable_cache } from 'next/cache';
 import { getChainId } from 'utils/chains/id-maps';
 import { fetchRegistry } from './fetch-registry';
 
@@ -31,7 +32,7 @@ export async function GET(request: NextRequest) {
 }
 
 async function getExplorerUrl(chainId: number) {
-  const registry = await fetchRegistry();
+  const registry = await getRegistryWithCache();
 
   let explorerUrl = '';
   const chainData = registry[chainId];
@@ -45,3 +46,9 @@ async function getExplorerUrl(chainId: number) {
 
   return NextResponse.json({ explorerUrl }, { status: 200 });
 }
+
+const getRegistryWithCache = unstable_cache(
+  async () => fetchRegistry(),
+  ['registry'],
+  { revalidate: 180 }
+)
