@@ -1,21 +1,20 @@
 export const getChainId = (chainName: string, env: string): number => {
   chainName = chainName.toLowerCase();
 
-  if (env === 'mainnet') {
-    if (!(chainName in mainnetIdMap)) {
-      throw new Error(`Invalid chain name: ${chainName}`);
-    }
-    return mainnetIdMap[chainName as ChainName];
+  let chainMap: Record<string, number>;
+  if (env === 'sepolia') {
+    chainMap = sepoliaIdMap;
+  } else if (env === 'mainnet') {
+    chainMap = mainnetIdMap;
+  } else {
+    throw new Error(`Invalid environment: ${env}`);
   }
 
-  else if (env === 'sepolia') {
-    if (!(chainName in sepoliaIdMap)) {
-      throw new Error(`Invalid chain name: ${chainName}`);
-    }
-    return sepoliaIdMap[chainName as ChainName];
+  if (!(chainName in chainMap)) {
+    throw new Error(`Invalid chain name: ${chainName}`);
   }
 
-  throw new Error(`Invalid environment: ${env}`);
+  return chainMap[chainName as ChainName];
 }
 
 export type ChainName = 'optimism' | 'base';
