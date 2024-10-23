@@ -215,6 +215,7 @@ async function calcTxFunding(chainName: string, feesDeposited?: number, gasLimit
   if (feeData.error) { return 0; }
 
   const gasPrice = Number(feeData.gasPrice);
+  if (isNaN(gasPrice)) { return 0; }
 
   feesDeposited = Number(feesDeposited);
   gasLimit = Number(gasLimit);

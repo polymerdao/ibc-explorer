@@ -1,3 +1,5 @@
+import { getClientEnv } from './client-env';
+
 export function classNames(...classes: string[]) {
   return classes.filter(Boolean).join(' ');
 }
@@ -8,20 +10,6 @@ export function classLogic(func: () => string): string {
 
 export function numberWithCommas(input: number): string {
   return input.toLocaleString('en');
-}
-
-function getClientEnv(): string {
-  let env: string = '';
-  if (
-    window.location.hostname.includes('sepolia') ||
-    window.location.hostname.includes('stg') ||
-    window.location.hostname.includes('localhost')) {
-    env = 'sepolia';
-  } else {
-    env = 'mainnet';
-  }
-
-  return env;
 }
 
 export async function getExplorerFromRegistry(chainName: string): Promise<string> {

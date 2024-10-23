@@ -1,7 +1,6 @@
 export interface Chain {
   display: string;
   rpc: string;
-  txUrl: string;
   dispatchers: string[];
   clients: string[];
   blockTime: number;
