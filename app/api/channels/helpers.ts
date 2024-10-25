@@ -49,10 +49,18 @@ export async function getUniversalChannels(): Promise<IdentifiedChannel[]> {
   return universalChannels;
 }
 
-export async function getIncompleteChannels(limit: number = 100, offset: number = 0): Promise<IdentifiedChannel[]> {
+export async function getChannels(channelType: string, limit: number = 100, offset: number = 0): Promise<IdentifiedChannel[]> {
+  let filter = '';
+  if (channelType === 'in-progress') {
+    filter = 'state_not_eq';
+  } else if (channelType === 'recent') {
+    filter = 'state_eq';
+  } else {
+    throw new Error('Invalid channel type');
+  }
   const channelsRequest = {
     query: `query Channels($limit:Int! $offset:Int!){
-              channels(where: {state_not_eq: OPEN}, limit: $limit, offset: $offset, orderBy: blockTimestamp_DESC){
+              channels(where: {${filter}: OPEN}, limit: $limit, offset: $offset, orderBy: blockTimestamp_DESC){
                 state
                 ordering
                 version

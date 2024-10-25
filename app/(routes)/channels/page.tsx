@@ -106,8 +106,7 @@ export default function Channels() {
   const [searchId, setSearchId] = useState<string>('');
   const [channelSearch, setChannelSearch] = useState(false);
   const [foundChannel, setFoundChannel] = useState<IdentifiedChannel | null>(null);
-  const [showFilters, setShowFilters] = useState(false);
-  const [showInProgressChannels, setShowInProgressChannels] = useState(false);
+  const [channelType, setChannelType] = useState<string>('universal');
   const [pageNumber, setPageNumber] = useState(1);
   const [loading, setLoading] = useState(true);
   const [searchLoading, setSearchLoading] = useState(false);
@@ -137,7 +136,7 @@ export default function Channels() {
   }, []);
 
   useEffect(() => {
-    loadData(true);
+    loadData(channelType);
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pageNumber]);
 
@@ -155,21 +154,24 @@ export default function Channels() {
   }
 
   function updateChannelType(channelType: string) {
-    loadData(channelType === 'in-progress');
+    loadData(channelType);
+    setChannelType(channelType);
     if (channelType === 'universal') {
-      setShowInProgressChannels(false);
       updateHeader('Universal Channels');
+    } else if (channelType === 'recent') {
+      updateHeader('Recent Channels');
     } else if (channelType === 'in-progress') {
       updateHeader('In-Progress Channels');
-      setShowInProgressChannels(true);
     }
   }
 
-  function loadData(inProgress = false) {
+  function loadData(channelType: string = 'universal') {
     setLoading(true);
     const offset = (pageNumber - 1) * PAGE_SIZE;
 
-    fetch(`/api/channels${inProgress ? `?inProgress=true&offset=${offset}&limit=${PAGE_SIZE}` : ''}`)
+    fetch(`/api/channels?channelType=${channelType}&offset=${offset}&limit=${PAGE_SIZE}`,
+      { cache: 'no-store' }
+    )
       .then(res => {
         if (!res.ok) {
           console.error(res.status);
@@ -268,11 +270,25 @@ export default function Channels() {
       <h1 className="ml-1 h-8">{header}</h1>
       <div className="flex flex-row justify-between mt-4">
         <div className="flex flex-row justify-left w-2/5 min-w-[248px]">
+          <Select 
+            options={
+              [
+                {value: 'universal', label: 'Universal', dataTestId: 'universal'},
+                {value: 'recent', label: 'Recent', dataTestId: 'recent'},
+                {value: 'in-progress', label: 'In-Progress', dataTestId: 'in-progress'}
+              ]
+            }
+            onChange={value => updateChannelType(value as string)}
+            dataTestId="channel-type"
+            containerClassName="w-80"
+            buttonClassName="inpt pl-4 cursor-default"
+            dropdownClassName="bg-vapor dark:bg-black"
+          />
           <input
             type="text"
             data-testid="search-input"
             placeholder="Search Custom Channels by ID"
-            className="inpt w-full px-3 font-mono placeholder:font-primary"
+            className="inpt w-full px-3 ml-3 font-mono placeholder:font-primary"
             value={searchId}
             onChange={e => setSearchId(e.target.value)}
             onKeyUp={e => { if (e.key === 'Enter') searchChannels(searchId) }}
@@ -284,54 +300,15 @@ export default function Channels() {
             onClick={() => searchChannels(searchId)}>
             Search
           </button>
-          <FilterButton open={showFilters} setOpen={setShowFilters} />
         </div>
         <button onClick={() => loadData()} className="btn">
           Reload
         </button>
       </div>
 
-      <div 
-        className={classNames(
-          showFilters
-          ? 'h-14 duration-100'
-          : 'h-0 duration-100 delay-100'
-          , 'w-full transition-all ease-in-out'
-        )}>
-        <div
-          className={classNames(
-            showFilters
-            ? 'opacity-100 duration-100 delay-100'
-            : 'opacity-0 duration-100'
-            , 'relative flex flex-row space-x-4 items-center w-full mx-auto pt-4 transition-all ease-in-out'
-          )}>
-
-          <Select 
-            options={
-              [
-                {value: 'universal', label: 'Universal', dataTestId: 'universal'},
-                {value: 'in-progress', label: 'In-Progress', dataTestId: 'in-progress'}
-              ]
-            }
-            onChange={value => updateChannelType(value as string)}
-            dataTestId="channel-type"
-            containerClassName="w-36"
-            buttonClassName="inpt pl-4 cursor-default"
-            dropdownClassName="bg-vapor dark:bg-black"
-          />
-        </div>
-      </div>
-
-      {showInProgressChannels ? (
-        // Only do server-side pagination when fetching in-progress channels
-        <Table {...{
-          table, loading, rowDetails: ChannelDetails, pageLimit: PAGE_SIZE, pageNumber, setPageNumber
-        }} />
-      ) : (
-        <Table {...{
-          table, loading, rowDetails: ChannelDetails, pageLimit: PAGE_SIZE
-        }} />
-      )}
+      <Table {...{
+        table, loading, rowDetails: ChannelDetails, pageLimit: PAGE_SIZE, pageNumber, setPageNumber
+      }} />
     </div>
   );
 }
