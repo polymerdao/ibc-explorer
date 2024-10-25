@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getChannel, getUniversalChannels, getIncompleteChannels } from 'api/channels/helpers';
+import { getChannel, getUniversalChannels, getChannels } from 'api/channels/helpers';
 import logger from 'utils/logger';
 
 export const dynamic = 'force-dynamic'; // defaults to auto
@@ -7,25 +7,40 @@ export const dynamic = 'force-dynamic'; // defaults to auto
 export async function GET(request: NextRequest) {
   const { searchParams } = request.nextUrl;
   const channelId = searchParams.get('channelId');
-  const inProgress = searchParams.get('inProgress');
+  const channelType = searchParams.get('channelType');
+
+  let rawLimit = searchParams.get('limit');
+  let rawOffset = searchParams.get('offset');
+  if (!channelId && (rawLimit === null || rawOffset === null)) {
+    return NextResponse.json({ error: 'Invalid request' }, { status: 400 });
+  }
+  const limit = Number(rawLimit);
+  const offset = Number(rawOffset);
 
   if (!channelId) {
-    if (inProgress) {
-      const limit = Number(searchParams.get('limit'));
-      const offset = Number(searchParams.get('offset'));
+    if (!channelType) {
+      return NextResponse.json({ error: 'Invalid request' }, { status: 400 });
+    }
+
+    if (channelType === 'in-progress' || channelType === 'recent') {
       try {
-        return NextResponse.json(await getIncompleteChannels(limit, offset));
+        return NextResponse.json(await getChannels(channelType, limit, offset));
       } catch (err) {
         logger.error(`Error fetching incomplete channels: ${err}`);
         return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
       }
-    } else {
+    }
+    else if (channelType === 'universal') {
       try {
         return NextResponse.json(await getUniversalChannels())
       } catch (err) {
         logger.error(`Error fetching universal channels: ${err}`);
         return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
       }
+    }
+
+    else {
+      return NextResponse.json({ error: 'Invalid request' }, { status: 400 });
     }
   }
 
