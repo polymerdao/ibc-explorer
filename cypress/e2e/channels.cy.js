@@ -9,7 +9,6 @@ describe('Universal Channels', () => {
 describe('In-Progress Channels', () => {
   it('should filter in-progress channels', () => {
     cy.visit('/channels');
-    cy.get('[data-testid="filter-button"]').click();
     cy.get('[data-testid="channel-type"]').click();
     cy.intercept('GET', '/api/channels*').as('getChannels');
     cy.get('[data-testid="in-progress"]').click();
@@ -18,6 +17,19 @@ describe('In-Progress Channels', () => {
       cy.get('table').find('tr').should('have.length', channels.length + 1);
       channels.forEach(element => {
         expect(element.state).to.be.oneOf([1, 2]);
+      });
+    })
+  })
+  it('should filter recent channels', () => {
+    cy.visit('/channels');
+    cy.get('[data-testid="channel-type"]').click();
+    cy.intercept('GET', '/api/channels*').as('getChannels');
+    cy.get('[data-testid="recent"]').click();
+    cy.wait('@getChannels').then((interception) => {
+      const channels = interception.response.body;
+      cy.get('table').find('tr').should('have.length', channels.length + 1);
+      channels.forEach(element => {
+        expect(element.state).to.be.oneOf([3]);
       });
     })
   })
