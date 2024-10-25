@@ -124,7 +124,6 @@ export default function Channels() {
   }]);
 
   useEffect(() => {
-    loadData();
     updateHeader('Universal Channels');
     // Check if url contains a channelId to load by default
     const searchParams = new URLSearchParams(window.location.search);
@@ -137,8 +136,7 @@ export default function Channels() {
 
   useEffect(() => {
     loadData(channelType);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [pageNumber]);
+  }, [pageNumber, channelType]);
 
   function updateHeader(newHeader: string) {
     shuffle({
@@ -154,7 +152,6 @@ export default function Channels() {
   }
 
   function updateChannelType(channelType: string) {
-    loadData(channelType);
     setChannelType(channelType);
     if (channelType === 'universal') {
       updateHeader('Universal Channels');

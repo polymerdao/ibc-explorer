@@ -16,6 +16,9 @@ export async function GET(request: NextRequest) {
   }
   const limit = Number(rawLimit);
   const offset = Number(rawOffset);
+  if (isNaN(limit) || isNaN(offset)) {
+    return NextResponse.json({ error: 'Invalid request' }, { status: 400 });
+  }
 
   if (!channelId) {
     if (!channelType) {
