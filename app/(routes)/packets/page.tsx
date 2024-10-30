@@ -150,7 +150,6 @@ export default function Packets() {
   ]);
   const [pageNumber, setPageNumber] = useState(1);
   const [foundPacket, setFoundPacket] = useState<Packet | null>(null);
-  const [resType, setResType] = useState<string>('all');
   const [noResults, setNoResults] = useState<boolean>(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
@@ -207,6 +206,7 @@ export default function Packets() {
       searchValue = textField;
     }
     if (searchValue !== '') {
+      searchValue = searchValue.trim().toLocaleLowerCase();
       window.history.replaceState({}, '', `/packets?searchValue=${searchValue}`);
     }
     if (resetPage) {
@@ -236,14 +236,19 @@ export default function Packets() {
         return res.json();
       })
       .then(data => {
-        setResType(data.type);
+        if (data.type === 'channel') {
+          const header = String(searchValue).charAt(0).toUpperCase() + String(searchValue).slice(1);
+          setHeader(`Recent Packets on ${header}`);
+        } else {
+          setHeader('Recent Packets');
+        }
+
         if (data.packets.length === 1) {
           setFoundPacket(data.packets[0]);
         } else if (data.packets.length > 1) {
           setPackets(data.packets);
           setPaginationSearchValue(searchValue || '');
-        }
-        else {
+        } else {
           setNoResults(true);
         }
         setLoading(false);

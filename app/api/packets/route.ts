@@ -4,7 +4,8 @@ import {
   getAllPackets,
   searchTxHashes,
   searchSenderAddresses,
-  searchPacketId
+  searchPacketId,
+  searchChannels
 } from './request-handlers';
 
 export const dynamic = 'force-dynamic'; // defaults to auto
@@ -12,6 +13,7 @@ export const dynamic = 'force-dynamic'; // defaults to auto
 export async function GET(request: NextRequest) {
   const { searchParams } = request.nextUrl;
   let searchValue = searchParams.get('searchValue') || '';
+  searchValue = searchValue.toLocaleLowerCase();
   const limit = Number(searchParams.get('limit'));
   const offset = Number(searchParams.get('offset'));
   let start = searchParams.get('start') || '';
@@ -31,7 +33,7 @@ export async function GET(request: NextRequest) {
     states = `[${states}]`;
   }
  
-  // No txHash provided, return all packets
+  // No search value provided, return all packets
   if (!searchValue) {
     const packetRes: PacketRes = await getAllPackets(start, end, limit, offset, states, src, dest);
     if (packetRes.error) {
@@ -40,8 +42,22 @@ export async function GET(request: NextRequest) {
     return NextResponse.json(packetRes);
   }
 
-  // Currently nothing this short is searchable
   let emptyRes: PacketRes = { type: 'none', packets: [] };
+
+  // Search packets by channel id
+  if (searchValue.slice(1, 8) === 'channel') {
+    let packetRes: PacketRes = await searchChannels(searchValue, start, end, limit, offset, states, src, dest);
+    if (packetRes.error) {
+      return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
+    }
+    if (packetRes.packets?.length) {
+      return NextResponse.json(packetRes);
+    }
+
+    return NextResponse.json(emptyRes);
+  }
+
+  // Nothing besides channel id is this short and searchable
   if (searchValue.length < 40) {
     return NextResponse.json(emptyRes);
   }

@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react';
 import { IdentifiedChannel, stateToString } from 'utils/types/channel';
 import { getExplorerFromRegistry } from 'utils/functions';
+import Link from 'next/link';
 import { LinkAndCopy } from 'components/link-and-copy';
 import { CHAIN_CONFIGS, CHAIN } from 'utils/chains/configs';
-import { Chain } from 'utils/types/chain';
 
 export function ChannelDetails(channel: IdentifiedChannel | null) {
   const [explorerUrl, setExplorerUrl] = useState<string>('');
@@ -43,6 +43,16 @@ export function ChannelDetails(channel: IdentifiedChannel | null) {
         <div className="flex flex-row justify-between">
           <p className="mr-8 font-medium">State</p>
           <p className="font-mono text-[17px]/[24px]">{ stateToString(channel.state) }</p>
+        </div>
+        <Divider />
+        <div className="flex flex-row justify-between">
+          <p className="mr-8 font-medium">Packets</p>
+          <p className="font-mono text-[17px]/[24px]">
+            <Link href={'/packets?searchValue=' + channel.channelId}
+              className="text-light-blue dark:text-light-blue font-mono text-[17px]/[24px] hover:underline underline-offset-2">
+              See Recent Packets
+            </Link>
+          </p>
         </div>
         <Divider />
         <div className="flex flex-row justify-between">
