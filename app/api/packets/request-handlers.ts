@@ -48,6 +48,41 @@ export async function getAllPackets(
   return packetRes;
 }
 
+export async function searchChannels(
+  searchValue: string,
+  start?: string,
+  end?: string,
+  limit?: number,
+  offset?: number,
+  states?: string,
+  src?: string,
+  dest?: string
+): Promise<PacketRes> {
+  const channelFilter = `srcChannelId_eq: ${searchValue}`;
+  const filterProps: FiltersProps = { start, end, states, src, dest };
+  const filters = generateSendPacketFilters(filterProps);
+
+  const queryParams = generateQueryParams({
+    orderBy: 'blockTimestamp_DESC',
+    where: `AND: [{${channelFilter}}, {${filters}}]`,
+    limit,
+    offset
+  });
+
+  let packetRes: PacketRes = { type: 'channel' };
+  try {
+    const packets = await processRequest(generateSendPacketQuery(queryParams));
+    if (packets.length) {
+      packetRes.packets = packets;
+    }
+  } catch (err) {
+    logger.error(`Error finding packets with channel id ${searchValue}: ` + err);
+    packetRes.error = true;
+  }
+
+  return packetRes;
+}
+
 export async function searchSenderAddresses(
   searchValue: string,
   start?: string,

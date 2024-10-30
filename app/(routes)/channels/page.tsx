@@ -19,13 +19,11 @@ import {
   Arrow,
   formatPortId,
   formatConnectionHops,
-  FilterButton,
   Select,
   shortenHex
 } from 'components';
 import { ChannelDetails } from './channel-details';
 import { IdentifiedChannel, stateToString } from 'utils/types/channel';
-import { classNames } from 'utils/functions';
 const { shuffle } = require('txt-shuffle');
 
 const columnHelper = createColumnHelper<IdentifiedChannel>();
@@ -188,6 +186,7 @@ export default function Channels() {
 
   const controller = new AbortController();
   function searchChannels(channelId: string) {
+    channelId = channelId.trim().toLocaleLowerCase();
     setSearchLoading(true);
     setFoundChannel(null);
     setChannelSearch(true);
@@ -266,7 +265,7 @@ export default function Channels() {
 
       <h1 className="ml-1 h-8">{header}</h1>
       <div className="flex flex-row justify-between mt-4">
-        <div className="flex flex-row justify-left w-2/5 min-w-[248px]">
+        <div className="flex flex-row justify-left w-3/7 min-w-[248px]">
           <Select 
             options={
               [
@@ -284,7 +283,7 @@ export default function Channels() {
           <input
             type="text"
             data-testid="search-input"
-            placeholder="Search Custom Channels by ID"
+            placeholder="Search Custom Channel IDs"
             className="inpt w-full px-3 ml-3 font-mono placeholder:font-primary"
             value={searchId}
             onChange={e => setSearchId(e.target.value)}
