@@ -46,6 +46,12 @@ export async function GET(request: NextRequest) {
 
   // Search packets by channel id
   if (searchValue.slice(1, 8) === 'channel') {
+    // Validate channel ID format
+    searchValue = searchValue.trim();
+    if (!/^["']?channel-\d+["']?$/.test(searchValue)) {
+      return NextResponse.json({ error: 'Invalid channel ID format' }, { status: 400 });
+    }
+
     let packetRes: PacketRes = await searchChannels(searchValue, start, end, limit, offset, states, src, dest);
     if (packetRes.error) {
       return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });

@@ -58,6 +58,8 @@ export async function searchChannels(
   src?: string,
   dest?: string
 ): Promise<PacketRes> {
+  let packetRes: PacketRes = { type: 'channel' };
+
   const channelFilter = `srcChannelId_eq: ${searchValue}`;
   const filterProps: FiltersProps = { start, end, states, src, dest };
   const filters = generateSendPacketFilters(filterProps);
@@ -69,7 +71,6 @@ export async function searchChannels(
     offset
   });
 
-  let packetRes: PacketRes = { type: 'channel' };
   try {
     const packets = await processRequest(generateSendPacketQuery(queryParams));
     if (packets.length) {
