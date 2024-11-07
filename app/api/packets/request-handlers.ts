@@ -59,6 +59,7 @@ export async function searchChannels(
   dest?: string
 ): Promise<PacketRes> {
   let packetRes: PacketRes = { type: 'channel' };
+  searchValue = searchValue.toLocaleLowerCase();
 
   const channelFilter = `srcChannelId_eq: ${searchValue}`;
   const filterProps: FiltersProps = { start, end, states, src, dest };

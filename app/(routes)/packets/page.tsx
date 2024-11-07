@@ -206,7 +206,7 @@ export default function Packets() {
       searchValue = textField;
     }
     if (searchValue !== '') {
-      searchValue = searchValue.trim().toLocaleLowerCase();
+      searchValue = searchValue.trim();
       window.history.replaceState({}, '', `/packets?searchValue=${searchValue}`);
     }
     if (resetPage) {
@@ -312,7 +312,7 @@ export default function Packets() {
           <input
             type="text"
             data-testid="search-input"
-            placeholder="Tx Hash, Sender Address or Packet ID"
+            placeholder="Tx Hash, Channel ID, Sender Address or Packet ID"
             className="inpt w-full px-4 font-mono placeholder:font-primary"
             value={textField}
             onChange={e => setTextField(e.target.value)}

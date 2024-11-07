@@ -13,7 +13,6 @@ export const dynamic = 'force-dynamic'; // defaults to auto
 export async function GET(request: NextRequest) {
   const { searchParams } = request.nextUrl;
   let searchValue = searchParams.get('searchValue') || '';
-  searchValue = searchValue.toLocaleLowerCase();
   const limit = Number(searchParams.get('limit'));
   const offset = Number(searchParams.get('offset'));
   let start = searchParams.get('start') || '';
@@ -23,7 +22,6 @@ export async function GET(request: NextRequest) {
   let dest = searchParams.get('dest') || '';
 
   // Format as strings for graphql query
-  if (searchValue) { searchValue = `"${searchValue}"`; }
   if (start) { start = `"${start}"`; }
   if (end) { end = `"${end}"`; }
   if (src) { src = `"${src}"`; }
@@ -43,15 +41,11 @@ export async function GET(request: NextRequest) {
   }
 
   let emptyRes: PacketRes = { type: 'none', packets: [] };
+  searchValue = searchValue.trim();
+  searchValue = `"${searchValue}"`;
 
   // Search packets by channel id
-  if (searchValue.slice(1, 8) === 'channel') {
-    // Validate channel ID format
-    searchValue = searchValue.trim();
-    if (!/^["']?channel-\d+["']?$/.test(searchValue)) {
-      return NextResponse.json({ error: 'Invalid channel ID format' }, { status: 400 });
-    }
-
+  if (searchValue.toLocaleLowerCase().startsWith('"channel-')) {
     let packetRes: PacketRes = await searchChannels(searchValue, start, end, limit, offset, states, src, dest);
     if (packetRes.error) {
       return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
