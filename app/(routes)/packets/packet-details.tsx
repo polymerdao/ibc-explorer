@@ -4,7 +4,8 @@ import { classNames, numberWithCommas, getExplorerFromRegistry } from 'utils/fun
 import { LinkAndCopy } from 'components/link-and-copy';
 import { useEffect, useState } from 'react';
 
-export function PacketDetails(packet: Packet | null) {
+export function PacketDetails(initialPacket: Packet | null) {
+  const [packet, setPacket] = useState<Packet | null>(initialPacket);
   const [sourceChainName, setSourceChainName] = useState<CHAIN | ''>('');
   const [destChainName, setDestChainName] = useState<CHAIN | ''>('');
   const [sourceChainExplorer, setSourceChainExplorer] = useState<string>('');
@@ -23,6 +24,43 @@ export function PacketDetails(packet: Packet | null) {
       }
     }
   }, [packet]);
+
+
+  // TODO:
+  // - Do something else with console.log
+  // - Stop requests when modal is closed
+  useEffect(() => {
+    setPacket(initialPacket);
+    if (!packet) {
+      return;
+    }
+
+    const controller = new AbortController();
+    const intervalId = setInterval(() => {
+      fetch(
+        `/api/packets?searchValue=${packet!.id}`,
+        {
+          cache: 'no-store',
+          signal: controller.signal
+        }
+      ).then(res => {
+        if (!res.ok) {
+          console.log('Failed to fetch packets');
+        }
+        return res.json();
+      }).then(data => {
+        if (data.packets.length > 0) {
+          setPacket(data.packets[0]);
+        } else {
+          console.log('No packets');
+        }
+      }).catch((err) => {
+        console.log('Failed to fetch packets', err);
+      });
+    }, 5000);
+
+    return () => clearInterval(intervalId);
+  }, [initialPacket]);
 
   useEffect(() => {
     async function fetchVars() {
