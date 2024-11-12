@@ -11,7 +11,7 @@ const tabs = [
   { name: 'Packets', href: '/packets' },
   { name: 'Channels', href: '/channels' },
   // { name: 'Connections', href: '/connections' },
-  { name: 'Clients', href: '/clients' }
+  // { name: 'Clients', href: '/clients' }
 ];
 
 export default function Navbar() {
