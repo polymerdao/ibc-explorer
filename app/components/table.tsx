@@ -15,7 +15,7 @@ import { useState, Fragment, useEffect } from 'react';
 interface TableProps<TableType> {
   table: TanStackTable<TableType>,
   loading: boolean,
-  rowDetails?: (row: TableType) => JSX.Element,
+  rowDetails?: (row: TableType, open: boolean) => JSX.Element,
   pageNumber?: number,
   setPageNumber?: (pageNumber: number) => void,
   pageLimit: number
@@ -267,7 +267,7 @@ export function Table<TableType extends Packet | Client | IdentifiedChannel | Id
             setRowSelected(false);
             window.history.replaceState({}, '', originalUrl);
           }}
-          content={rowDetails(selectedRow as TableType)}
+          content={rowDetails(selectedRow as TableType, rowSelected)}
         />
       }
     </div>

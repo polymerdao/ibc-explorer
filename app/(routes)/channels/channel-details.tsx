@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { LinkAndCopy } from 'components/link-and-copy';
 import { CHAIN_CONFIGS, CHAIN } from 'utils/chains/configs';
 
-export function ChannelDetails(channel: IdentifiedChannel | null) {
+export function ChannelDetails(channel: IdentifiedChannel | null, open: boolean) {
   const [explorerUrl, setExplorerUrl] = useState<string>('');
 
   useEffect(() => {
