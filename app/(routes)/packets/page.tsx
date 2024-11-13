@@ -149,6 +149,7 @@ export default function Packets() {
     { value: 'ACK', label: 'Delivered', selected: true }
   ]);
   const [pageNumber, setPageNumber] = useState(1);
+  const [lastRequest, setLastRequest] = useState<string>('');
   const [foundPacket, setFoundPacket] = useState<Packet | null>(null);
   const [noResults, setNoResults] = useState<boolean>(false);
   const [loading, setLoading] = useState(true);
@@ -197,6 +198,22 @@ export default function Packets() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pageNumber]);
 
+  useEffect(() => {
+    let intervalId: NodeJS.Timeout;
+
+    if (lastRequest) {
+      intervalId = setInterval(() => {
+        backgroundRefresh();
+      }, 5000);
+    }
+
+    return () => {
+      clearInterval(intervalId);
+      backgroundController.abort();
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [lastRequest]);
+
   const controller = new AbortController();
   function searchPackets(searchValue?: string, resetPage: boolean = true) {
     setLoading(true);
@@ -220,8 +237,9 @@ export default function Packets() {
     }
     const offset = (pageNumber - 1) * PAGE_SIZE;
 
+    const req = `/api/packets?searchValue=${searchValue}&src=${srcFilter}&dest=${destFilter}&states=${states}&limit=${PAGE_SIZE}&offset=${offset}`;
     fetch(
-      `/api/packets?searchValue=${searchValue}&src=${srcFilter}&dest=${destFilter}&states=${states}&limit=${PAGE_SIZE}&offset=${offset}`,
+      req,
       {
         cache: 'no-store',
         signal: controller.signal
@@ -248,6 +266,7 @@ export default function Packets() {
         } else if (data.packets.length > 1) {
           setPackets(data.packets);
           setPaginationSearchValue(searchValue || '');
+          setLastRequest(req);
         } else {
           setNoResults(true);
         }
@@ -255,6 +274,34 @@ export default function Packets() {
       }).catch(() => {
         setError(true);
         setLoading(false);
+      });
+  }
+
+  const backgroundController = new AbortController();
+  function backgroundRefresh() {
+    fetch(
+      lastRequest,
+      {
+        cache: 'no-store',
+        signal: backgroundController.signal
+      }
+    )
+      .then(res => {
+        if (!res.ok) {
+          // Don't error on background refresh
+          return;
+        }
+        return res.json();
+      })
+      .then(data => {
+        if (data.packets.length === 1) {
+          // Do nothing if only one packet is found, modal has separate refresh handling
+          return;
+        } else if (data.packets.length > 1) {
+          setPackets(data.packets);
+        }
+      }).catch(() => {
+        return;
       });
   }
 
@@ -303,7 +350,7 @@ export default function Packets() {
           setNoResults(false);
           window.history.replaceState({}, '', '/packets');
         }}
-        content={PacketDetails(foundPacket)}
+        content={PacketDetails(foundPacket, foundPacket !== null)}
       />
 
       <h1 className="ml-1 h-8">{header}</h1>

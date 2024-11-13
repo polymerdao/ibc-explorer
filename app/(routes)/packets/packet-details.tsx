@@ -3,8 +3,9 @@ import { CHAIN_CONFIGS, CHAIN, clientToDisplay } from 'utils/chains/configs';
 import { classNames, numberWithCommas, getExplorerFromRegistry } from 'utils/functions';
 import { LinkAndCopy } from 'components/link-and-copy';
 import { useEffect, useState } from 'react';
+import { clear } from 'console';
 
-export function PacketDetails(initialPacket: Packet | null) {
+export function PacketDetails(initialPacket: Packet | null, open: boolean) {
   const [packet, setPacket] = useState<Packet | null>(initialPacket);
   const [sourceChainName, setSourceChainName] = useState<CHAIN | ''>('');
   const [destChainName, setDestChainName] = useState<CHAIN | ''>('');
@@ -14,59 +15,68 @@ export function PacketDetails(initialPacket: Packet | null) {
   const [ackFunding, setAckFunding] = useState<number>(0);
 
   useEffect(() => {
+    if (!initialPacket) return;
+
+    setPacket(initialPacket);
+
     for (const chain of Object.keys(CHAIN_CONFIGS)) {
       const chainName = chain as CHAIN;
-      if (packet?.sourceClient?.toLowerCase().startsWith(chain)) {
+      if (initialPacket?.sourceClient?.toLowerCase().startsWith(chain)) {
         setSourceChainName(chainName);
       }
-      if (packet?.destClient?.toLowerCase().startsWith(chain)) {
+      if (initialPacket?.destClient?.toLowerCase().startsWith(chain)) {
         setDestChainName(chainName);
       }
     }
-  }, [packet]);
 
+    let intervalId: NodeJS.Timeout;
+    let controller = new AbortController();
 
-  // TODO:
-  // - Do something else with console.log
-  // - Stop requests when modal is closed
-  useEffect(() => {
-    setPacket(initialPacket);
-    if (!packet) {
-      return;
+    if (initialPacket.state < PacketStates.ACK) {
+      intervalId = setInterval(() => {
+        fetch(
+          `/api/packets?searchValue=${initialPacket.id}`,
+          {
+            cache: 'no-store',
+            signal: controller.signal
+          }
+        ).then(res => {
+          if (!res.ok) {
+            // Don't error on refreshes
+            return;
+          }
+          return res.json();
+        }).then(data => {
+          if (data.packets.length > 0) {
+            const fetchedPacket = data.packets[0];
+            setPacket(fetchedPacket);
+            if (fetchedPacket.state >= PacketStates.ACK) {
+              clearInterval(intervalId);
+            }
+          }
+        }).catch(() => {
+          return;
+        });
+      }, 5000);
+
+      if (!open) {
+        controller.abort();
+        clearInterval(intervalId);
+        return;
+      }
     }
 
-    const controller = new AbortController();
-    const intervalId = setInterval(() => {
-      fetch(
-        `/api/packets?searchValue=${packet!.id}`,
-        {
-          cache: 'no-store',
-          signal: controller.signal
-        }
-      ).then(res => {
-        if (!res.ok) {
-          console.log('Failed to fetch packets');
-        }
-        return res.json();
-      }).then(data => {
-        if (data.packets.length > 0) {
-          setPacket(data.packets[0]);
-        } else {
-          console.log('No packets');
-        }
-      }).catch((err) => {
-        console.log('Failed to fetch packets', err);
-      });
-    }, 5000);
-
-    return () => clearInterval(intervalId);
-  }, [initialPacket]);
+    return () => {
+      controller.abort();
+      clearInterval(intervalId);
+    };
+  }, [initialPacket, open]);
 
   useEffect(() => {
     async function fetchVars() {
-      if (packet && sourceChainName && destChainName) {
-        const recv = await calcTxFunding(sourceChainName, packet.totalRecvFeesDeposited, packet.recvGasLimit);
-        const ack = await calcTxFunding(destChainName, packet.totalAckFeesDeposited, packet.ackGasLimit);
+      if (initialPacket && sourceChainName && destChainName) {
+        const recv = await calcTxFunding(sourceChainName, initialPacket.totalRecvFeesDeposited, initialPacket.recvGasLimit);
+        const ack = await calcTxFunding(destChainName, initialPacket.totalAckFeesDeposited, initialPacket.ackGasLimit);
         const sourceExplorer = await getExplorerFromRegistry(sourceChainName);
         const destExplorer = await getExplorerFromRegistry(destChainName);
         setRecvFunding(recv);
@@ -76,7 +86,7 @@ export function PacketDetails(initialPacket: Packet | null) {
       }
     }
     fetchVars();
-  }, [packet, sourceChainName, destChainName]);
+  }, [initialPacket, sourceChainName, destChainName]);
 
   return !packet ? (
     <>

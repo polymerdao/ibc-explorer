@@ -259,7 +259,7 @@ export default function Channels() {
             setSearchLoading(false);
           }
         }}
-        content={ChannelDetails(foundChannel)}
+        content={ChannelDetails(foundChannel, channelSearch)}
         loading={searchLoading}
       />
 
