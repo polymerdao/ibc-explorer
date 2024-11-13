@@ -3,7 +3,6 @@ import { CHAIN_CONFIGS, CHAIN, clientToDisplay } from 'utils/chains/configs';
 import { classNames, numberWithCommas, getExplorerFromRegistry } from 'utils/functions';
 import { LinkAndCopy } from 'components/link-and-copy';
 import { useEffect, useState } from 'react';
-import { clear } from 'console';
 
 export function PacketDetails(initialPacket: Packet | null, open: boolean) {
   const [packet, setPacket] = useState<Packet | null>(initialPacket);
@@ -68,7 +67,7 @@ export function PacketDetails(initialPacket: Packet | null, open: boolean) {
 
     return () => {
       controller.abort();
-      clearInterval(intervalId);
+      if (intervalId) clearInterval(intervalId);
     };
   }, [initialPacket, open]);
 

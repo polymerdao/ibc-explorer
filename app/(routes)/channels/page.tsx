@@ -134,6 +134,7 @@ export default function Channels() {
 
   useEffect(() => {
     loadData(channelType);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pageNumber, channelType]);
 
   function updateHeader(newHeader: string) {
