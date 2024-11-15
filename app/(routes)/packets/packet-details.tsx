@@ -10,8 +10,20 @@ export function PacketDetails(initialPacket: Packet | null, open: boolean) {
   const [destChainName, setDestChainName] = useState<CHAIN | ''>('');
   const [sourceChainExplorer, setSourceChainExplorer] = useState<string>('');
   const [destChainExplorer, setDestChainExplorer] = useState<string>('');
+  const [createTime, setCreateTime] = useState<string>('');
+  const [displayUtc, setDisplayUtc] = useState<boolean>(false);
   const [recvFunding, setRecvFunding] = useState<number>(0);
   const [ackFunding, setAckFunding] = useState<number>(0);
+
+  const dateFormat: Intl.DateTimeFormatOptions = {
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+    hour12: false,
+  };
 
   useEffect(() => {
     if (!initialPacket) return;
@@ -86,6 +98,53 @@ export function PacketDetails(initialPacket: Packet | null, open: boolean) {
     }
     fetchVars();
   }, [initialPacket, sourceChainName, destChainName]);
+
+  useEffect(() => {
+    initTimeZone();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [packet]);
+
+  function initTimeZone() {
+    if (!packet) return;
+
+    const time = new Date(packet.createTime*1000);
+    const localTime = new Intl.DateTimeFormat('en-US', dateFormat).format(time);
+    const utcTime = new Intl.DateTimeFormat('en-US', {
+      ...dateFormat,
+      timeZone: 'UTC'
+    }).format(time);
+
+    if ((utcTime === createTime) || (localTime === createTime)) return;
+
+    if (displayUtc) {
+      setCreateTime(utcTime);
+      return;
+    } else {
+      setCreateTime(localTime);
+      return;
+    }
+  }
+
+  function toggleTimeZone() {
+    if (!packet) return;
+
+    const time = new Date(packet.createTime*1000);
+    const localTime = new Intl.DateTimeFormat('en-US', dateFormat).format(time);
+    const utcTime = new Intl.DateTimeFormat('en-US', {
+      ...dateFormat,
+      timeZone: 'UTC'
+    }).format(time);
+
+    if (createTime === localTime) {
+      setDisplayUtc(true);
+      setCreateTime(utcTime);
+      return;
+    } else {
+      setDisplayUtc(false);
+      setCreateTime(localTime);
+      return;
+    }
+  }
 
   return !packet ? (
     <>
@@ -185,7 +244,19 @@ export function PacketDetails(initialPacket: Packet | null, open: boolean) {
         {/* Date */}
         <div className="flex flex-row justify-between">
           <p className="mr-8 font-medium">Time Created</p>
-          <p className="font-mono text-[17px]/[24px]">{new Date(packet.createTime*1000).toLocaleString()}</p>
+          <div className="flex flex-row">
+            <button
+              onClick={toggleTimeZone}
+              className={classNames(
+                displayUtc
+                ? 'text-turquoise'
+                : 'text-gray-500'
+                , 'hover:cursor-pointer mr-3 px-1 py-[1px] ease-in-out duration-150'
+              )}>
+              UTC
+            </button>
+            <p className="font-mono text-[17px]/[24px]">{createTime}</p>
+          </div>
         </div>
         <Divider />
 
