@@ -15,7 +15,7 @@ jobs:
           docker build -t explorer  .
 
       - name: Peptide vulnerability scan
-        uses: aquasecurity/trivy-action@0.21.0
+        uses: aquasecurity/trivy-action@0.28.0
         with:
           image-ref: 'explorer'
           format: 'table'
