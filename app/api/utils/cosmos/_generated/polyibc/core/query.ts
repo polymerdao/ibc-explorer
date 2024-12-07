@@ -8,7 +8,7 @@ export const protobufPackage = "polyibc.core";
 
 /**
  * PrepareSendConsensusUpdateRequest is request type for the PrepareSendConsensusUpdate RPC method.
- * It is used to query if light client is good to accept a update immeidately
+ * It is used to query if light client is good to accept a update immediately
  * There are 3 cases:
  *   1. Can update immediately
  *   2. Can not update, and no clue.  This indicates a fatal
