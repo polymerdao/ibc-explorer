@@ -14,7 +14,7 @@ export const protobufPackage = "polyibc.core";
  * RevisionNumber the same. However some consensus algorithms may choose to
  * reset the height in certain conditions e.g. hard forks, state-machine
  * breaking changes In these cases, the RevisionNumber is incremented so that
- * height continues to be monitonically increasing even as the RevisionHeight
+ * height continues to be monotonically increasing even as the RevisionHeight
  * gets reset
  */
 export interface Height {

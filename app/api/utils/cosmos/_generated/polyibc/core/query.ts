@@ -8,7 +8,7 @@ export const protobufPackage = "polyibc.core";
 
 /**
  * PrepareSendConsensusUpdateRequest is request type for the PrepareSendConsensusUpdate RPC method.
- * It is used to query if light client is good to accept a update immeidately
+ * It is used to query if light client is good to accept an update immediately
  * There are 3 cases:
  *   1. Can update immediately
  *   2. Can not update, and no clue.  This indicates a fatal
@@ -29,7 +29,7 @@ export interface PrepareSendConsensusUpdateResponse {
  * GetLastFinalizedCheckpointRequest is request used by relayer to query the last finalized checkpoint
  *   -- The response includes
  *       -- height of the checkpoint
- *       -- checkpoint bytes, this is flexbile based on the client type
+ *       -- checkpoint bytes, this is flexible based on the client type
  */
 export interface GetLastFinalizedCheckpointRequest {
   clientId: string;

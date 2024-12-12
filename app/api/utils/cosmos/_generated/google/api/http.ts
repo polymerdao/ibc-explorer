@@ -16,7 +16,7 @@ export interface Http {
    */
   rules: HttpRule[];
   /**
-   * When set to true, URL path parmeters will be fully URI-decoded except in
+   * When set to true, URL path parameters will be fully URI-decoded except in
    * cases of single segment matches in reserved expansion, where "%2F" will be
    * left encoded.
    *
@@ -29,7 +29,7 @@ export interface Http {
 /**
  * `HttpRule` defines the mapping of an RPC method to one or more HTTP
  * REST API methods. The mapping specifies how different portions of the RPC
- * request message are mapped to URL path, URL query parameters, and
+ * request messages are mapped to URL path, URL query parameters, and
  * HTTP request body. The mapping is typically specified as an
  * `google.api.http` annotation on the RPC method,
  * see "google/api/annotations.proto" for details.

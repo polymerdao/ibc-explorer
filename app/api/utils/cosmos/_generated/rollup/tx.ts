@@ -6,7 +6,7 @@ export const protobufPackage = "rollup";
 /** MsgL1Txs defines a message for all L1 system and user deposit txs */
 export interface MsgL1Txs {
   /**
-   * array of bytes, each bytes is a eth.Transaction.MarshalBinary tx
+   * array of bytes, each byte is a eth.Transaction.MarshalBinary tx
    * The first tx must be a L1 system deposit tx, and the rest are user txs if present
    */
   txBytes: Uint8Array[];
