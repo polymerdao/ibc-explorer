@@ -26,7 +26,7 @@ const columns = [
     header: 'Chain',
     id: 'chain',
     cell: props => (
-      <div className="">
+      <div>
         <div className="ml-2.5"><ChainCell chain={props.getValue()} /></div>
       </div>
     ),
