@@ -18,7 +18,7 @@ Alternatively you can run via Docker:
 ```shell
 docker build -t ibc-explorer .
 
-docker run -e API_URL=tcp://host.docker.internal:8080 -p 5001:5000 ibc-explorer
+docker run -e API_URL=http://host.docker.internal:8080 -p 5001:5000 ibc-explorer
 ```
 
 ## E2E Testing
@@ -33,4 +33,4 @@ npm run build
 npm run test:headless
 ```
 
-(All tests are designed to use production graphql and chain-registry)
+(All tests are designed to use production GraphQL and chain-registry)
