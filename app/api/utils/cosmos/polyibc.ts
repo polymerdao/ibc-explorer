@@ -42,25 +42,26 @@ export const txMsgTypes: ReadonlyArray<[string, GeneratedType]> = Object.entries
 
 interface txMsgEncodeObject<T extends keyof typeof txMsgTypesRegistry & string> extends EncodeObject {
   readonly typeUrl: T
-  // the value obj's decode method returns a vanila js object with all msg fields
   readonly value: ReturnType<typeof txMsgTypesRegistry[T]['decode']>
 }
 
-export interface MsgCreateClientEncodeObject extends txMsgEncodeObject<'/polyibc.core.MsgCreateClient'> {}
-export interface MsgSendIbcPacketEncodeObject extends txMsgEncodeObject<'/polyibc.core.MsgSendIbcPacket'> {}
-export interface MsgAcknowledgementEncodeObject extends txMsgEncodeObject<'/polyibc.core.MsgAcknowledgement'> {}
-export interface MsgCreateVibcClientEncodeObject extends txMsgEncodeObject<'/polyibc.core.MsgCreateVibcClient'> {}
-export interface MsgCreateVibcConnectionEncodeObject
-  extends txMsgEncodeObject<'/polyibc.core.MsgCreateVibcConnection'> {}
-export interface MsgOpenIBCChannelEncodeObject extends txMsgEncodeObject<'/polyibc.core.MsgOpenIBCChannel'> {}
-export interface MsgConnectIBCChannelEncodeObject extends txMsgEncodeObject<'/polyibc.core.MsgConnectIBCChannel'> {}
+// Helper type for creating message encode objects
+type CreateMsgEncodeObject<T extends string> = txMsgEncodeObject<T>
 
-export interface MsgChannelOpenInitEncodeObject extends txMsgEncodeObject<'/ibc.core.channel.v1.MsgChannelOpenInit'> {}
-export interface MsgChannelOpenTryEncodeObject extends txMsgEncodeObject<'/ibc.core.channel.v1.MsgChannelOpenTry'> {}
-export interface MsgChannelOpenAckEncodeObject extends txMsgEncodeObject<'/ibc.core.channel.v1.MsgChannelOpenAck'> {}
-export interface MsgChannelOpenConfirmEncodeObject
-  extends txMsgEncodeObject<'/ibc.core.channel.v1.MsgChannelOpenConfirm'> {}
-export interface MsgTransferEncodeObject extends txMsgEncodeObject<'/ibc.applications.transfer.v1.MsgTransfer'> {}
+// Message types
+export type MsgCreateClientEncodeObject = CreateMsgEncodeObject<'/polyibc.core.MsgCreateClient'>
+export type MsgSendIbcPacketEncodeObject = CreateMsgEncodeObject<'/polyibc.core.MsgSendIbcPacket'>
+export type MsgAcknowledgementEncodeObject = CreateMsgEncodeObject<'/polyibc.core.MsgAcknowledgement'>
+export type MsgCreateVibcClientEncodeObject = CreateMsgEncodeObject<'/polyibc.core.MsgCreateVibcClient'>
+export type MsgCreateVibcConnectionEncodeObject = CreateMsgEncodeObject<'/polyibc.core.MsgCreateVibcConnection'>
+export type MsgOpenIBCChannelEncodeObject = CreateMsgEncodeObject<'/polyibc.core.MsgOpenIBCChannel'>
+export type MsgConnectIBCChannelEncodeObject = CreateMsgEncodeObject<'/polyibc.core.MsgConnectIBCChannel'>
+
+export type MsgChannelOpenInitEncodeObject = CreateMsgEncodeObject<'/ibc.core.channel.v1.MsgChannelOpenInit'>
+export type MsgChannelOpenTryEncodeObject = CreateMsgEncodeObject<'/ibc.core.channel.v1.MsgChannelOpenTry'>
+export type MsgChannelOpenAckEncodeObject = CreateMsgEncodeObject<'/ibc.core.channel.v1.MsgChannelOpenAck'>
+export type MsgChannelOpenConfirmEncodeObject = CreateMsgEncodeObject<'/ibc.core.channel.v1.MsgChannelOpenConfirm'>
+export type MsgTransferEncodeObject = CreateMsgEncodeObject<'/ibc.applications.transfer.v1.MsgTransfer'>
 
 // TODO: is there a way to automate these?
 
